@@ -1,0 +1,17 @@
+{
+  "name": "agentguard",
+  "version": "1.0.0",
+  "description": "On-chain spending limits for autonomous AI agents — Uniswap v4 hook",
+  "type": "module",
+  "scripts": {
+    "demo": "npx tsx src/demo/pipeline.ts",
+    "demo:guard": "npx tsx src/demo/guard-check.ts"
+  },
+  "dependencies": {
+    "viem": "^2.23.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
