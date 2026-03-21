@@ -1,5 +1,9 @@
-node_modules/\n.env\ncredentials/\n*.key
 node_modules/
+.next/
+.env
+.env.local
+credentials/
+*.key
 SUBMISSION.md
 REQUIREMENTS.md
-SUBMISSION.md
+app/data/

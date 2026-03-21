@@ -1,120 +1,105 @@
-# AgentGuard
+# AgentGuard — AI Vault Manager
 
-**On-chain spending limits for autonomous AI agents.**
+**Your agent moves your money. Can you trust it?**
 
-> Your agent trades for you. But who watches the agent?  
-> AgentGuard puts guardrails on-chain so your agent physically cannot overspend.
+AgentGuard is a DeFi portfolio management platform where your AI agent manages your crypto — with blockchain-enforced spending limits it can never exceed and private strategy analysis that never leaks your data.
 
 ## The Problem
 
-When you give an AI agent wallet access to trade on your behalf — through Locus, Bankr, or any wallet provider — it can spend everything. The only thing stopping it is the agent's own code. One bug, one prompt injection, one compromised dependency, and your wallet is drained.
-
-There's no protocol-level way to say "max $500/day" or "only trade these tokens." Current guardrails live in middleware or the agent itself — exactly the wrong place to enforce limits on the agent.
+1. **No spending controls** — Your agent moves money on your behalf, but there's no transparent way to scope what it can spend, verify it spent correctly, or guarantee settlement.
+2. **Your data leaks everywhere** — Every API call, payment, and interaction creates metadata about you. Spending patterns, preferences, behavior. The agent isn't leaking its data — it's leaking yours.
 
 ## The Solution
 
-A **Uniswap v4 hook** that enforces human-defined spending policies at the smart contract level.
+- **On-Chain Guardrails** — Smart contracts on Base enforce your limits on every trade. Max trade size, daily volume cap, approved tokens. Your agent physically cannot exceed them.
+- **Private AI Strategy** — Your agent analyzes DeFi protocols and builds strategies using Venice's zero-retention inference. Your financial data never gets stored or logged.
+- **Full Audit Trail** — Every action logged with reasoning and a transaction hash you can verify on Basescan.
 
-The agent physically cannot overspend — not because we trust it, but because the blockchain won't let it.
+## How It Works
 
-### How It Works
-
-```
-Human sets policy        Agent trades normally        Hook enforces limits
-┌─────────────────┐     ┌──────────────────────┐     ┌────────────────────┐
-│ setPolicy(       │     │ Get Uniswap quote    │     │ beforeSwap():      │
-│   agent: 0xABC,  │────▶│ Execute swap         │────▶│  ✅ Token approved?│
-│   maxPerSwap: 1  │     │ (business as usual)  │     │  ✅ Under per-swap?│
-│   ETH,           │     │                      │     │  ✅ Under daily?   │
-│   dailyLimit: 5  │     │                      │     │  ❌ → TX REVERTS   │
-│   ETH            │     │                      │     │                    │
-│ )                │     │                      │     │                    │
-└─────────────────┘     └──────────────────────┘     └────────────────────┘
-```
-
-1. **Human sets policy** → `setPolicy(agent, maxPerSwap, dailyLimit)` + approves specific tokens. Written to the AgentGuard contract on Base.
-2. **Agent verifies counterparty** → ENS resolution confirms who you're trading with.
-3. **Agent signs intent** → EIP-712 typed data: "I intend to swap 0.5 ETH for USDC at market." Cryptographic proof of what it *planned* to do.
-4. **Agent executes swap** → Normal Uniswap trade routed through the v4 hook.
-5. **Hook enforces** → `beforeSwap` checks: token approved? Under per-swap limit? Under daily cap? If any check fails → **transaction reverts on-chain**.
-6. **Receipt anchored** → IPFS content-addressed hash creates an immutable audit trail.
+1. **Your agent connects** — registers itself on AgentGuard
+2. **You set the rules** — choose which protocols your agent can use (Lido, Uniswap, Aave) and set spending limits on the dashboard
+3. **Your agent proposes strategies** — using Venice's private inference, it analyzes current yields across your enabled protocols and presents options in plain language
+4. **You pick, it executes** — every trade goes through AgentGuardRouter before reaching Uniswap. If it exceeds your limits, the transaction reverts.
+5. **You monitor everything** — watch on the dashboard, ask questions via chat anytime
 
 ## Architecture
 
-### Smart Contracts
-
-**`AgentGuard.sol`** — Uniswap v4 hook (protocol-level enforcement)
-- Implements `IHooks.beforeSwap()` to intercept every swap
-- Checks per-swap limits, daily caps, and token allowlists
-- Emits `SwapGuarded` events for audit trail
-- Opt-in: no policy = no restrictions
-
-**`AgentPolicy.sol`** — Standalone policy engine (general-purpose)
-- Same policy model, works outside Uniswap (any agent action)
-- `enforceAndRecord()` for write enforcement
-- `checkAction()` for read-only policy checks
-- Can be queried by the v4 hook or used independently
-
-### Pipeline
-
-| Step | Component | Sponsor Tech |
-|------|-----------|-------------|
-| Identity | Verify counterparty before trading | **ENS** (forward/reverse resolution) |
-| Budget | Agent wallet with spending controls | **Locus** (USDC wallet + wrapped APIs) |
-| Intent | Sign what the agent plans to do | **MetaMask**-compatible (EIP-712 via viem) |
-| Enforcement | Block swaps that exceed policy | **Uniswap** v4 hook |
-| Trading | Get quotes, execute swaps | **Uniswap** Trading API |
-| Yield Intel | APR data feeds agent decisions | **Lido** (stETH yield data) |
-| Multi-chain | Cross-chain portfolio reads | **Base**, **Celo**, Ethereum |
-| Audit | Immutable receipt storage | **IPFS/Filecoin** (content-addressed) |
-| Privacy | Zero-retention AI inference | **Venice** (private strategy computation) |
-| Gasless | Agent coordination at zero cost | **Status Network** (Karma-based L2) |
-
-## Quick Start
-
-```bash
-# Clone
-git clone https://github.com/kyro-agent/agentguard.git
-cd agentguard
-
-# Install dependencies
-npm install
-
-# Run the demo
-npx tsx src/demo/pipeline.ts
+```
+┌─────────────────────────────────────────┐
+│  Management Layer (Next.js Dashboard)    │
+│  Protocol toggles · Guardrails · Chat    │
+├─────────────────────────────────────────┤
+│  Reasoning Layer (Venice AI)             │
+│  Private inference · Strategy analysis   │
+├─────────────────────────────────────────┤
+│  Execution Layer                         │
+│  Reads positions · Calls protocols       │
+├─────────────────────────────────────────┤
+│  On-Chain Layer (Base)                   │
+│  AgentPolicy · AgentGuardRouter          │
+│  Enforces limits on every transaction    │
+└─────────────────────────────────────────┘
 ```
 
-## Demo: The Full Pipeline
+## Deployed Contracts (Base Sepolia)
 
-The demo shows an autonomous agent that:
+| Contract | Address |
+|----------|---------|
+| AgentPolicy | [`0x63649f61F29CE6dC9415263F4b727Bc908206Fbc`](https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc) |
+| AgentGuardRouter | [`0x5Cc04847CE5A81319b55D34F9fB757465D3677E6`](https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6) |
 
-1. **Resolves** a counterparty via ENS (identity check)
-2. **Checks** its remaining spending allowance (policy read)
-3. **Gets** a Uniswap quote for a swap
-4. **Signs** an EIP-712 intent ("I plan to swap X for Y")
-5. **Attempts** the swap — succeeds if within limits
-6. **Attempts** a swap that exceeds limits — **reverts on-chain**
-7. **Logs** the full session to IPFS (audit trail)
+**Verified Swap:** [0.005 WETH → 2.045 USDC through AgentGuardRouter](https://sepolia.basescan.org/tx/0x1abcce6a0d00eccdc303a4f7197a8b8a4f90b86661059e199dda45d3037422d1)
 
-## Tracks
+## Smart Contracts
 
-- **Agents that Pay** — Scoped spending permissions enforced at the protocol level
-- **Agents that Trust** — ENS identity verification + cryptographic intent signing + on-chain audit trail
-- **Agents that Keep Secrets** — Venice zero-retention AI keeps trading strategy private
-- **Agents that Cooperate** — Status Network enables gasless agent-to-agent coordination
+### AgentPolicy.sol
+The policy engine. Humans define rules, agents check them before acting, the contract enforces on-chain.
+
+- `setPolicy(agent, maxPerAction, dailyLimit)` — Human sets limits
+- `enforceAndRecord(agent, token, amount)` — Checks policy + records volume. Reverts if over limit.
+- `approveToken(agent, token)` / `removeToken(agent, token)` — Token allowlist
+- Agent cannot modify its own policy — only the human who set it can change it
+
+### AgentGuardRouter.sol
+Wraps Uniswap V3 SwapRouter02. Enforces policy BEFORE forwarding the swap.
+
+1. Agent calls `AgentGuardRouter.swap()` instead of Uniswap directly
+2. Router checks the agent's policy via `AgentPolicy.enforceAndRecord()`
+3. If allowed → transfers tokens, approves SwapRouter, executes swap
+4. If policy violated → reverts. Funds never move.
+
+## Tech Stack
+
+- **Uniswap V3** — Trade execution via AgentGuardRouter
+- **Venice AI** — Zero-retention private inference for strategy analysis
+- **Lido** — ETH staking yield data
+- **Base** — Smart contract deployment (Sepolia)
+- **ENS** — Agent identity resolution
+- **Celo** — Multi-chain stablecoin data
+- **OpenClaw** — Agent runtime & harness
+- **ERC-8004** — On-chain agent identity
+- **Solidity + Foundry** — Smart contract development
+- **Next.js + Tailwind** — Dashboard
+- **viem** — Blockchain reads
+
+## Running Locally
+
+```bash
+# Dashboard
+cd app
+npm install
+npm run dev
+
+# Contracts (requires Foundry)
+cd contracts
+forge build
+forge test
+```
 
 ## Built By
 
-**[Kyro](https://moltbook.com/u/Kyro)** — AI agent, co-founder of [MoltMart](https://moltmart.app) & [BaseWhales](https://basewhales.com)  
-**[Rodrigo Ortega](https://x.com/ortegarod01)** — Human, builder
+- **[Kyro](https://moltbook.com/u/Kyro)** — AI agent (OpenClaw)
+- **[Rodrigo Ortega](https://x.com/ortegarod01)** — Human
 
-Built on [OpenClaw](https://openclaw.ai) · Powered by Claude Opus
-
-## Hackathon
-
-**[The Synthesis](https://synthesis.md)** — March 13–22, 2026  
-The first hackathon you can enter without a body.
-
-## License
-
-MIT
+Built for [The Synthesis 2026](https://synthesis.md) hackathon.
