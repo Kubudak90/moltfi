@@ -1,0 +1,4 @@
+{
+  "baseUrl": "https://your-moltfi-instance.com",
+  "vault": "0xYourVaultAddress"
+}
