@@ -7,3 +7,6 @@ credentials/
 SUBMISSION.md
 REQUIREMENTS.md
 app/data/
+app/data/agents.json
+app/data/strategies.json
+app/data/activity-summaries.json
