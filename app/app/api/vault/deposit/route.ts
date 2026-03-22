@@ -24,28 +24,50 @@ export async function POST(req: NextRequest) {
     const walletClient = createWalletClient({ account, chain: baseSepolia, transport: http() })
     const publicClient = createPublicClient({ chain: baseSepolia, transport: http() })
 
-    // Look up vault dynamically from factory
-    const vaults = await publicClient.readContract({
-      address: VAULT_FACTORY,
-      abi: factoryAbi,
-      functionName: 'getVaults',
-      args: [account.address],
-    })
+    // Look up vault — check agent registration to find human wallet, then query factory
+    const { readFileSync, existsSync } = require('fs')
+    const { join } = require('path')
+    const dbPath = join(process.cwd(), 'data', 'agents.json')
+    let vault: string | null = null
 
-    if (!vaults || vaults.length === 0) {
-      return NextResponse.json({
-        error: 'No vault found for this agent. Create a vault first — your human can do it from the dashboard, or call POST /api/vault/create.',
-      }, { status: 404 })
+    if (existsSync(dbPath)) {
+      const agents = JSON.parse(readFileSync(dbPath, 'utf-8'))
+      const agent = agents.find((a: any) => a.agentWallet.toLowerCase() === account.address.toLowerCase())
+      if (agent) {
+        const vaults = await publicClient.readContract({
+          address: VAULT_FACTORY,
+          abi: factoryAbi,
+          functionName: 'getVaults',
+          args: [agent.humanWallet as `0x${string}`],
+        })
+        if (vaults && vaults.length > 0) vault = vaults[0] as string
+      }
     }
 
-    const vault = vaults[0]
+    // Fallback: check if agent itself owns vaults
+    if (!vault) {
+      const vaults = await publicClient.readContract({
+        address: VAULT_FACTORY,
+        abi: factoryAbi,
+        functionName: 'getVaults',
+        args: [account.address],
+      })
+      if (vaults && vaults.length > 0) vault = vaults[0] as string
+    }
+
+    if (!vault) {
+      return NextResponse.json({
+        error: 'No vault found. Create a vault first — your human can do it from the dashboard, or call POST /api/vault/create.',
+      }, { status: 404 })
+    }
     const value = parseEther(amount.toString())
 
+    // Send ETH directly — vault has receive() so it accepts plain transfers
+    // depositETH() is owner-only, but agents can still fund the vault
     const hash = await walletClient.sendTransaction({
-      to: vault,
+      to: vault as `0x${string}`,
       value,
-      data: '0xf6326fb3', // depositETH()
-    } as any)
+    })
 
     const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
