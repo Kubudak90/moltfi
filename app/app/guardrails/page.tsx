@@ -2,13 +2,35 @@
 
 import { useAgentContext } from '../components/AgentContext'
 import { useState } from 'react'
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi'
+import { parseEther } from 'viem'
+import { baseSepolia } from 'viem/chains'
+
+const AGENT_POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
+// The agent address that the policy applies to (MoltFi server key)
+const AGENT_ADDRESS = '0x90d9c75f3761c02Bf3d892A701846F6323e9112D' as const
+
+const policyAbi = [
+  {
+    name: 'setPolicy', type: 'function', stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'agent', type: 'address' },
+      { name: 'maxPerAction', type: 'uint256' },
+      { name: 'dailyLimit', type: 'uint256' },
+    ],
+    outputs: [],
+  },
+] as const
 
 export default function GuardrailsPage() {
   const { vaults, vaultData, hasVault } = useAgentContext()
+  const { address, chainId } = useAccount()
+  const { switchChain } = useSwitchChain()
   const [maxPerTrade, setMaxPerTrade] = useState('')
   const [dailyLimit, setDailyLimit] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [result, setResult] = useState<string | null>(null)
+
+  const { writeContract, data: txHash, isPending } = useWriteContract()
+  const { isSuccess: txConfirmed, isLoading: txWaiting } = useWaitForTransactionReceipt({ hash: txHash })
 
   if (!hasVault) {
     return (
@@ -20,42 +42,42 @@ export default function GuardrailsPage() {
 
   const policy = vaultData?.policy
   const vault = vaults[0] as string
+  const wrongNetwork = chainId !== baseSepolia.id
+  const saving = isPending || txWaiting
 
   const updatePolicy = async () => {
-    setSaving(true)
-    setResult(null)
-    try {
-      const res = await fetch('/api/vault/policy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          vault,
-          maxPerAction: maxPerTrade || policy?.maxPerAction || '0.5',
-          dailyLimit: dailyLimit || policy?.dailyLimit || '1',
-        }),
-      })
-      const data = await res.json()
-      if (data.txHash) {
-        setResult(`Updated on-chain — ${data.txHash.slice(0, 14)}…`)
-        setMaxPerTrade('')
-        setDailyLimit('')
-      } else {
-        setResult(data.error || 'Failed to update')
-      }
-    } catch (e: any) {
-      setResult(e.message)
+    if (wrongNetwork) {
+      try { await switchChain({ chainId: baseSepolia.id }) } catch { return }
     }
-    setSaving(false)
+    const max = parseEther(maxPerTrade || policy?.maxPerAction || '0.5')
+    const daily = parseEther(dailyLimit || policy?.dailyLimit || '1')
+    writeContract({
+      account: address,
+      address: AGENT_POLICY,
+      abi: policyAbi,
+      functionName: 'setPolicy',
+      args: [AGENT_ADDRESS, max, daily],
+      chain: baseSepolia,
+    })
   }
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Guardrails</h1>
-        <a href={`https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc#readContract`}
+        <a href={`https://sepolia.basescan.org/address/${AGENT_POLICY}#readContract`}
           target="_blank" rel="noopener"
           className="text-xs text-indigo-400 hover:underline">View contract →</a>
       </div>
+
+      {txConfirmed && (
+        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 text-sm text-green-400">
+          ✓ Guardrails updated on-chain —{' '}
+          <a href={`https://sepolia.basescan.org/tx/${txHash}`} target="_blank" rel="noopener" className="underline">
+            view transaction
+          </a>
+        </div>
+      )}
 
       {policy?.active ? (
         <>
@@ -103,11 +125,10 @@ export default function GuardrailsPage() {
             <div className="flex items-center gap-3">
               <button onClick={updatePolicy} disabled={saving || (!maxPerTrade && !dailyLimit)}
                 className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm px-4 py-2 rounded-lg transition">
-                {saving ? 'Writing to chain...' : 'Update on-chain'}
+                {isPending ? 'Confirm in wallet...' : txWaiting ? 'Waiting for confirmation...' : 'Update on-chain'}
               </button>
-              {result && <span className="text-xs text-gray-400">{result}</span>}
             </div>
-            <p className="text-xs text-gray-600">This writes directly to the AgentPolicy smart contract. Changes take effect on the next trade.</p>
+            <p className="text-xs text-gray-600">Your wallet signs this transaction directly on the AgentPolicy contract. You control the rules.</p>
           </div>
 
           {/* Contracts */}
@@ -115,7 +136,7 @@ export default function GuardrailsPage() {
             <h3 className="text-sm font-medium text-gray-400">Contracts</h3>
             <div className="space-y-2 text-xs">
               {[
-                { label: 'AgentPolicy', addr: '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' },
+                { label: 'AgentPolicy', addr: AGENT_POLICY as string },
                 { label: 'AgentGuardRouter', addr: '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' },
                 { label: 'Vault', addr: vault },
               ].map(c => (
@@ -150,7 +171,7 @@ export default function GuardrailsPage() {
           </div>
           <button onClick={updatePolicy} disabled={saving || (!maxPerTrade && !dailyLimit)}
             className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-sm px-4 py-2 rounded-lg transition">
-            {saving ? 'Writing to chain...' : 'Set guardrails'}
+            {isPending ? 'Confirm in wallet...' : txWaiting ? 'Waiting for confirmation...' : 'Set guardrails'}
           </button>
         </div>
       )}
