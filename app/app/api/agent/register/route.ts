@@ -139,12 +139,15 @@ export async function GET(req: NextRequest) {
   )
 
   if (!match) {
-    return NextResponse.json({ registered: false })
+    return NextResponse.json({ agents: [] })
   }
 
   return NextResponse.json({
-    registered: true,
-    vault: match.vault,
-    agentName: match.agentName,
+    agents: [{
+      agentName: match.agentName,
+      humanWallet: match.humanWallet,
+      vault: match.vault,
+      platform: match.platform,
+    }],
   })
 }
