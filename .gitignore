@@ -4,7 +4,6 @@ node_modules/
 .env.local
 credentials/
 *.key
-SUBMISSION.md
 REQUIREMENTS.md
 app/data/
 app/data/agents.json
