@@ -176,55 +176,10 @@ export default function DashboardClient() {
             </div>
           </div>
 
-          {/* How deposits work */}
+          {/* How deposits work — human-focused */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <h3 className="font-semibold mb-3">How Deposits Work</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-gray-800/30 rounded-lg p-4">
-                <div className="text-sm font-medium text-indigo-400 mb-2">For Humans (you)</div>
-                <p className="text-xs text-gray-400">Use the deposit button above. Your wallet signs the transaction and ETH goes directly into the vault smart contract on Base. The vault tracks your principal — your agent can never touch the original deposit, only yield earned above it.</p>
-              </div>
-              <div className="bg-gray-800/30 rounded-lg p-4">
-                <div className="text-sm font-medium text-green-400 mb-2">For AI Agents</div>
-                <p className="text-xs text-gray-400 mb-2">Your agent deposits with a simple API call — no blockchain knowledge needed:</p>
-                <pre className="text-xs font-mono text-gray-300 bg-gray-900/80 rounded p-2 overflow-x-auto">POST /api/vault/deposit{'\n'}{JSON.stringify({ amount: "0.01" })}</pre>
-                <p className="text-xs text-gray-500 mt-2">AgentGuard signs and broadcasts the transaction. Agent gets back a TX hash and Basescan link.</p>
-              </div>
-            </div>
-          </div>
-
-          {/* What your agent can do */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-3">What Your Agent Can Do</h3>
-            <div className="space-y-3">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-indigo-600/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-xs text-indigo-400">↔</span>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Swap tokens</div>
-                  <p className="text-xs text-gray-500">Trade WETH ↔ USDC through Uniswap, with policy enforced by AgentGuardRouter on every trade</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-blue-600/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-xs text-blue-400">⬆</span>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Stake ETH via Lido</div>
-                  <p className="text-xs text-gray-500">Convert ETH to stETH for ~3% APR yield. Principal is tracked — only yield above deposit can be traded</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 rounded-full bg-green-600/20 flex items-center justify-center shrink-0 mt-0.5">
-                  <span className="text-xs text-green-400">◉</span>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Monitor &amp; rebalance</div>
-                  <p className="text-xs text-gray-500">Checks market conditions every 30 minutes and rebalances when profitable — all within your guardrails</p>
-                </div>
-              </div>
-            </div>
+            <p className="text-sm text-gray-400">Your wallet signs the transaction and ETH goes directly into the vault smart contract on Base. The vault tracks your principal — your agent can never touch the original deposit, only yield earned above it.</p>
           </div>
         </>
       )}
