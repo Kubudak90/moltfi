@@ -25,10 +25,17 @@ type Strategy = {
 export default function StrategyPage() {
   const { address } = useAccount()
   const { vaults, vaultData, rates, hasVault } = useAgentContext()
-  const [strategies, setStrategies] = useState<Strategy[]>([])
+  // Restore cached strategies from localStorage
+  const [strategies, setStrategies] = useState<Strategy[]>(() => {
+    if (typeof window === 'undefined') return []
+    try { return JSON.parse(localStorage.getItem('ag_strategies') || '[]') } catch { return [] }
+  })
   const [generating, setGenerating] = useState(false)
   const [selected, setSelected] = useState<number | null>(null)
-  const [active, setActive] = useState<Strategy | null>(null)
+  const [active, setActive] = useState<Strategy | null>(() => {
+    if (typeof window === 'undefined') return null
+    try { return JSON.parse(localStorage.getItem('ag_active_strategy') || 'null') } catch { return null }
+  })
   const [txStatus, setTxStatus] = useState('')
   const router = useRouter()
 
@@ -37,6 +44,7 @@ export default function StrategyPage() {
 
   const generate = async () => {
     setGenerating(true); setStrategies([]); setSelected(null)
+    localStorage.removeItem('ag_strategies')
     try {
       const balance = vaultData?.balances?.WETH || '0'
       const usdcBalance = vaultData?.balances?.USDC || '0'
@@ -77,6 +85,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] }) })
           try { parsed.push(JSON.parse(match[1])) } catch {}
         }
         setStrategies(parsed)
+        localStorage.setItem('ag_strategies', JSON.stringify(parsed))
       }
     } catch {}
     setGenerating(false)
@@ -89,6 +98,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] }) })
       args: [vaults[0] as `0x${string}`, parseEther(s.guardrails.maxTradeSize.replace(' ETH', '')),
         parseEther(s.guardrails.dailyLimit.replace(' ETH', ''))], chain: baseSepolia })
     setActive(s)
+    localStorage.setItem('ag_active_strategy', JSON.stringify(s))
   }
 
   const pause = () => {
@@ -97,6 +107,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] }) })
     writeContract({ account: address, address: VAULT_FACTORY, abi: factoryAbi, functionName: 'revokePolicy',
       args: [vaults[0] as `0x${string}`], chain: baseSepolia })
     setActive(null)
+    localStorage.removeItem('ag_active_strategy')
   }
 
   if (!address) return <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-500">Connect your wallet to view strategies.</div>
@@ -148,7 +159,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] }) })
             <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Protocols: </span><span className="text-gray-300">{active.guardrails.protocols.join(', ')}</span></div>
           </div>
           <div className="flex gap-3">
-            <button onClick={() => { setActive(null); setStrategies([]); setSelected(null) }}
+            <button onClick={() => { setActive(null); setStrategies([]); setSelected(null); localStorage.removeItem('ag_active_strategy'); localStorage.removeItem('ag_strategies') }}
               className="text-sm text-gray-500 hover:text-gray-300">Change Strategy</button>
             <button onClick={pause}
               className="ml-auto bg-red-600/20 hover:bg-red-600/40 text-red-400 px-4 py-2 rounded-lg border border-red-500/30 transition text-sm font-medium">
