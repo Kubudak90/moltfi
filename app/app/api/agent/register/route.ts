@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         updated: true,
         agentWallet: existing.agentWallet,
         humanWallet: existing.humanWallet,
-        message: 'Agent registration updated. Tell your human to connect their wallet at the ClawFi dashboard.'
+        message: 'Agent registration updated. Tell your human to connect their wallet at the MoltFi dashboard.'
       })
     }
 
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       registered: true,
       agentWallet: registration.agentWallet,
       humanWallet: registration.humanWallet,
-      message: 'Agent registered. Tell your human to connect their wallet at the ClawFi dashboard to create a vault.'
+      message: 'Agent registered. Tell your human to connect their wallet at the MoltFi dashboard to create a vault.'
     }, { status: 201 })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })

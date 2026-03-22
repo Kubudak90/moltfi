@@ -5,7 +5,7 @@ import { ConnectWallet } from './components/ConnectWallet'
 import { NavTabs } from './components/NavTabs'
 
 export const metadata = {
-  title: 'ClawFi — AI Vault Manager',
+  title: 'MoltFi — AI Vault Manager',
   description: 'Manage your DeFi positions with an AI agent, protected by on-chain guardrails',
   icons: { icon: '/favicon.svg' },
 }
@@ -18,7 +18,7 @@ function Nav() {
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-xs font-bold">AG</div>
-          <span className="font-bold text-lg">ClawFi</span>
+          <span className="font-bold text-lg">MoltFi</span>
           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-yellow-500/15 text-yellow-400 border border-yellow-500/25">Base Sepolia</span>
         </Link>
         <div className="flex items-center gap-3">

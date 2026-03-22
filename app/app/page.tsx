@@ -29,7 +29,7 @@ export default function Home() {
               className="bg-indigo-600 hover:bg-indigo-500 px-8 py-3 rounded-lg text-lg font-medium transition">
               Open Dashboard
             </Link>
-            <a href="https://github.com/ortegarod/clawfi" target="_blank" rel="noopener"
+            <a href="https://github.com/ortegarod/moltfi" target="_blank" rel="noopener"
               className="border border-gray-700 hover:border-gray-500 px-8 py-3 rounded-lg text-lg font-medium transition">
               View on GitHub
             </a>
@@ -55,7 +55,7 @@ export default function Home() {
               <li className="flex gap-2"><span className="text-indigo-400">→</span> Knows you, your goals, your risk tolerance</li>
               <li className="flex gap-2"><span className="text-indigo-400">→</span> You talk to it in plain English</li>
               <li className="flex gap-2"><span className="text-indigo-400">→</span> It decides when and what to trade</li>
-              <li className="flex gap-2"><span className="text-indigo-400">→</span> Calls ClawFi&apos;s API to execute</li>
+              <li className="flex gap-2"><span className="text-indigo-400">→</span> Calls MoltFi&apos;s API to execute</li>
             </ul>
           </div>
 
@@ -63,7 +63,7 @@ export default function Home() {
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center text-sm font-bold">AG</div>
               <div>
-                <div className="font-semibold">ClawFi DeFi Agent</div>
+                <div className="font-semibold">MoltFi DeFi Agent</div>
                 <div className="text-xs text-gray-500">Powered by Venice AI · Zero data retention</div>
               </div>
             </div>
@@ -147,7 +147,7 @@ export default function Home() {
       <section className="max-w-4xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-3 text-center">Bring Your Own Agent</h2>
         <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
-          ClawFi works with any AI agent on any platform. Your agent reads one skill file and instantly knows how to manage DeFi vaults, execute trades, and respect guardrails.
+          MoltFi works with any AI agent on any platform. Your agent reads one skill file and instantly knows how to manage DeFi vaults, execute trades, and respect guardrails.
         </p>
 
         <div className="bg-gray-900 border border-indigo-500/30 rounded-xl p-8 mb-8">
@@ -176,7 +176,7 @@ export default function Home() {
             <div>
               <div className="bg-gray-800/80 rounded-lg p-4 font-mono text-xs leading-relaxed">
                 <div className="text-gray-500 mb-2"># Your agent does this once:</div>
-                <div className="text-green-400">curl https://clawfi.app/api/skill</div>
+                <div className="text-green-400">curl https://moltfi.app/api/skill</div>
                 <div className="text-gray-500 mt-3 mb-2"># Now it knows how to:</div>
                 <div className="text-gray-300">POST /api/agent/register     <span className="text-gray-600"># connect</span></div>
                 <div className="text-gray-300">GET  /api/vault/status       <span className="text-gray-600"># check vault</span></div>
@@ -197,7 +197,7 @@ export default function Home() {
         <div className="space-y-4 max-w-2xl mx-auto">
           {[
             { step: '1', title: 'Connect your wallet', desc: 'Open the dashboard. Connect your wallet. That\'s it — no accounts, no signups, no KYC.' },
-            { step: '2', title: 'Tell your agent about ClawFi', desc: 'Your agent reads one skill file and instantly knows how to register, trade, check balances, and follow guardrails. Works with any agent on any platform.' },
+            { step: '2', title: 'Tell your agent about MoltFi', desc: 'Your agent reads one skill file and instantly knows how to register, trade, check balances, and follow guardrails. Works with any agent on any platform.' },
             { step: '3', title: 'Your agent talks to our DeFi agent', desc: 'Your agent calls the API. Our DeFi agent analyzes markets privately via Venice AI, proposes strategies, and executes trades — all through on-chain guardrails.' },
             { step: '4', title: 'You stay in control', desc: 'Set limits on the dashboard or let your agent propose them. Every trade goes through a smart contract that enforces your rules. Pause anytime with one click.' },
             { step: '5', title: 'Verify everything', desc: 'Every action has a transaction hash. Click it to verify on Basescan. The activity tab shows exactly what happened, what limits applied, and proves the guardrails were honored.' },
@@ -218,7 +218,7 @@ export default function Home() {
         <h2 className="text-2xl font-bold mb-8 text-center">Built With</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { name: 'Uniswap V3', desc: 'Trade execution via ClawFiRouter', color: 'border-pink-500/30' },
+            { name: 'Uniswap V3', desc: 'Trade execution via MoltFiRouter', color: 'border-pink-500/30' },
             { name: 'Venice AI', desc: 'Zero-retention private inference', color: 'border-purple-500/30' },
             { name: 'Lido', desc: 'ETH staking yields', color: 'border-blue-500/30' },
             { name: 'Base', desc: 'Smart contract deployment', color: 'border-blue-400/30' },
@@ -240,7 +240,7 @@ export default function Home() {
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center">
           <h3 className="font-semibold text-lg mb-3">Verified On-Chain</h3>
           <p className="text-sm text-gray-400 mb-4">
-            ClawFi is deployed on Base Sepolia with a verified swap through the guardrail contract.
+            MoltFi is deployed on Base Sepolia with a verified swap through the guardrail contract.
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center text-xs">
             <a href="https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc"
@@ -249,7 +249,7 @@ export default function Home() {
             </a>
             <a href="https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6"
               target="_blank" rel="noopener" className="text-indigo-400 hover:underline font-mono">
-              ClawFiRouter Contract →
+              MoltFiRouter Contract →
             </a>
             <a href="https://sepolia.basescan.org/tx/0x1abcce6a0d00eccdc303a4f7197a8b8a4f90b86661059e199dda45d3037422d1"
               target="_blank" rel="noopener" className="text-indigo-400 hover:underline font-mono">

@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       }
     } catch {}
 
-    const systemPrompt = `You are an autonomous DeFi strategy agent for ClawFi on Base.
+    const systemPrompt = `You are an autonomous DeFi strategy agent for MoltFi on Base.
 
 MARKET DATA (live): ${marketData}
 VAULT BALANCES: ${balances ? JSON.stringify(balances) : 'unknown'}
@@ -107,7 +107,7 @@ Return a strategy block:
 // GET — Legacy pipeline info
 export async function GET() {
   return NextResponse.json({
-    pipeline: 'ClawFi Strategy Pipeline',
+    pipeline: 'MoltFi Strategy Pipeline',
     provider: 'Venice AI',
     model: 'llama-3.3-70b',
     dataRetention: 'none',

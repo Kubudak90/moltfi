@@ -1,8 +1,8 @@
-# ClawFi — AI Vault Manager
+# MoltFi — AI Vault Manager
 
 **Your agent moves your money. Can you trust it?**
 
-ClawFi is a DeFi portfolio management platform where your AI agent manages your crypto — with blockchain-enforced spending limits it can never exceed and private strategy analysis that never leaks your data.
+MoltFi is a DeFi portfolio management platform where your AI agent manages your crypto — with blockchain-enforced spending limits it can never exceed and private strategy analysis that never leaks your data.
 
 ## The Problem
 
@@ -17,10 +17,10 @@ ClawFi is a DeFi portfolio management platform where your AI agent manages your 
 
 ## How It Works
 
-1. **Your agent connects** — registers itself on ClawFi
+1. **Your agent connects** — registers itself on MoltFi
 2. **You set the rules** — choose which protocols your agent can use (Lido, Uniswap, Aave) and set spending limits on the dashboard
 3. **Your agent proposes strategies** — using Venice's private inference, it analyzes current yields across your enabled protocols and presents options in plain language
-4. **You pick, it executes** — every trade goes through ClawFiRouter before reaching Uniswap. If it exceeds your limits, the transaction reverts.
+4. **You pick, it executes** — every trade goes through MoltFiRouter before reaching Uniswap. If it exceeds your limits, the transaction reverts.
 5. **You monitor everything** — watch on the dashboard, ask questions via chat anytime
 
 ## Architecture
@@ -37,7 +37,7 @@ ClawFi is a DeFi portfolio management platform where your AI agent manages your 
 │  Reads positions · Calls protocols       │
 ├─────────────────────────────────────────┤
 │  On-Chain Layer (Base)                   │
-│  AgentPolicy · ClawFiRouter          │
+│  AgentPolicy · MoltFiRouter          │
 │  Enforces limits on every transaction    │
 └─────────────────────────────────────────┘
 ```
@@ -47,9 +47,9 @@ ClawFi is a DeFi portfolio management platform where your AI agent manages your 
 | Contract | Address |
 |----------|---------|
 | AgentPolicy | [`0x63649f61F29CE6dC9415263F4b727Bc908206Fbc`](https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc) |
-| ClawFiRouter | [`0x5Cc04847CE5A81319b55D34F9fB757465D3677E6`](https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6) |
+| MoltFiRouter | [`0x5Cc04847CE5A81319b55D34F9fB757465D3677E6`](https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6) |
 
-**Verified Swap:** [0.005 WETH → 2.045 USDC through ClawFiRouter](https://sepolia.basescan.org/tx/0x1abcce6a0d00eccdc303a4f7197a8b8a4f90b86661059e199dda45d3037422d1)
+**Verified Swap:** [0.005 WETH → 2.045 USDC through MoltFiRouter](https://sepolia.basescan.org/tx/0x1abcce6a0d00eccdc303a4f7197a8b8a4f90b86661059e199dda45d3037422d1)
 
 ## Smart Contracts
 
@@ -61,17 +61,17 @@ The policy engine. Humans define rules, agents check them before acting, the con
 - `approveToken(agent, token)` / `removeToken(agent, token)` — Token allowlist
 - Agent cannot modify its own policy — only the human who set it can change it
 
-### ClawFiRouter.sol
+### MoltFiRouter.sol
 Wraps Uniswap V3 SwapRouter02. Enforces policy BEFORE forwarding the swap.
 
-1. Agent calls `ClawFiRouter.swap()` instead of Uniswap directly
+1. Agent calls `MoltFiRouter.swap()` instead of Uniswap directly
 2. Router checks the agent's policy via `AgentPolicy.enforceAndRecord()`
 3. If allowed → transfers tokens, approves SwapRouter, executes swap
 4. If policy violated → reverts. Funds never move.
 
 ## Tech Stack
 
-- **Uniswap V3** — Trade execution via ClawFiRouter
+- **Uniswap V3** — Trade execution via MoltFiRouter
 - **Venice AI** — Zero-retention private inference for strategy analysis
 - **Lido** — ETH staking yield data
 - **Base** — Smart contract deployment (Sepolia)

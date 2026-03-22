@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   return NextResponse.json({
-    description: 'Uniswap Trading API quote endpoint for ClawFi',
+    description: 'Uniswap Trading API quote endpoint for MoltFi',
     usage: 'POST with { tokenIn, tokenOut, amount, swapper }',
     supportedTokens: Object.keys(TOKENS),
     chain: 'Base Sepolia (84532)',

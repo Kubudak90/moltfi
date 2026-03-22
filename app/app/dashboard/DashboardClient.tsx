@@ -121,7 +121,7 @@ export default function DashboardClient() {
         <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-5 flex items-center justify-between">
           <div>
             <div className="font-semibold text-red-300">Wrong Network</div>
-            <p className="text-sm text-red-400/80 mt-1">You&apos;re connected to the wrong network. ClawFi runs on <strong>Base Sepolia (testnet)</strong>. No real money is involved.</p>
+            <p className="text-sm text-red-400/80 mt-1">You&apos;re connected to the wrong network. MoltFi runs on <strong>Base Sepolia (testnet)</strong>. No real money is involved.</p>
           </div>
           <button onClick={() => switchChain({ chainId: baseSepolia.id })}
             className="bg-red-500/20 hover:bg-red-500/30 text-red-300 px-4 py-2 rounded-lg text-sm font-medium transition shrink-0">
@@ -143,7 +143,7 @@ export default function DashboardClient() {
       {/* No agent yet */}
       {!hasAgent && (() => {
         const origin = typeof window !== 'undefined' ? window.location.origin : ''
-        const skillSnippet = `# ClawFi — Connect to ${address}
+        const skillSnippet = `# MoltFi — Connect to ${address}
 
 Your human wants you to manage their DeFi vault on Base Sepolia.
 Base URL: ${origin}
@@ -166,7 +166,7 @@ curl -X POST ${origin}/api/strategy/generate \\
   -H "Content-Type: application/json" \\
   -d '{"vault": "VAULT_ADDRESS"}'
 
-Full reference: https://github.com/ortegarod/clawfi/blob/main/skill/SKILL.md`
+Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
 
         function doCopy(text: string) {
           if (navigator.clipboard?.writeText) {
@@ -466,7 +466,7 @@ Full reference: https://github.com/ortegarod/clawfi/blob/main/skill/SKILL.md`
               <div className="bg-gray-800/30 rounded-lg p-4">
                 <div className="text-sm font-medium text-green-400 mb-2">For AI Agents</div>
                 <pre className="text-xs font-mono text-gray-300 bg-gray-900/80 rounded p-2 overflow-x-auto mb-2">POST /api/vault/deposit{'\n'}{JSON.stringify({ amount: "0.01" })}</pre>
-                <p className="text-xs text-gray-500">ClawFi handles signing and broadcasting. See the <a href="https://github.com/ortegarod/clawfi/blob/main/skill/SKILL.md#3-deposit-eth" className="text-indigo-400 hover:underline">full skill reference</a> for all endpoints.</p>
+                <p className="text-xs text-gray-500">MoltFi handles signing and broadcasting. See the <a href="https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md#3-deposit-eth" className="text-indigo-400 hover:underline">full skill reference</a> for all endpoints.</p>
               </div>
             </div>
           </div>

@@ -11,7 +11,7 @@ export async function GET() {
       headers: { 'Content-Type': 'text/markdown; charset=utf-8' }
     })
   } catch {
-    return new NextResponse('# ClawFi Skill\n\nSee https://github.com/ortegarod/clawfi/blob/main/skill/SKILL.md', {
+    return new NextResponse('# MoltFi Skill\n\nSee https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md', {
       headers: { 'Content-Type': 'text/markdown; charset=utf-8' }
     })
   }

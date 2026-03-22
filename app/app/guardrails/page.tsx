@@ -361,7 +361,7 @@ export default function GuardrailsPage() {
         {[
           { icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', title: 'Principal Protection', desc: 'Your original deposit is locked. The agent can only trade yield above your principal.' },
           { icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', title: 'No Self-Modification', desc: 'The agent cannot change its own guardrails. Only your wallet can.' },
-          { icon: 'M13 10V3L4 14h7v7l9-11h-7z', title: 'Router-Only Execution', desc: 'All trades go through ClawFiRouter → policy check → Uniswap. No bypass possible.' },
+          { icon: 'M13 10V3L4 14h7v7l9-11h-7z', title: 'Router-Only Execution', desc: 'All trades go through MoltFiRouter → policy check → Uniswap. No bypass possible.' },
           { icon: 'M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2', title: 'Owner-Only Withdrawals', desc: 'Only your wallet can withdraw funds. The agent can trade but never move funds out.' },
         ].map(({ icon, title, desc }) => (
           <div key={title} className="flex items-start gap-3">
@@ -392,7 +392,7 @@ export default function GuardrailsPage() {
             </ul>
           </div>
           <div>
-            <div className="font-medium text-indigo-400 mb-2">On-chain (ClawFi)</div>
+            <div className="font-medium text-indigo-400 mb-2">On-chain (MoltFi)</div>
             <ul className="space-y-1.5 text-xs">
               <li className="flex items-start gap-2"><span className="text-green-400 shrink-0">✓</span> Limits enforced by smart contract on Base</li>
               <li className="flex items-start gap-2"><span className="text-green-400 shrink-0">✓</span> Agent can&apos;t bypass — code is immutable on-chain</li>
