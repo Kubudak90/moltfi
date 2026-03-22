@@ -3,12 +3,10 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const tabs: { href: string; label: string; badge?: string }[] = [
+const tabs: { href: string; label: string }[] = [
   { href: '/dashboard', label: 'Vault' },
   { href: '/strategy', label: 'Strategy' },
-  { href: '/guardrails', label: 'Guardrails' },
   { href: '/activity', label: 'Activity' },
-  { href: '/chat', label: 'DeFi Agent', badge: 'Beta' },
 ]
 
 export function NavTabs() {
@@ -31,11 +29,6 @@ export function NavTabs() {
                     : 'border-transparent text-gray-500 hover:text-gray-300'
                 }`}>
                 {tab.label}
-                {tab.badge && (
-                  <span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-indigo-600/20 text-indigo-400 border border-indigo-500/30">
-                    {tab.badge}
-                  </span>
-                )}
               </Link>
             )
           })}

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFileSync, existsSync } from 'fs'
-import { join } from 'path'
+import { readFileSync } from 'fs'
 export const dynamic = 'force-dynamic'
 
 // Venice API — OpenAI-compatible
@@ -85,18 +84,6 @@ CRITICAL RULES:
 - Always include guardrails in the strategy. Set them conservatively — protect the user.
 - If market data is unavailable, say so. Never fake numbers.`
 
-function isPrivateMode(vault?: string): boolean {
-  if (!vault) return false
-  try {
-    const pmPath = join(process.cwd(), 'data', 'private-mode.json')
-    if (existsSync(pmPath)) {
-      const data = JSON.parse(readFileSync(pmPath, 'utf-8'))
-      return !!data[vault.toLowerCase()]
-    }
-  } catch {}
-  return false
-}
-
 export async function POST(req: NextRequest) {
   const apiKey = getApiKey()
   if (!apiKey) {
@@ -106,8 +93,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { messages, vault } = await req.json()
-    const privateMode = isPrivateMode(vault)
+    const { messages } = await req.json()
 
     // Get real market data
     const origin = req.nextUrl.origin
@@ -115,8 +101,6 @@ export async function POST(req: NextRequest) {
 
     const systemPrompt = SYSTEM_PROMPT.replace('{MARKET_DATA}', marketData)
 
-    // All inference goes through Venice — the only provider we use.
-    // When Private Mode is on, this is explicitly enforced (no fallbacks allowed).
     const response = await fetch(VENICE_URL, {
       method: 'POST',
       headers: {
@@ -136,14 +120,6 @@ export async function POST(req: NextRequest) {
 
     if (!response.ok) {
       const err = await response.text()
-      // If Venice is down and private mode is on, we MUST fail — no fallback allowed
-      if (privateMode) {
-        return NextResponse.json({
-          error: 'Venice AI is unavailable and Private Mode is enabled. No fallback providers allowed — your data stays private. Try again later.',
-          privateMode: true,
-          provider: 'venice',
-        }, { status: 503 })
-      }
       return NextResponse.json({ error: `Venice API error: ${response.status} ${err}` }, { status: 502 })
     }
 
@@ -154,7 +130,6 @@ export async function POST(req: NextRequest) {
       reply,
       model: data.model,
       provider: 'venice',
-      privateMode,
       dataRetention: 'none',
     })
   } catch (e) {

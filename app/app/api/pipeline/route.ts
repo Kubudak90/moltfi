@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFileSync, existsSync } from 'fs'
-import { join } from 'path'
+import { readFileSync } from 'fs'
+
 export const dynamic = 'force-dynamic'
 
 const VENICE_URL = 'https://api.venice.ai/api/v1/chat/completions'
-const PM_PATH = join(process.cwd(), 'data', 'private-mode.json')
 
 function getVeniceKey(): string | null {
   try {
@@ -14,19 +13,7 @@ function getVeniceKey(): string | null {
   }
 }
 
-function isPrivateMode(vault?: string): boolean {
-  if (!vault) return false
-  try {
-    if (existsSync(PM_PATH)) {
-      const data = JSON.parse(readFileSync(PM_PATH, 'utf-8'))
-      return !!data[vault.toLowerCase()]
-    }
-  } catch {}
-  return false
-}
-
 // POST — Agent requests strategy generation
-// If Private Mode is active, this is the ONLY way to generate strategies (Venice enforced)
 export async function POST(req: NextRequest) {
   const apiKey = getVeniceKey()
   if (!apiKey) {
@@ -34,7 +21,8 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { vault, balances, prompt } = await req.json()
+    const { balances, prompt } = await req.json()
+
     // Get market data
     let marketData = 'Market data unavailable'
     try {
@@ -83,13 +71,6 @@ Return a strategy block:
     })
 
     if (!response.ok) {
-      if (isPrivateMode(vault)) {
-        return NextResponse.json({
-          error: 'Venice AI is unavailable and Private Mode is enabled. No fallback providers allowed — your data stays private.',
-          privateMode: true,
-          provider: 'venice',
-        }, { status: 503 })
-      }
       return NextResponse.json({ error: `Venice error: ${response.status}` }, { status: 502 })
     }
 
@@ -100,22 +81,20 @@ Return a strategy block:
       reply,
       model: data.model,
       provider: 'venice',
-      privateMode: isPrivateMode(vault),
       dataRetention: 'none',
-      note: 'Strategy generated via Venice AI with zero data retention.',
     })
   } catch (e) {
     return NextResponse.json({ error: String(e) }, { status: 500 })
   }
 }
 
-// GET — Legacy pipeline info
+// GET — Pipeline info
 export async function GET() {
   return NextResponse.json({
     pipeline: 'MoltFi Strategy Pipeline',
     provider: 'Venice AI',
     model: 'llama-3.3-70b',
     dataRetention: 'none',
-    note: 'All strategy generation routes through Venice with zero data retention. When Private Mode is active, this is the only allowed inference path.',
+    note: 'All strategy generation routes through Venice AI with zero data retention.',
   })
 }
