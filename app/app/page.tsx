@@ -125,7 +125,7 @@ export default function Home() {
             </div>
             <h3 className="font-semibold text-lg mb-2">Private Analysis</h3>
             <p className="text-sm text-gray-400">
-              The AI&apos;s thinking is private — strategy analysis runs through Venice AI with zero data retention. Your portfolio data never gets stored or used for training. But trades themselves are on-chain and publicly verifiable — that&apos;s how you audit what the agent actually did.
+              Strategy analysis runs through Venice AI with zero data retention — they don&apos;t store your data or use it for training. Strategies are cached in your browser only, not on our servers. Trades themselves are on-chain and publicly verifiable — that&apos;s how you audit what the agent did.
             </p>
           </div>
 

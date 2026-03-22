@@ -226,7 +226,7 @@ If they ask how the agent-to-agent flow works: their personal AI agent (on OpenC
                   I&apos;m the DeFi specialist your agent talks to through the API. You can also ask me questions directly here.
                 </p>
                 <p className="text-gray-600 text-xs max-w-md mx-auto mb-6">
-                  All analysis is private via Venice AI — your financial data is never stored.
+                  All analysis runs through Venice AI (zero data retention). Strategies are cached in your browser only — not on our servers.
                 </p>
                 <div className="flex flex-wrap justify-center gap-2">
                   {['What should I do with my vault?', 'Explain the risks of each strategy', 'How do guardrails protect me?', 'How does agent-to-agent work?'].map(q => (
