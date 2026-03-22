@@ -251,16 +251,19 @@ export default function DashboardClient() {
                   {/* Balance hero */}
                   <div className="bg-gray-800/50 rounded-lg p-5">
                     <div className="text-xs text-gray-500 mb-1">Total Balance</div>
-                    <div className="text-3xl font-bold">{totalEth > 0 || usdc > 0 ? `${totalEth.toFixed(4)} ETH` : '—'}</div>
-                    {usdc > 0 && <div className="text-lg text-gray-400 mt-0.5">+ {usdc.toFixed(2)} USDC</div>}
-                    {totalUsd > 0 && <div className="text-sm text-gray-500 mt-1">≈ ${totalUsd.toFixed(2)}</div>}
-                    <div className="flex items-center gap-4 mt-3 text-sm">
-                      {totalEth > 0 && (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 rounded-full bg-indigo-600" />
-                          <span className="text-gray-400">{eth.toFixed(4)} ETH + {weth.toFixed(4)} WETH</span>
-                        </div>
-                      )}
+                    {(() => {
+                      const usdcInEth = price ? usdc / price : 0
+                      const totalInEth = totalEth + usdcInEth
+                      return (
+                        <>
+                          <div className="text-3xl font-bold">{totalInEth > 0 ? `${totalInEth.toFixed(4)} ETH` : '—'}</div>
+                          {totalUsd > 0 && <div className="text-sm text-gray-500 mt-1">≈ ${totalUsd.toFixed(2)}</div>}
+                        </>
+                      )
+                    })()}
+                    <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
+                      {totalEth > 0 && <span>{totalEth.toFixed(4)} ETH</span>}
+                      {usdc > 0 && <span>{usdc.toFixed(2)} USDC</span>}
                     </div>
                   </div>
 
