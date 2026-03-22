@@ -12,7 +12,6 @@ const POLICY_ADDR = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
 const TOKENS: Record<string, { address: `0x${string}`; description: string }> = {
   WETH: { address: '0x4200000000000000000000000000000000000006', description: 'Wrapped ETH — the base trading pair' },
   USDC: { address: '0x036CbD53842c5426634e7929541eC2318f3dCF7e', description: 'USD Coin — stablecoin pegged to $1' },
-  wstETH: { address: '0x0000000000000000000000000000000000000000', description: 'Wrapped staked ETH — earns Lido yield' },
 }
 
 const FACTORY_ABI = [
@@ -47,12 +46,12 @@ export default function GuardrailsPage() {
   // Editable limits
   const [maxPerTrade, setMaxPerTrade] = useState('')
   const [dailyLimit, setDailyLimit] = useState('')
-  const [enabledTokens, setEnabledTokens] = useState<Record<string, boolean>>({ WETH: true, USDC: true, wstETH: true })
+  const [enabledTokens, setEnabledTokens] = useState<Record<string, boolean>>({ WETH: true, USDC: true })
 
   // Original values (to detect changes)
   const [origMax, setOrigMax] = useState('')
   const [origDaily, setOrigDaily] = useState('')
-  const [origTokens, setOrigTokens] = useState<Record<string, boolean>>({ WETH: true, USDC: true, wstETH: true })
+  const [origTokens, setOrigTokens] = useState<Record<string, boolean>>({ WETH: true, USDC: true })
 
   // Deploy state
   const [deploying, setDeploying] = useState(false)
