@@ -60,18 +60,18 @@ export function PrivacyIndicator() {
             {privateMode ? (
               <>
                 <p className="text-gray-300 mb-2">
-                  Both sides locked to Venice AI. MoltFi runs Venice server-side. External agents must pass a Venice verification handshake before they can interact.
+                  Strategy generation locked to Venice AI — your portfolio analysis is never saved or used for training.
                 </p>
                 <p className="text-gray-300 mb-2">
-                  No Venice access = no conversation. If Venice goes down, requests fail rather than falling back to another provider.
+                  If Venice goes down, requests fail rather than falling back to another provider.
                 </p>
                 <p className="text-gray-500">
-                  Trades are still on a public blockchain — private mode protects the AI reasoning, not the transactions.
+                  This protects the AI reasoning about your portfolio. Trades are still on a public blockchain.
                 </p>
               </>
             ) : (
               <p className="text-gray-300">
-                Your agent can use any AI provider for strategy advice. Turn on Private Mode in <a href="/guardrails" className="text-indigo-400 hover:underline">Guardrails</a> to require Venice AI on both sides.
+                MoltFi uses Venice AI by default. Turn on Private Mode in <a href="/guardrails" className="text-indigo-400 hover:underline">Guardrails</a> to block fallback providers.
               </p>
             )}
           </div>

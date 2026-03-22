@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readFileSync, existsSync } from 'fs'
 import { join } from 'path'
-import { verifyToken } from '../../../lib/venice-tokens'
-
 export const dynamic = 'force-dynamic'
 
 const VENICE_URL = 'https://api.venice.ai/api/v1/chat/completions'
@@ -37,22 +35,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const { vault, balances, prompt } = await req.json()
-    const privateMode = isPrivateMode(vault)
-
-    // When Private Mode is on, external agents must prove Venice access
-    if (privateMode) {
-      const veniceToken = req.headers.get('x-venice-token')
-      const isFromUI = req.headers.get('x-moltfi-source') === 'dashboard'
-      if (!isFromUI && !verifyToken(veniceToken)) {
-        return NextResponse.json({
-          error: 'Private Mode is active. Your agent must verify Venice AI access before calling this endpoint.',
-          action: 'Call POST /api/venice-verify with { action: "challenge" } to start the verification handshake.',
-          veniceSetup: 'https://docs.openclaw.ai/providers/venice',
-          privateMode: true,
-        }, { status: 403 })
-      }
-    }
-
     // Get market data
     let marketData = 'Market data unavailable'
     try {
