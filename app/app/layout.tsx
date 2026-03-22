@@ -19,6 +19,7 @@ function Nav() {
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-xs font-bold">AG</div>
           <span className="font-bold text-lg">AgentGuard</span>
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-yellow-500/15 text-yellow-400 border border-yellow-500/25">Base Sepolia</span>
         </Link>
         <div className="flex items-center gap-3">
           <PrivacyIndicator />
