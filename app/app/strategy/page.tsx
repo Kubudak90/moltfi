@@ -246,7 +246,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
             </div>
 
             <div className="mb-5">
-              <p className="text-sm text-gray-400">Your agent can trade within the guardrails below. Every trade is a blockchain transaction — verifiable on Basescan.</p>
+              <p className="text-sm text-gray-400">Your agent requests trades through the MoltFi API. We execute them within the guardrails below — enforced by the blockchain, not by us. Every trade is verifiable on Basescan.</p>
             </div>
 
             {/* On-chain guardrails — always shown, always real */}
@@ -529,7 +529,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
       {/* How it works — compact */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
         <p className="text-xs text-gray-500">
-          Venice AI analyzes your vault privately (zero retention) and proposes strategies with guardrails baked in. When you approve, the limits are written to the <a href={`https://sepolia.basescan.org/address/${POLICY_CONTRACT}`} target="_blank" rel="noopener" className="text-indigo-400 hover:underline">policy contract</a> on-chain. Your agent trades within those limits — if it tries to exceed them, the blockchain reverts the transaction. Pause anytime to revoke the policy.
+          Venice AI proposes strategies privately (zero retention). When you approve, the limits are written to the <a href={`https://sepolia.basescan.org/address/${POLICY_CONTRACT}`} target="_blank" rel="noopener" className="text-indigo-400 hover:underline">policy contract</a> on-chain. Your agent requests trades via the API — MoltFi executes them through the vault. If any trade exceeds the guardrails, the blockchain reverts it automatically.
         </p>
       </div>
     </div>

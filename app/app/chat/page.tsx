@@ -166,7 +166,7 @@ If they ask how the agent-to-agent flow works: their personal AI agent (on OpenC
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-indigo-400 font-bold shrink-0">2.</span>
-                <span>Your agent reads the MoltFi skill and knows how to consult our DeFi advisor</span>
+                <span>Your agent reads the MoltFi skill and knows how to call our API</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-indigo-400 font-bold shrink-0">3.</span>
@@ -186,7 +186,7 @@ If they ask how the agent-to-agent flow works: their personal AI agent (on OpenC
           {/* Skill file */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <h3 className="font-semibold mb-2">Send this to your agent</h3>
-            <p className="text-sm text-gray-500 mb-4">Your agent reads this skill file and instantly knows how to use MoltFi — register, check markets, execute trades, add to heartbeat.</p>
+            <p className="text-sm text-gray-500 mb-4">Your agent reads this skill file and knows how to call MoltFi — register, check rates, request trades. We handle the DeFi execution.</p>
             <div className="bg-gray-950 rounded-lg p-4 font-mono text-sm text-gray-300 relative group">
               <div className="break-all">{baseUrl}/api/skill</div>
               <button onClick={() => { navigator.clipboard.writeText(`${baseUrl}/api/skill`); }}

@@ -21,7 +21,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-            Your agent talks to our DeFi agent. It handles swaps, yield strategies, and portfolio management — with on-chain guardrails it can never exceed and private analysis that never leaks your data.
+            Your agent tells ours what to do. We handle the DeFi — swaps, staking, yield — and execute within on-chain guardrails your human sets. Private analysis, verifiable trades.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
@@ -40,7 +40,7 @@ export default function Home() {
       {/* Two Agents, Clear Roles */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-3 text-center">Agent-to-Agent Architecture</h2>
-        <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">Your agent is the brain. Our DeFi agent is the specialist. They talk to each other — you just talk to yours.</p>
+        <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">Your agent decides what to do. Our agent handles the DeFi execution. You just talk to yours.</p>
 
         <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-gray-900 border border-indigo-500/30 rounded-xl p-6">
@@ -147,7 +147,7 @@ export default function Home() {
       <section className="max-w-4xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-3 text-center">Bring Your Own Agent</h2>
         <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
-          MoltFi works with any AI agent on any platform. Your agent reads one skill file and instantly knows how to manage DeFi vaults, execute trades, and respect guardrails.
+          MoltFi works with any AI agent on any platform. Your agent reads one skill file and knows how to call our API — request trades, check balances, monitor the vault. We handle the DeFi execution.
         </p>
 
         <div className="bg-gray-900 border border-indigo-500/30 rounded-xl p-8 mb-8">
@@ -156,7 +156,7 @@ export default function Home() {
               <div className="text-xs text-indigo-400 uppercase tracking-wider mb-3 font-medium">One skill file. Any agent.</div>
               <h3 className="text-xl font-bold mb-3">Your agent curls one URL and it just works.</h3>
               <p className="text-sm text-gray-400 mb-4">
-                The same pattern that powers the agent economy — a single skill file teaches your agent everything: how to register, check balances, execute swaps, follow guardrails, and report back to you.
+                One skill file teaches your agent how to use MoltFi: register, check rates, request trades, monitor your vault. Your agent calls the API — we handle the on-chain execution.
               </p>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2 text-gray-300">
@@ -197,9 +197,9 @@ export default function Home() {
         <div className="space-y-4 max-w-2xl mx-auto">
           {[
             { step: '1', title: 'Connect your wallet', desc: 'Open the dashboard. Connect your wallet. That\'s it — no accounts, no signups, no KYC.' },
-            { step: '2', title: 'Tell your agent about MoltFi', desc: 'Your agent reads one skill file and instantly knows how to register, trade, check balances, and follow guardrails. Works with any agent on any platform.' },
-            { step: '3', title: 'Your agent talks to our DeFi agent', desc: 'Your agent calls the API. Our DeFi agent analyzes markets privately via Venice AI, proposes strategies, and executes trades — all through on-chain guardrails.' },
-            { step: '4', title: 'You stay in control', desc: 'Set limits on the dashboard or let your agent propose them. Every trade goes through a smart contract that enforces your rules. Pause anytime with one click.' },
+            { step: '2', title: 'Tell your agent about MoltFi', desc: 'Your agent reads one skill file and knows how to call our API — check rates, request trades, monitor the vault. Works with any agent on any platform.' },
+            { step: '3', title: 'Your agent requests, we execute', desc: 'Your agent calls the API when it wants to trade. MoltFi executes through the vault — the blockchain enforces your guardrails on every transaction.' },
+            { step: '4', title: 'You stay in control', desc: 'Set limits on the dashboard. Every trade goes through a smart contract that enforces your rules. Pause anytime with one click — the agent loses trading permissions instantly.' },
             { step: '5', title: 'Verify everything', desc: 'Every action has a transaction hash. Click it to verify on Basescan. The activity tab shows exactly what happened, what limits applied, and proves the guardrails were honored.' },
           ].map(item => (
             <div key={item.step} className="flex gap-4 bg-gray-900 border border-gray-800 rounded-xl p-5">
