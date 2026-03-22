@@ -213,12 +213,11 @@ export default function Home() {
         <h2 className="text-2xl font-bold mb-8 text-center">Built With</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {[
-            { name: 'Uniswap V3', desc: 'Trade execution via MoltFiRouter', color: 'border-pink-500/30' },
+            { name: 'Uniswap V3', desc: 'Real swap execution via AgentGuardRouter', color: 'border-pink-500/30' },
             { name: 'Venice AI', desc: 'Zero-retention inference — trade intent stays private', color: 'border-indigo-500/30' },
-            { name: 'Lido', desc: 'Staking yields + vault principal tracking', color: 'border-blue-500/30' },
+            { name: 'Lido', desc: 'Live staking APR data for market context', color: 'border-blue-500/30' },
             { name: 'Base', desc: 'All contracts deployed on Base', color: 'border-blue-400/30' },
-            { name: 'OpenClaw', desc: 'Agent runtime & harness', color: 'border-orange-500/30' },
-            { name: 'ERC-8004', desc: 'On-chain agent identity', color: 'border-yellow-500/30' },
+            { name: 'OpenClaw', desc: 'Agent runtime & skill harness', color: 'border-orange-500/30' },
           ].map(item => (
             <div key={item.name} className={`bg-gray-900 border ${item.color} rounded-xl p-4`}>
               <div className="font-medium text-sm">{item.name}</div>
