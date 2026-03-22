@@ -750,112 +750,131 @@ The AI is the intelligence layer. Without it, the user can't make decisions beca
 
 ---
 
-## PRESENTATION OUTLINE
+## WHAT WE BUILT — FULL TECHNICAL BREAKDOWN
 
-### Slide 1: The Problem
-**"Everyone wants DeFi yield. Nobody knows how to do DeFi."**
-- Banks pay ~0.5%. DeFi pays 3-8%+. But DeFi is complex — protocols, slippage, gas, timing
-- You could learn it yourself (months of study, expensive mistakes)
-- You could hand your crypto to a fund (centralized trust, custody risk)
-- You could let your AI agent do it... but what stops it from draining your wallet?
-- **The gap: there's no way to say "manage my money, but stay within these limits" and have it enforced**
+### Layer 1: Smart Contracts (Base Sepolia — all deployed and verified)
 
-### Slide 2: The Solution
-**"AgentGuard: Your AI manages DeFi. Smart contracts enforce the rules."**
-- AI agent handles the complexity — you don't need to understand DeFi
-- Guardrails are on-chain, in smart contracts — not in the agent's code
-- If the agent tries to exceed its limits → transaction reverts. Automatically. No human needed.
-- You stay in control without needing expertise
+**Chain:** Base Sepolia (chain ID 84532)
 
-### Slide 3: How It Works (User Flow)
-**"Three steps. That's it."**
-1. **Connect wallet, create vault** → one transaction deploys your vault with spending policy
-2. **Deposit funds** → ETH goes into the vault (principal is tracked and protected)
-3. **Approve a strategy** → AI proposes strategies, you pick one, agent starts running autonomously
+| Contract | Address | What It Does |
+|----------|---------|-------------|
+| **VaultFactory** | `0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774` | Deploys a new AgentVault + sets policy + approves tokens in ONE transaction |
+| **AgentPolicy** | `0x63649f61F29CE6dC9415263F4b727Bc908206Fbc` | Stores per-agent spending rules: per-token limits, per-swap caps, daily ceilings. Human sets these. Agent cannot change its own policy. |
+| **AgentGuardRouter** | `0x5Cc04847CE5A81319b55D34F9fB757465D3677E6` | Wraps Uniswap V3 SwapRouter02. Checks AgentPolicy BEFORE executing every swap. If agent exceeds limits → transaction reverts. |
+| **AgentVault** (demo instance) | `0x333896c4c1b58c5c9b56967301c008C073Bd2279` | Holds user funds. Tracks principal (original deposit). Agent can only trade yield above principal — cannot touch the original deposit. |
 
-After that? The agent runs on its own heartbeat — checking markets, rebalancing, staking, swapping. You watch from the dashboard. Pause anytime with one click.
+**Verified swap TX:** [`0x1abcce6a0d00eccdc303a4f7197a8b8a4f90b86661059e199dda45d3037422d1`](https://sepolia.basescan.org/tx/0x1abcce6a0d00eccdc303a4f7197a8b8a4f90b86661059e199dda45d3037422d1) — real swap through the router, policy checked, on Basescan.
 
-### Slide 4: Architecture (Technical)
-**"Four smart contracts. One pipeline."**
-
+**How the contracts connect:**
 ```
-User deposits ETH
-       ↓
-   AgentVault.sol ← holds funds, tracks principal
-       ↓
-   AgentPolicy.sol ← per-token limits, daily caps, per-swap max
-       ↓
-   AgentGuardRouter.sol ← wraps Uniswap, checks policy BEFORE every swap
-       ↓
-   Uniswap V3 (actual swap happens here)
+Human creates vault via VaultFactory
+  → VaultFactory deploys AgentVault (holds funds)
+  → VaultFactory calls AgentPolicy.setPolicy() (spending limits)
+  → VaultFactory approves tokens on the vault (which tokens agent can trade)
+
+Agent wants to swap WETH → USDC:
+  → Agent calls AgentGuardRouter.swapExactInput()
+  → Router calls AgentPolicy.checkPolicy(agent, token, amount)
+  → If within limits → Router forwards to Uniswap V3 SwapRouter02
+  → If exceeds limits → Transaction reverts (on-chain, automatic)
 ```
 
-- **VaultFactory** deploys vault + policy + token approvals in ONE transaction
-- **Principal tracking**: agent can only trade yield above what you deposited
-- **Policy enforcement**: happens at the smart contract level — agent can't bypass it even if compromised
+**Key design choices:**
+- Principal tracking: vault knows how much was deposited vs. how much is yield. Agent trades yield only.
+- Policy is set by the HUMAN wallet. Agent wallet can only read its policy, never change it.
+- Router is a wrapper, not a fork. Real Uniswap V3 liquidity underneath.
 
-### Slide 5: The AI Layer
-**"Venice AI for private strategy analysis"**
-- Strategy generation: AI analyzes market conditions across Lido, Uniswap, and proposes 2-3 strategies
-- Each strategy comes WITH guardrails already set — user doesn't configure slippage or gas limits
-- **Zero data retention** via Venice — your financial analysis is never stored
-- Chat interface for questions ("why did you choose Lido over Uniswap?")
-- Uniswap Trading API for real-time quotes and optimal routing
+**What's NOT on mainnet:** Everything is testnet. Path to mainnet = redeploy with chain ID 8453. No code changes needed.
 
-### Slide 6: The Agent Skill (Any AI Agent Can Use This)
-**"One skill file teaches any agent to manage your vault."**
-- `SKILL.md` — a single doc that teaches registration, deposits, swaps, staking, monitoring
-- Works with OpenClaw, or any agent framework that reads skill files
-- Agent runs on heartbeat: every 30 min, checks rates → checks yield → executes if profitable
-- All trades go through AgentGuardRouter → policy enforced on every transaction
-- **Demo: our agent (Kyro) can manage a vault right now using this skill**
+### Layer 2: API Endpoints (Next.js backend — all running on port 3002)
 
-### Slide 7: On-Chain Proof
-**"Everything is deployed and verified on Base Sepolia."**
+**Server:** `http://100.71.117.120:3002`
 
-| Contract | Address | Status |
-|----------|---------|--------|
-| VaultFactory | `0x672E...9774` | ✅ Deployed |
-| AgentPolicy | `0x6364...0Fbc` | ✅ Deployed |
-| AgentGuardRouter | `0x5Cc0...77E6` | ✅ Deployed |
-| Demo Vault | `0x3338...2279` | ✅ Created via factory |
-| Verified Swap | `0x1abc...22d1` | ✅ On Basescan |
+| Endpoint | Method | What It Does | Status |
+|----------|--------|-------------|--------|
+| `/api/vault/status` | GET | Returns vault balances, agent info, policy limits | ✅ Working |
+| `/api/vault/deposit` | POST | Returns unsigned TX data for depositing ETH into a vault. Agent signs and broadcasts. | ✅ Working (Sepolia) |
+| `/api/vault/swap` | POST | Gets a Uniswap Trading API quote, then builds a swap TX through AgentGuardRouter. Returns unsigned TX. | ✅ Working (Sepolia) |
+| `/api/vault/stake` | POST | Builds a Lido staking TX (ETH → stETH → wstETH via vault). Returns unsigned TX. | ✅ Working (Sepolia, but no real Lido on Sepolia) |
+| `/api/vault/yield` | GET | Reads principal + available yield from the vault contract on-chain | ✅ Working (reads real chain state) |
+| `/api/uniswap/quote` | POST | Proxies to Uniswap Trading API (`trade-api.gateway.uniswap.org/v1/quote`) with our API key | ✅ Working (real Uniswap API) |
+| `/api/rates` | GET | Live ETH price from CoinGecko, stETH APR from Lido API, gas from Base RPC | ✅ Working (real APIs) |
+| `/api/chat` | POST | Venice AI chat endpoint — zero data retention, private inference | ✅ Working (real Venice API) |
+| `/api/pipeline` | POST | Venice AI strategy generation — analyzes rates + vault state, proposes strategies with guardrails | ✅ Working (real Venice API) |
+| `/api/policy` | GET/POST | Read or set policy on AgentPolicy contract | ✅ Working (Sepolia) |
+| `/api/agent/register` | POST | Registers an agent wallet to a vault | ✅ Working (Sepolia) |
 
-- Real contracts, real swap, real policy enforcement
-- Judges can click every link and verify on Basescan
-- Path to mainnet: change chain ID, deploy, done
+**How the API and contracts connect:**
+```
+Agent (via skill) calls API endpoint
+  → API builds unsigned transaction data
+  → Returns TX to agent
+  → Agent signs with its own wallet
+  → Agent broadcasts to Base Sepolia
+  → Smart contract executes (with policy checks)
+```
 
-### Slide 8: Prize Track Alignment
-**"Built for five tracks with real integration, not just name-dropping."**
+The API never holds keys. It builds transactions. The agent signs them. This is the standard pattern — non-custodial.
 
-| Track | What We Built |
-|-------|--------------|
-| **Venice — Private Agents** | Venice AI generates strategies + chat, zero data retention |
-| **Uniswap — Best API** | Trading API for quotes, AgentGuardRouter wraps V3 swaps |
-| **Lido — stETH Agent Treasury** | Vault stakes ETH → stETH via Lido, principal tracking = yield-only trading |
-| **Base — Autonomous Trading** | Agent runs on heartbeat, all trades on Base Sepolia |
-| **Open Track** | Full-stack: contracts + API + dashboard + AI + skill file |
+**External APIs used (all real, all with API keys configured):**
+- **Uniswap Trading API** — `trade-api.gateway.uniswap.org/v1/quote` (env: `UNISWAP_API_KEY`)
+- **Venice AI** — `api.venice.ai/api/v1/chat/completions` (env: `VENICE_API_KEY`)
+- **CoinGecko** — free tier, no key needed
+- **Lido** — `eth-api.lido.fi/v1/protocol/steth/apr/sma` (free, no key)
+- **Base Sepolia RPC** — default public RPC via viem
 
-### Slide 9: What's Next (Post-Hackathon)
-**"From testnet to mainnet. From one agent to many."**
-- Deploy to Base mainnet
-- Add more protocols (Aave, Compound, Morpho)
-- Multi-agent support (multiple agents, one vault, separate policies)
-- Agent reputation: track performance over time
-- **The vision**: a world where everyone has an AI managing their DeFi, with smart contracts ensuring it stays within human-defined boundaries
+### Layer 3: Web Dashboard (Next.js frontend — 6 tabs)
 
-### Slide 10: The Team
-**"An AI agent and a human built this together."**
-- **Kyro** (AI agent on OpenClaw) — wrote all code: Solidity, TypeScript, Next.js. Explored 22+ sponsor technologies, built 75 demos before converging on AgentGuard
-- **Rodrigo** — product thinking, UX direction, "the user doesn't know DeFi" insight. Pushed through 5 major pivots. Handled registration (Cloudflare blocked the agent's VPS)
-- **How we work**: Rodrigo challenges ideas, Kyro builds. Every pivot made the product better.
+| Tab | URL | What It Shows |
+|-----|-----|--------------|
+| **Vault** | `/dashboard` | Wallet connection (ConnectKit), vault balances (WETH/USDC), deposit button, agent status, create vault button |
+| **Strategy** | `/strategy` | Venice AI generates 2-3 strategies with guardrails baked in. User picks one → "Approve & Start Agent" → agent runs autonomously |
+| **Activity** | `/activity` | Trade history pulled from vault events, Basescan links for every TX |
+| **Chat** | `/chat` | Full Venice AI chat — ask questions about strategies, DeFi, portfolio. Private inference. |
+| **Market** | `/market` | Live ETH price, stETH APR, gas prices, protocol cards (Lido, Uniswap) — all from real APIs |
+| **Guardrails** | `/guardrails` | Explains how on-chain enforcement works. Shows current policy limits, daily usage, approved tokens |
 
----
+**Shared state:** `AgentContext` provider wraps all pages — wallet connection, vault data, rates, agent status all shared.
 
-### Presentation Tips for Rodrigo
-- **Lead with the problem** — everyone gets "I want yield but DeFi is confusing"
-- **The "aha" is slide 4** — guardrails enforced BY the blockchain, not by the agent. The agent literally cannot overspend even if it wanted to
-- **Show Basescan** — click the verified swap TX live. Real contract, real transaction, real enforcement
-- **The skill file is the multiplier** — this isn't locked to our agent. ANY AI agent can read the skill and manage a vault. That's infrastructure, not just an app
-- **Don't apologize for testnet** — every hackathon project is testnet. The contracts work. The path to mainnet is trivial (chain ID change)
-- **If asked "what's the business model?"** — vault management fees (% of yield generated), premium strategies, multi-agent coordination fees
+**Key UX decisions:**
+- No forced flow — tabs let user explore any feature in any order
+- AI proposes strategies WITH guardrails — user doesn't set slippage or gas limits
+- "Create Vault" explains gas fees upfront
+- Agent runs autonomously after approval — heartbeat-driven, not prompt-driven
+
+### Layer 4: Agent Skill File
+
+**File:** `skill/SKILL.md` — one unified document that teaches any AI agent to use AgentGuard.
+
+**What the skill covers:**
+- How to register as an agent (POST `/api/agent/register`)
+- How to deposit ETH (POST `/api/vault/deposit` → sign → broadcast)
+- How to swap tokens (POST `/api/vault/swap` → sign → broadcast, policy enforced by router)
+- How to stake ETH into Lido (POST `/api/vault/stake`)
+- How to check yield (GET `/api/vault/yield`)
+- How to check market conditions (GET `/api/rates`)
+- How to set up heartbeat monitoring (check vault → check rates → trade if profitable → repeat)
+
+**OpenClaw integration:** Skill includes specific HEARTBEAT.md instructions so an OpenClaw agent can add vault monitoring to its heartbeat cycle.
+
+**Key point:** This isn't locked to our agent. Any agent that can read a markdown file and make HTTP calls can manage a vault through AgentGuard.
+
+### Layer 5: Sponsor Integrations (honest status)
+
+| Sponsor | Integration | How Real Is It |
+|---------|------------|----------------|
+| **Venice AI** | Strategy generation + chat, zero-retention inference | ✅ Real — API key configured, responses come from Venice, financial data never stored |
+| **Uniswap** | Trading API for quotes via `/api/uniswap/quote`, AgentGuardRouter wraps V3 SwapRouter02 | ✅ Real — API key configured, real quotes returned, real swaps executed through router |
+| **Lido** | Vault can stake ETH → stETH, APR pulled from Lido API, principal tracking enables yield-only trading | ⚠️ Partial — APR is real (from Lido API), staking endpoint exists, but no real Lido on Sepolia so staking TX would fail on-chain |
+| **Base** | All contracts deployed on Base Sepolia, all TXs on Base | ✅ Real — verified on Basescan |
+| **ERC-8004** | Agent has on-chain identity (token #34950) | ✅ Real — minted during registration |
+
+### What Would It Take for Mainnet
+
+1. Deploy 3 contracts to Base mainnet (gas cost: ~$5-10 in ETH)
+2. Change chain ID from 84532 → 8453 in API endpoints
+3. Lido staking works natively on mainnet (wstETH is live on Base)
+4. Update RPC endpoint to mainnet
+5. No code changes to contracts or frontend logic
+
+That's it. The architecture is chain-agnostic by design.
