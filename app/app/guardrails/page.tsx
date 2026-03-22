@@ -220,22 +220,17 @@ export default function GuardrailsPage() {
           </button>
         </div>
         {privateMode ? (
-          <div className="space-y-3 text-sm">
+          <div className="space-y-2 text-sm">
             <p className="text-gray-300">
-              When your agent calls MoltFi to get strategy advice or chat with the DeFi advisor, <strong>our server</strong> uses Venice AI to generate the response. Venice doesn&apos;t save your conversations or use them for training.
+              MoltFi&apos;s DeFi advisor runs on Venice AI — your strategy analysis is never saved or used for training.
             </p>
-            <p className="text-gray-300">
-              If Venice is down, the request fails — we won&apos;t quietly switch to another AI provider.
+            <p className="text-gray-400">
+              For end-to-end privacy, configure your own agent to use Venice as its model provider too. <a href="https://venice.ai" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">Get started →</a>
             </p>
-            <div className="bg-gray-800/50 rounded-lg p-3 text-xs text-gray-500 space-y-1">
-              <p><strong className="text-gray-400">What this covers:</strong> Strategy generation and DeFi advisor responses on the MoltFi server.</p>
-              <p><strong className="text-gray-400">What this doesn&apos;t cover:</strong> Your own AI agent. Whatever model your agent runs on (GPT-4, Claude, etc.) is controlled by your agent platform, not by us.</p>
-              <p><strong className="text-gray-400">What&apos;s always public:</strong> Your vault balances and trades are on the blockchain — anyone can see them.</p>
-            </div>
           </div>
         ) : (
           <p className="text-sm text-gray-500">
-            When your agent calls MoltFi for strategy advice, our server can use any AI provider. Enable this to restrict our server to Venice AI only (they don&apos;t save your data).
+            MoltFi&apos;s DeFi advisor uses Venice AI by default. Enable Private Mode to block fallback to other providers if Venice is unavailable.
           </p>
         )}
       </div>
