@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { parseEther } from 'viem'
 import { baseSepolia } from 'viem/chains'
@@ -22,13 +22,27 @@ type Strategy = {
   guardrails: { maxTradeSize: string; dailyLimit: string; maxSlippage: string; protocols: string[] }
 }
 
+function timeAgo(ts: number): string {
+  const diff = Math.floor((Date.now() - ts) / 1000)
+  if (diff < 60) return 'just now'
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
+  return `${Math.floor(diff / 3600)}h ago`
+}
+
 export default function StrategyPage() {
   const { address } = useAccount()
   const { vaults, vaultData, rates, hasVault } = useAgentContext()
-  // Restore cached strategies from localStorage
+  const router = useRouter()
+  const fetchRef = useRef<AbortController | null>(null)
+
+  // Load cached state from localStorage
   const [strategies, setStrategies] = useState<Strategy[]>(() => {
     if (typeof window === 'undefined') return []
     try { return JSON.parse(localStorage.getItem('ag_strategies') || '[]') } catch { return [] }
+  })
+  const [generatedAt, setGeneratedAt] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0
+    return parseInt(localStorage.getItem('ag_strategies_ts') || '0')
   })
   const [generating, setGenerating] = useState(false)
   const [selected, setSelected] = useState<number | null>(null)
@@ -37,20 +51,41 @@ export default function StrategyPage() {
     try { return JSON.parse(localStorage.getItem('ag_active_strategy') || 'null') } catch { return null }
   })
   const [txStatus, setTxStatus] = useState('')
-  const router = useRouter()
 
   const { writeContract, data: txHash } = useWriteContract()
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash })
 
-  const generate = async () => {
-    setGenerating(true); setStrategies([]); setSelected(null)
+  // Check if a generation was in progress when we mounted (tab switch recovery)
+  useEffect(() => {
+    const inProgress = localStorage.getItem('ag_generating')
+    if (inProgress === 'true' && strategies.length === 0) {
+      // Generation was interrupted by tab switch — auto-restart
+      localStorage.removeItem('ag_generating')
+      generate()
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const generate = useCallback(async () => {
+    if (fetchRef.current) fetchRef.current.abort()
+    const controller = new AbortController()
+    fetchRef.current = controller
+
+    setGenerating(true)
+    setStrategies([])
+    setSelected(null)
+    localStorage.setItem('ag_generating', 'true')
     localStorage.removeItem('ag_strategies')
+    localStorage.removeItem('ag_strategies_ts')
+
     try {
       const balance = vaultData?.balances?.WETH || '0'
       const usdcBalance = vaultData?.balances?.USDC || '0'
       const lidoApr = rates?.lido ? `${rates.lido.smaApr.toFixed(2)}%` : 'unknown'
       const ep = rates?.prices?.eth ? `$${rates.prices.eth.toLocaleString()}` : 'unknown'
-      const res = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal,
         body: JSON.stringify({ messages: [{ role: 'user',
           content: `You are an autonomous AI DeFi agent for AgentGuard on Base. The user has a vault with ${balance} WETH and ${usdcBalance} USDC. Current data: ETH price ${ep}, Lido stETH APR ${lidoApr}.
 
@@ -77,19 +112,31 @@ Return EXACTLY this format for each, no other text:
 }
 \`\`\`
 
-Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] }) })
+Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
+      })
       const data = await res.json()
       if (data.reply) {
         const parsed: Strategy[] = []
         for (const match of data.reply.matchAll(/```strategy\n([\s\S]*?)\n```/g)) {
           try { parsed.push(JSON.parse(match[1])) } catch {}
         }
+        const now = Date.now()
         setStrategies(parsed)
+        setGeneratedAt(now)
         localStorage.setItem('ag_strategies', JSON.stringify(parsed))
+        localStorage.setItem('ag_strategies_ts', String(now))
       }
-    } catch {}
+    } catch (e: any) {
+      if (e.name === 'AbortError') return // tab switch, don't clear generating flag
+    }
     setGenerating(false)
-  }
+    localStorage.removeItem('ag_generating')
+  }, [vaultData, rates])
+
+  // Cleanup abort controller on unmount
+  useEffect(() => {
+    return () => { fetchRef.current?.abort() }
+  }, [])
 
   const deploy = (s: Strategy) => {
     if (!vaults[0]) return
@@ -159,7 +206,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] }) })
             <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Protocols: </span><span className="text-gray-300">{active.guardrails.protocols.join(', ')}</span></div>
           </div>
           <div className="flex gap-3">
-            <button onClick={() => { setActive(null); setStrategies([]); setSelected(null); localStorage.removeItem('ag_active_strategy'); localStorage.removeItem('ag_strategies') }}
+            <button onClick={() => { setActive(null); setStrategies([]); setSelected(null); localStorage.removeItem('ag_active_strategy'); localStorage.removeItem('ag_strategies'); localStorage.removeItem('ag_strategies_ts') }}
               className="text-sm text-gray-500 hover:text-gray-300">Change Strategy</button>
             <button onClick={pause}
               className="ml-auto bg-red-600/20 hover:bg-red-600/40 text-red-400 px-4 py-2 rounded-lg border border-red-500/30 transition text-sm font-medium">
@@ -169,28 +216,81 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] }) })
         </div>
       )}
 
-      {/* Generate */}
-      {!active && strategies.length === 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
-          <p className="text-gray-400 mb-6">
-            {generating ? 'Analyzing protocols, yields, and market conditions...'
-              : 'Your agent will analyze current market conditions and propose strategies.'}
-          </p>
-          <button onClick={generate} disabled={generating}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-800 px-8 py-3 rounded-lg font-medium transition text-lg">
-            {generating ? (
-              <span className="flex items-center gap-2">
-                <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
-                Analyzing...
-              </span>
-            ) : 'Show Me Strategies'}
+      {/* Empty state — no strategies yet */}
+      {!active && strategies.length === 0 && !generating && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-10 text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+              <svg className="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5m14.8.8l1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0112 21c-2.773 0-5.491-.235-8.135-.687-1.718-.293-2.3-2.379-1.067-3.61L5 14.5" />
+              </svg>
+            </div>
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold mb-2">Get personalized DeFi strategies</h2>
+            <p className="text-sm text-gray-400 max-w-md mx-auto">
+              Venice AI analyzes your vault balance, current yields, and market conditions to propose strategies tailored to your portfolio.
+            </p>
+          </div>
+
+          {/* Privacy callout */}
+          <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-4 max-w-md mx-auto">
+            <div className="flex items-start gap-3 text-left">
+              <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0 mt-0.5">
+                <svg className="w-4 h-4 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-purple-300 mb-1">Private by design</div>
+                <p className="text-xs text-gray-500">
+                  Strategies are generated fresh each time using Venice AI with <strong className="text-gray-400">zero data retention</strong>. Your financial data is never stored — not by us, not by Venice. That&apos;s why you click the button each visit.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <button onClick={generate}
+            className="bg-indigo-600 hover:bg-indigo-500 px-8 py-3 rounded-lg font-medium transition text-lg">
+            Show Me Strategies
           </button>
+        </div>
+      )}
+
+      {/* Generating state */}
+      {!active && generating && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center space-y-4">
+          <div className="flex justify-center">
+            <svg className="w-10 h-10 animate-spin text-indigo-400" viewBox="0 0 24 24" fill="none">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-gray-300 font-medium">Analyzing protocols, yields, and market conditions</p>
+            <p className="text-sm text-gray-500 mt-1">Venice AI is reviewing your vault — this takes a few seconds.</p>
+            <p className="text-xs text-gray-600 mt-3">You can switch tabs — strategies will be ready when you come back.</p>
+          </div>
         </div>
       )}
 
       {/* Strategy cards */}
       {!active && strategies.length > 0 && (
         <div className="space-y-4">
+          {/* Generated timestamp */}
+          <div className="flex items-center justify-between text-xs text-gray-600">
+            <span>
+              {generatedAt ? `Generated ${timeAgo(generatedAt)}` : 'Cached strategies'}
+            </span>
+            <button onClick={generate} disabled={generating}
+              className="text-gray-500 hover:text-gray-300 transition flex items-center gap-1">
+              <svg className={`w-3.5 h-3.5 ${generating ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh
+            </button>
+          </div>
+
           {strategies.map((s, i) => (
             <button key={i} onClick={() => setSelected(i)}
               className={`w-full text-left border rounded-xl p-6 transition ${selected === i ? 'border-indigo-500 bg-indigo-500/10' : 'border-gray-800 hover:border-gray-700 bg-gray-900'}`}>
@@ -233,8 +333,6 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] }) })
               )}
             </button>
           ))}
-          <button onClick={generate} disabled={generating}
-            className="text-sm text-gray-500 hover:text-gray-300 transition">Regenerate strategies</button>
         </div>
       )}
 
