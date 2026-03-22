@@ -123,9 +123,9 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
-            <h3 className="font-semibold text-lg mb-2">Private by Default</h3>
+            <h3 className="font-semibold text-lg mb-2">Private Analysis</h3>
             <p className="text-sm text-gray-400">
-              All strategy analysis runs through Venice AI with zero data retention. Your portfolio, your balances, your trading patterns — none of it gets stored, logged, or used for training. Ever.
+              The AI&apos;s thinking is private — strategy analysis runs through Venice AI with zero data retention. Your portfolio data never gets stored or used for training. But trades themselves are on-chain and publicly verifiable — that&apos;s how you audit what the agent actually did.
             </p>
           </div>
 
@@ -135,9 +135,9 @@ export default function Home() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
             </div>
-            <h3 className="font-semibold text-lg mb-2">Verifiable Audit Trail</h3>
+            <h3 className="font-semibold text-lg mb-2">Public Audit Trail</h3>
             <p className="text-sm text-gray-400">
-              Every trade logged with on-chain proof. See exactly what your agent did, what limits applied, and verify it yourself on Basescan. Trust, but verify — with one click.
+              Every trade is a blockchain transaction — publicly visible, independently verifiable. Click any tx hash to see it on Basescan. The AI&apos;s reasoning stays private; the actions it takes are transparent.
             </p>
           </div>
         </div>
