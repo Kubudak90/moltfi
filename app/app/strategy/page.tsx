@@ -68,13 +68,19 @@ export default function StrategyPage() {
   const policyDailySpent = vaultData?.policy?.dailySpent || '0'
   const policyRemaining = vaultData?.policy?.remaining || '0'
 
-  // Strategy state
-  const [cachedStrategy, setCachedStrategy] = useState<Strategy | null>(() => {
-    if (typeof window === 'undefined') return null
-    try { return JSON.parse(localStorage.getItem('ag_active_strategy') || 'null') } catch { return null }
-  })
+  // Strategy state — loaded from server, not localStorage
+  const [cachedStrategy, setCachedStrategy] = useState<Strategy | null>(null)
   const [strategies, setStrategies] = useState<Strategy[]>([])
   const [generating, setGenerating] = useState(false)
+
+  // Load active strategy from server
+  useEffect(() => {
+    if (!vaults[0]) return
+    fetch(`/api/vault/strategy?vault=${vaults[0]}`)
+      .then(r => r.json())
+      .then(d => { if (d.strategy) setCachedStrategy(d.strategy) })
+      .catch(() => {})
+  }, [vaults])
 
   // Chat state (advisor)
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -184,7 +190,14 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
       args: [vaults[0] as `0x${string}`, parseEther(s.guardrails.maxTradeSize.replace(' ETH', '')),
         parseEther(s.guardrails.dailyLimit.replace(' ETH', ''))], chain: baseSepolia })
     setCachedStrategy(s)
-    localStorage.setItem('ag_active_strategy', JSON.stringify(s))
+    // Save strategy server-side
+    if (vaults[0]) {
+      fetch('/api/vault/strategy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vault: vaults[0], strategy: s }),
+      }).catch(() => {})
+    }
   }
 
   // ── Pause agent (revoke policy) ──
@@ -194,7 +207,10 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
     writeContract({ account: address, address: VAULT_FACTORY, abi: factoryAbi, functionName: 'revokePolicy',
       args: [vaults[0] as `0x${string}`], chain: baseSepolia })
     setCachedStrategy(null)
-    localStorage.removeItem('ag_active_strategy')
+    // Clear strategy server-side
+    if (vaults[0]) {
+      fetch(`/api/vault/strategy?vault=${vaults[0]}`, { method: 'DELETE' }).catch(() => {})
+    }
   }
 
   // ── Save adjusted guardrails ──

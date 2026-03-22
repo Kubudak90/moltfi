@@ -103,6 +103,39 @@ const TOOLS = [
       parameters: { type: 'object', properties: {}, required: [] },
     },
   },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'get_strategy',
+      description: 'Get the currently active strategy for this vault — what the agent is supposed to be doing, including steps, guardrails, and when it was activated.',
+      parameters: { type: 'object', properties: {}, required: [] },
+    },
+  },
+  {
+    type: 'function' as const,
+    function: {
+      name: 'set_strategy',
+      description: 'Save a new active strategy for the vault. Use after generating a strategy the user approves. Includes name, description, steps, and guardrails.',
+      parameters: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Strategy name (e.g. "Conservative Yield")' },
+          description: { type: 'string', description: 'Plain English description of what the agent will do' },
+          expectedYield: { type: 'string', description: 'Expected yield range (e.g. "2-4% APR")' },
+          steps: { type: 'array', items: { type: 'string' }, description: 'What the agent will actively do' },
+          guardrails: {
+            type: 'object',
+            properties: {
+              maxTradeSize: { type: 'string' },
+              dailyLimit: { type: 'string' },
+              protocols: { type: 'array', items: { type: 'string' } },
+            },
+          },
+        },
+        required: ['name', 'description', 'steps', 'guardrails'],
+      },
+    },
+  },
 ]
 
 const SYSTEM_PROMPT = `You are MoltFi, a private DeFi vault manager on Base.
@@ -120,7 +153,9 @@ Rules:
 - Be concise — 1-3 sentences plus the relevant data.
 - If a tool fails, explain clearly what went wrong.
 - Include Basescan links for any transaction.
-- When asked for strategies, use the generate_strategy tool to get AI-powered analysis.`
+- When asked for strategies, use generate_strategy to get AI-powered analysis.
+- After generating a strategy the user likes, use set_strategy to save it as the active strategy.
+- When running autonomously, use get_strategy to know what you're supposed to be doing, then act on it.`
 
 // ─── Tool execution ───
 async function executeTool(name: string, args: any, origin: string, vault: string, apiKey: string): Promise<string> {
@@ -184,11 +219,22 @@ async function executeTool(name: string, args: any, origin: string, vault: strin
           body: JSON.stringify({ maxPerTrade: '0.5', dailyLimit: '1' }),
         })
         const data = await res.json()
-        // Update registration with new vault address
         if (data.vault) {
           updateVault(apiKey, data.vault)
         }
         return JSON.stringify(data)
+      }
+      case 'get_strategy': {
+        const res = await fetch(`${origin}/api/vault/strategy?vault=${vault}`)
+        return await res.text()
+      }
+      case 'set_strategy': {
+        const res = await fetch(`${origin}/api/vault/strategy`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vault, strategy: args }),
+        })
+        return await res.text()
       }
       default:
         return JSON.stringify({ error: `Unknown tool: ${name}` })
