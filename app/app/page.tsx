@@ -16,12 +16,12 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Your agent moves your money.<br />
-            <span className="text-indigo-400">Can you trust it?</span>
+            DeFi infrastructure<br />
+            <span className="text-indigo-400">for AI agents.</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-            AgentGuard gives your AI agent DeFi superpowers — with blockchain-enforced limits it can never exceed and private strategy analysis that never leaks your data.
+            Your agent talks to our DeFi agent. It handles swaps, yield strategies, and portfolio management — with on-chain guardrails it can never exceed and private analysis that never leaks your data.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
@@ -37,28 +37,73 @@ export default function Home() {
         </div>
       </section>
 
-      {/* The Problem */}
+      {/* Two Agents, Clear Roles */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
-        <h2 className="text-2xl font-bold mb-8 text-center">The Problem</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="text-red-400 text-sm font-medium mb-3">No spending controls</div>
-            <p className="text-gray-400 text-sm">
-              Your agent moves money on your behalf — but there&apos;s no transparent way to scope what it can spend, verify it spent correctly, or guarantee settlement without a middleman.
-            </p>
+        <h2 className="text-2xl font-bold mb-3 text-center">Agent-to-Agent Architecture</h2>
+        <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">Your agent is the brain. Our DeFi agent is the specialist. They talk to each other — you just talk to yours.</p>
+
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
+          <div className="bg-gray-900 border border-indigo-500/30 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-indigo-600 flex items-center justify-center text-sm font-bold">You</div>
+              <div>
+                <div className="font-semibold">Your Agent</div>
+                <div className="text-xs text-gray-500">OpenClaw, Telegram, Discord — any platform</div>
+              </div>
+            </div>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li className="flex gap-2"><span className="text-indigo-400">→</span> Knows you, your goals, your risk tolerance</li>
+              <li className="flex gap-2"><span className="text-indigo-400">→</span> You talk to it in plain English</li>
+              <li className="flex gap-2"><span className="text-indigo-400">→</span> It decides when and what to trade</li>
+              <li className="flex gap-2"><span className="text-indigo-400">→</span> Calls AgentGuard&apos;s API to execute</li>
+            </ul>
           </div>
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="text-red-400 text-sm font-medium mb-3">Your data leaks everywhere</div>
-            <p className="text-gray-400 text-sm">
-              Every API call, every payment, every interaction creates metadata about you. Spending patterns, contacts, preferences. The agent isn&apos;t leaking its data — it&apos;s leaking yours.
-            </p>
+
+          <div className="bg-gray-900 border border-purple-500/30 rounded-xl p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-lg bg-purple-600 flex items-center justify-center text-sm font-bold">AG</div>
+              <div>
+                <div className="font-semibold">AgentGuard DeFi Agent</div>
+                <div className="text-xs text-gray-500">Powered by Venice AI · Zero data retention</div>
+              </div>
+            </div>
+            <ul className="space-y-2 text-sm text-gray-400">
+              <li className="flex gap-2"><span className="text-purple-400">→</span> Knows DeFi — Uniswap, Lido, yields, gas</li>
+              <li className="flex gap-2"><span className="text-purple-400">→</span> Analyzes markets privately via Venice</li>
+              <li className="flex gap-2"><span className="text-purple-400">→</span> Executes trades through on-chain guardrails</li>
+              <li className="flex gap-2"><span className="text-purple-400">→</span> Can never exceed your limits — blockchain enforces it</li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Flow diagram */}
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <div className="flex items-center justify-between max-w-2xl mx-auto text-center">
+            <div className="flex-1">
+              <div className="text-sm font-medium mb-1">You</div>
+              <div className="text-xs text-gray-500">&quot;Put my ETH to work&quot;</div>
+            </div>
+            <div className="text-gray-600 px-2">→</div>
+            <div className="flex-1">
+              <div className="text-sm font-medium text-indigo-400 mb-1">Your Agent</div>
+              <div className="text-xs text-gray-500">Reads skill, calls API</div>
+            </div>
+            <div className="text-gray-600 px-2">→</div>
+            <div className="flex-1">
+              <div className="text-sm font-medium text-purple-400 mb-1">DeFi Agent</div>
+              <div className="text-xs text-gray-500">Venice analysis + execution</div>
+            </div>
+            <div className="text-gray-600 px-2">→</div>
+            <div className="flex-1">
+              <div className="text-sm font-medium text-green-400 mb-1">Blockchain</div>
+              <div className="text-xs text-gray-500">Guardrails enforced</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* The Solution */}
+      {/* Three Pillars */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
-        <h2 className="text-2xl font-bold mb-8 text-center">The Solution</h2>
         <div className="grid md:grid-cols-3 gap-6">
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <div className="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center mb-4">
@@ -68,31 +113,31 @@ export default function Home() {
             </div>
             <h3 className="font-semibold text-lg mb-2">On-Chain Guardrails</h3>
             <p className="text-sm text-gray-400">
-              Smart contracts on Base enforce your limits on every trade. Max trade size, daily volume cap, approved tokens. Your agent physically cannot exceed them — the blockchain reverts the transaction.
+              Smart contracts enforce your limits on every trade. Max trade size, daily cap, approved tokens. If the agent tries to exceed them, the transaction reverts. Not &quot;we promise&quot; — the blockchain enforces it.
             </p>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center mb-4">
-              <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-10 h-10 rounded-lg bg-purple-600/20 flex items-center justify-center mb-4">
+              <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
-            <h3 className="font-semibold text-lg mb-2">Private AI Strategy</h3>
+            <h3 className="font-semibold text-lg mb-2">Private by Default</h3>
             <p className="text-sm text-gray-400">
-              Your agent analyzes DeFi protocols and builds strategies using Venice&apos;s zero-retention inference. Your financial data never gets stored, logged, or used for training. Private by default.
+              All strategy analysis runs through Venice AI with zero data retention. Your portfolio, your balances, your trading patterns — none of it gets stored, logged, or used for training. Ever.
             </p>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center mb-4">
-              <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="w-10 h-10 rounded-lg bg-green-600/20 flex items-center justify-center mb-4">
+              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
               </svg>
             </div>
-            <h3 className="font-semibold text-lg mb-2">Full Audit Trail</h3>
+            <h3 className="font-semibold text-lg mb-2">Verifiable Audit Trail</h3>
             <p className="text-sm text-gray-400">
-              Every action your agent takes is logged with reasoning and a transaction hash you can verify on Basescan. You always know what happened and why.
+              Every trade logged with on-chain proof. See exactly what your agent did, what limits applied, and verify it yourself on Basescan. Trust, but verify — with one click.
             </p>
           </div>
         </div>
@@ -151,11 +196,11 @@ export default function Home() {
         <h2 className="text-2xl font-bold mb-8 text-center">How It Works</h2>
         <div className="space-y-4 max-w-2xl mx-auto">
           {[
-            { step: '1', title: 'Connect your wallet', desc: 'Open the dashboard and connect your wallet. That\'s your identity — no accounts, no signups.' },
-            { step: '2', title: 'Your agent reads the skill file', desc: 'Point your AI agent to the skill URL. It learns every endpoint — register, trade, stake, monitor. One curl. No SDK.' },
-            { step: '3', title: 'Agent registers & gets a vault', desc: 'Your agent registers itself with your wallet address. You create a vault — a smart contract that holds your funds with on-chain spending limits.' },
-            { step: '4', title: 'AI proposes strategies privately', desc: 'Venice AI analyzes your vault, market conditions, and yields — with zero data retention. Your portfolio data never gets stored anywhere.' },
-            { step: '5', title: 'You approve, agent executes', desc: 'Pick a strategy. Guardrails get written to a smart contract on Base. Your agent trades within those limits — if it tries to exceed them, the blockchain reverts the transaction.' },
+            { step: '1', title: 'Connect your wallet', desc: 'Open the dashboard. Connect your wallet. That\'s it — no accounts, no signups, no KYC.' },
+            { step: '2', title: 'Tell your agent about AgentGuard', desc: 'Your agent reads one skill file and instantly knows how to register, trade, check balances, and follow guardrails. Works with any agent on any platform.' },
+            { step: '3', title: 'Your agent talks to our DeFi agent', desc: 'Your agent calls the API. Our DeFi agent analyzes markets privately via Venice AI, proposes strategies, and executes trades — all through on-chain guardrails.' },
+            { step: '4', title: 'You stay in control', desc: 'Set limits on the dashboard or let your agent propose them. Every trade goes through a smart contract that enforces your rules. Pause anytime with one click.' },
+            { step: '5', title: 'Verify everything', desc: 'Every action has a transaction hash. Click it to verify on Basescan. The activity tab shows exactly what happened, what limits applied, and proves the guardrails were honored.' },
           ].map(item => (
             <div key={item.step} className="flex gap-4 bg-gray-900 border border-gray-800 rounded-xl p-5">
               <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>

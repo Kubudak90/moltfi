@@ -16,8 +16,8 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
 
-  const systemContext = `You are the AgentGuard AI Financial Advisor (Beta), powered by Venice AI with zero data retention.
-You help users understand DeFi strategies for their vault on Base.
+  const systemContext = `You are AgentGuard's DeFi Agent — the specialist that handles DeFi strategy and execution. You're powered by Venice AI with zero data retention.
+Normally, the user's own AI agent talks to you through the API. But right now, the human is talking to you directly through the dashboard.
 Current vault data:
 - WETH: ${vaultData?.balances?.WETH || '0'}
 - USDC: ${vaultData?.balances?.USDC || '0'}
@@ -84,10 +84,10 @@ If they ask about deploying a strategy, explain that clicking "Approve & Start A
       <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            AI Financial Advisor
+            DeFi Agent
             <span className="text-xs px-2 py-0.5 rounded bg-purple-500/15 text-purple-400 border border-purple-500/25 font-normal">Beta</span>
           </h1>
-          <p className="text-sm text-gray-500">Private analysis powered by Venice AI — zero data retention</p>
+          <p className="text-sm text-gray-500">Talk directly to AgentGuard&apos;s DeFi specialist — private via Venice AI</p>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-purple-400">
           <div className="w-2 h-2 rounded-full bg-purple-400" />Venice AI
@@ -103,10 +103,9 @@ If they ask about deploying a strategy, explain that clicking "Approve & Start A
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold mb-2">Private Financial Analysis</h2>
+            <h2 className="text-lg font-semibold mb-2">AgentGuard&apos;s DeFi Agent</h2>
             <p className="text-gray-500 text-sm max-w-md mx-auto mb-6">
-              Ask me anything about your vault, DeFi strategies, or market conditions.
-              All analysis routed through Venice AI — your data is never stored.
+              I&apos;m the DeFi specialist your agent talks to through the API. You can also talk to me directly here. All analysis is private via Venice AI — zero data retention.
             </p>
             <div className="flex flex-wrap justify-center gap-2">
               {['What should I do with my vault?', 'Explain the risks of each strategy', 'How do guardrails protect me?', 'When should I rebalance?'].map(q => (
