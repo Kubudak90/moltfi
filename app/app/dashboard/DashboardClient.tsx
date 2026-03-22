@@ -82,18 +82,26 @@ export default function DashboardClient() {
   }
 
   const withdraw = async () => {
-    if (!vaults[0] || !withdrawAmount) return
+    const amt = withdrawAmount || '0'
+    if (parseFloat(amt) <= 0) { setError('Enter an amount to withdraw'); return }
+    if (!vaults[0]) { setError('No vault found'); return }
     if (!(await ensureNetwork())) return
-    setTxStatus(`Withdrawing ${withdrawToken}...`)
-    if (withdrawToken === 'ETH') {
-      writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdrawETH',
-        args: [parseEther(withdrawAmount)], chain: baseSepolia })
-    } else {
-      const token = withdrawToken === 'WETH' ? WETH : USDC
-      const decimals = withdrawToken === 'USDC' ? 6 : 18
-      const amount = BigInt(Math.floor(parseFloat(withdrawAmount) * (10 ** decimals)))
-      writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdraw',
-        args: [token, amount], chain: baseSepolia })
+    setError('')
+    try {
+      setTxStatus(`Withdrawing ${amt} ${withdrawToken}...`)
+      if (withdrawToken === 'ETH') {
+        writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdrawETH',
+          args: [parseEther(amt)], chain: baseSepolia })
+      } else {
+        const token = withdrawToken === 'WETH' ? WETH : USDC
+        const decimals = withdrawToken === 'USDC' ? 6 : 18
+        const amount = BigInt(Math.floor(parseFloat(amt) * (10 ** decimals)))
+        writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdraw',
+          args: [token, amount], chain: baseSepolia })
+      }
+    } catch (e: any) {
+      setError(`Withdraw failed: ${e.message}`)
+      setTxStatus('')
     }
   }
 
