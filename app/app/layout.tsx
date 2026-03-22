@@ -6,6 +6,8 @@ import { NavTabs } from './components/NavTabs'
 
 export const metadata = { title: 'AgentGuard — AI Vault Manager', description: 'Manage your DeFi positions with an AI agent, protected by on-chain guardrails' }
 
+import { PrivacyIndicator } from './components/PrivacyIndicator'
+
 function Nav() {
   return (
     <nav className="border-b border-gray-800 bg-[#09090b]/80 backdrop-blur-sm sticky top-0 z-50">
@@ -14,7 +16,10 @@ function Nav() {
           <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-xs font-bold">AG</div>
           <span className="font-bold text-lg">AgentGuard</span>
         </Link>
-        <ConnectWallet />
+        <div className="flex items-center gap-3">
+          <PrivacyIndicator />
+          <ConnectWallet />
+        </div>
       </div>
     </nav>
   )
