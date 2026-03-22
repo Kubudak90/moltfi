@@ -292,8 +292,8 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
           </div>
 
           {strategies.map((s, i) => (
-            <button key={i} onClick={() => setSelected(i)}
-              className={`w-full text-left border rounded-xl p-6 transition ${selected === i ? 'border-indigo-500 bg-indigo-500/10' : 'border-gray-800 hover:border-gray-700 bg-gray-900'}`}>
+            <div key={i}
+              className="w-full text-left border rounded-xl p-6 transition border-gray-800 bg-gray-900 hover:border-gray-700">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-semibold text-lg">{s.name}</span>
                 <span className="text-sm text-indigo-400 font-medium">{s.expectedYield}</span>
@@ -307,32 +307,34 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
                   </div>
                 ))}
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-3 border-t border-gray-800/50">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-3 border-t border-gray-800/50 mb-4">
                 <div><span className="text-gray-600">Max trade: </span><span className="text-gray-400">{s.guardrails.maxTradeSize}</span></div>
                 <div><span className="text-gray-600">Daily limit: </span><span className="text-gray-400">{s.guardrails.dailyLimit}</span></div>
                 <div><span className="text-gray-600">Slippage: </span><span className="text-gray-400">{s.guardrails.maxSlippage}</span></div>
                 <div><span className="text-gray-600">Protocols: </span><span className="text-gray-400">{s.guardrails.protocols.join(', ')}</span></div>
               </div>
-              {selected === i && (
-                <div className="mt-4 pt-4 border-t border-indigo-500/30 space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-indigo-300">Guardrails enforced on-chain via smart contract</span>
-                    <div className="flex gap-2">
-                      <div onClick={(e) => { e.stopPropagation(); router.push(`/chat?strategy=${encodeURIComponent(JSON.stringify(s))}`) }}
-                        className="bg-purple-600/20 hover:bg-purple-600/40 text-purple-300 px-4 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer border border-purple-500/30 flex items-center gap-2">
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-                        Chat About This
-                      </div>
-                      <div onClick={(e) => { e.stopPropagation(); deploy(s) }}
-                        className="bg-green-600 hover:bg-green-500 px-6 py-2.5 rounded-lg text-sm font-medium transition cursor-pointer">
-                        Approve &amp; Start Agent
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </button>
+              <div className="flex items-center justify-between pt-3 border-t border-gray-800/50">
+                <span className="text-xs text-gray-600">Guardrails enforced on-chain</span>
+                <button onClick={() => deploy(s)}
+                  className="bg-green-600 hover:bg-green-500 px-5 py-2 rounded-lg text-sm font-medium transition">
+                  Approve &amp; Start Agent
+                </button>
+              </div>
+            </div>
           ))}
+
+          {/* Chat about strategies CTA */}
+          <button onClick={() => router.push(`/chat?strategy=${encodeURIComponent(JSON.stringify(strategies))}`)}
+            className="w-full bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/30 rounded-xl p-5 transition flex items-center justify-center gap-3 group">
+            <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            <span className="text-purple-300 font-medium">Chat with DeFi Agent about these strategies</span>
+            <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Beta</span>
+            <svg className="w-4 h-4 text-purple-500 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
         </div>
       )}
 
