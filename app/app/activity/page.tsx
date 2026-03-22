@@ -4,86 +4,51 @@ import { useEffect, useState } from 'react'
 import { useAgentContext } from '../components/AgentContext'
 
 type Activity = {
-  type: 'deposit' | 'swap' | 'stake' | 'withdraw' | 'create' | 'unknown'
-  hash: string
-  from: string
-  to: string
-  value: string
-  timestamp: string
-  blockNumber: string
-  functionName?: string
+  type: string
+  summary: string
+  detail: string
+  txHash: string
+  blockNumber: number
+  timestamp: number | null
+  guardrailCheck: string
 }
 
-const TYPE_CONFIG: Record<string, { label: string; icon: string; color: string; bg: string }> = {
-  deposit: { label: 'Deposit', icon: '↓', color: 'text-green-400', bg: 'bg-green-500/20' },
-  swap: { label: 'Swap', icon: '↔', color: 'text-indigo-400', bg: 'bg-indigo-500/20' },
-  stake: { label: 'Stake', icon: '⬆', color: 'text-blue-400', bg: 'bg-blue-500/20' },
-  withdraw: { label: 'Withdraw', icon: '↑', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-  create: { label: 'Vault Created', icon: '✦', color: 'text-purple-400', bg: 'bg-purple-500/20' },
-  unknown: { label: 'Transaction', icon: '•', color: 'text-gray-400', bg: 'bg-gray-500/20' },
+const TYPE_STYLE: Record<string, { icon: string; color: string; bg: string; border: string }> = {
+  deposit: { icon: '↓', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' },
+  swap: { icon: '↔', color: 'text-indigo-400', bg: 'bg-indigo-500/10', border: 'border-indigo-500/20' },
+  stake: { icon: '⬆', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+  withdraw: { icon: '↑', color: 'text-yellow-400', bg: 'bg-yellow-500/10', border: 'border-yellow-500/20' },
+  yield: { icon: '◉', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
 }
 
-function classifyTx(tx: any): Activity['type'] {
-  const input = tx.input || ''
-  const fn = tx.functionName || ''
-  if (fn.includes('depositETH') || input.startsWith('0xf6326fb3')) return 'deposit'
-  if (fn.includes('swap') || fn.includes('executeSwap') || input.startsWith('0x12aa3caf')) return 'swap'
-  if (fn.includes('stake') || fn.includes('submit')) return 'stake'
-  if (fn.includes('withdraw')) return 'withdraw'
-  if (fn.includes('createVault')) return 'create'
-  // If sending ETH to the vault with no data, it's a deposit
-  if (input === '0x' && parseFloat(tx.value) > 0) return 'deposit'
-  return 'unknown'
-}
-
-function timeAgo(timestamp: string): string {
-  const seconds = Math.floor((Date.now() / 1000) - parseInt(timestamp))
-  if (seconds < 60) return 'just now'
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`
-  if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`
-  return `${Math.floor(seconds / 86400)}d ago`
+function formatTime(ts: number | null): string {
+  if (!ts) return ''
+  const d = new Date(ts * 1000)
+  const now = Date.now()
+  const diff = Math.floor((now - d.getTime()) / 1000)
+  const timeStr = d.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+  if (diff < 60) return `Just now · ${timeStr}`
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago · ${timeStr}`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago · ${timeStr}`
+  return `${Math.floor(diff / 86400)}d ago · ${timeStr}`
 }
 
 export default function ActivityPage() {
   const { vaults, hasVault } = useAgentContext()
   const [activities, setActivities] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const [expanded, setExpanded] = useState<string | null>(null)
 
   useEffect(() => {
     if (!hasVault || !vaults[0]) { setLoading(false); return }
-
-    const vault = vaults[0]
-    // Fetch transactions from Basescan API
-    const url = `https://api-sepolia.basescan.org/api?module=account&action=txlist&address=${vault}&startblock=0&endblock=99999999&page=1&offset=50&sort=desc`
-
-    fetch(url)
+    fetch(`/api/vault/activity?vault=${vaults[0]}`)
       .then(r => r.json())
-      .then(data => {
-        if (data.status === '1' && data.result) {
-          const txs: Activity[] = data.result.map((tx: any) => ({
-            type: classifyTx(tx),
-            hash: tx.hash,
-            from: tx.from,
-            to: tx.to,
-            value: (parseFloat(tx.value) / 1e18).toFixed(6),
-            timestamp: tx.timeStamp,
-            blockNumber: tx.blockNumber,
-            functionName: tx.functionName || '',
-          }))
-          setActivities(txs)
-        }
-        setLoading(false)
-      })
-      .catch(e => { setError(e.message); setLoading(false) })
+      .then(d => { setActivities(d.activities || []); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [vaults, hasVault])
 
   if (!hasVault) {
-    return (
-      <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-500">
-        Create a vault first to see activity.
-      </div>
-    )
+    return <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-500">Create a vault first to see activity.</div>
   }
 
   return (
@@ -91,75 +56,96 @@ export default function ActivityPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Activity</h1>
-          <p className="text-sm text-gray-500">Every action on your vault, pulled from the blockchain</p>
+          <p className="text-sm text-gray-500">What your agent has done with your money — in plain English</p>
         </div>
-        <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-          className="text-xs text-indigo-400 hover:underline">Full history on Basescan →</a>
+        <div className="text-right">
+          <div className="text-xs text-gray-500">{activities.length} transaction{activities.length !== 1 ? 's' : ''}</div>
+          <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
+            className="text-xs text-indigo-400 hover:underline">Raw blockchain data →</a>
+        </div>
       </div>
 
-      {loading && (
-        <div className="text-center py-12 text-gray-500">Loading transactions...</div>
-      )}
-
-      {error && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-sm text-red-300">{error}</div>
-      )}
+      {loading && <div className="text-center py-12 text-gray-500">Reading from blockchain...</div>}
 
       {!loading && activities.length === 0 && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
-          <div className="text-gray-500 mb-2">No activity yet</div>
-          <p className="text-xs text-gray-600">Deposit ETH into your vault to get started. Transactions will appear here automatically.</p>
+          <div className="text-4xl mb-3">📭</div>
+          <div className="text-gray-400 font-medium mb-1">No activity yet</div>
+          <p className="text-xs text-gray-600">When your agent makes trades, stakes, or deposits, every action shows up here with a plain-English explanation of what happened and whether guardrails were followed.</p>
         </div>
       )}
 
       {activities.length > 0 && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl divide-y divide-gray-800">
+        <div className="space-y-3">
           {activities.map((tx) => {
-            const config = TYPE_CONFIG[tx.type]
+            const style = TYPE_STYLE[tx.type] || TYPE_STYLE.deposit
+            const isExpanded = expanded === tx.txHash
             return (
-              <a key={tx.hash} href={`https://sepolia.basescan.org/tx/${tx.hash}`} target="_blank" rel="noopener"
-                className="flex items-center gap-4 p-4 hover:bg-gray-800/50 transition group">
-                <div className={`w-10 h-10 rounded-full ${config.bg} flex items-center justify-center shrink-0`}>
-                  <span className={`text-lg ${config.color}`}>{config.icon}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`font-medium ${config.color}`}>{config.label}</span>
-                    {tx.functionName && (
-                      <span className="text-xs text-gray-600 font-mono truncate">{tx.functionName.split('(')[0]}</span>
-                    )}
+              <div key={tx.txHash}
+                className={`bg-gray-900 border ${style.border} rounded-xl overflow-hidden transition-all`}>
+                {/* Main row — always visible */}
+                <button onClick={() => setExpanded(isExpanded ? null : tx.txHash)}
+                  className="w-full flex items-center gap-4 p-5 text-left hover:bg-gray-800/30 transition">
+                  <div className={`w-10 h-10 rounded-full ${style.bg} flex items-center justify-center shrink-0`}>
+                    <span className={`text-lg ${style.color}`}>{style.icon}</span>
                   </div>
-                  {parseFloat(tx.value) > 0 && (
-                    <div className="text-sm text-gray-400">{tx.value} ETH</div>
-                  )}
-                </div>
-                <div className="text-right shrink-0">
-                  <div className="text-xs text-gray-500">{timeAgo(tx.timestamp)}</div>
-                  <div className="text-xs text-gray-600 font-mono group-hover:text-indigo-400 transition">
-                    {tx.hash.slice(0, 6)}...{tx.hash.slice(-4)}
+                  <div className="flex-1 min-w-0">
+                    <div className={`font-medium ${style.color}`}>{tx.summary}</div>
+                    <div className="text-xs text-gray-500 mt-0.5">{formatTime(tx.timestamp)}</div>
                   </div>
-                </div>
-              </a>
+                  <svg className={`w-5 h-5 text-gray-600 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Expanded detail */}
+                {isExpanded && (
+                  <div className="px-5 pb-5 space-y-3 border-t border-gray-800">
+                    <div className="pt-4">
+                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">What happened</div>
+                      <p className="text-sm text-gray-300">{tx.detail}</p>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Guardrail check</div>
+                      <p className="text-sm text-gray-300">{tx.guardrailCheck}</p>
+                    </div>
+                    <div className="flex items-center justify-between pt-2">
+                      <div>
+                        <div className="text-xs text-gray-500">Transaction</div>
+                        <span className="text-xs font-mono text-gray-400">{tx.txHash}</span>
+                      </div>
+                      <a href={`https://sepolia.basescan.org/tx/${tx.txHash}`} target="_blank" rel="noopener"
+                        className="text-xs bg-gray-800 hover:bg-gray-700 text-indigo-400 px-3 py-1.5 rounded-lg transition">
+                        Verify on Basescan →
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>
       )}
 
-      {/* How it works */}
+      {/* What this page is */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h3 className="font-semibold mb-3">How Activity Tracking Works</h3>
-        <div className="space-y-3 text-sm text-gray-400">
-          <div className="flex items-start gap-3">
-            <span className="text-indigo-400 font-bold shrink-0">1.</span>
-            <span><strong className="text-gray-300">Every action is on-chain</strong> — deposits, swaps, stakes, and withdrawals are all blockchain transactions on Base.</span>
+        <h3 className="font-semibold mb-3">Your Audit Trail</h3>
+        <p className="text-sm text-gray-400 mb-4">
+          Every row above is a real blockchain transaction. This isn&apos;t a log file your agent writes — it&apos;s data pulled directly from Base. Your agent can&apos;t edit or hide anything here.
+        </p>
+        <div className="grid sm:grid-cols-3 gap-4 text-xs">
+          <div className="bg-gray-800/30 rounded-lg p-3">
+            <div className="font-medium text-gray-300 mb-1">Plain English</div>
+            <div className="text-gray-500">Every action is explained — what happened, why, and whether it followed your rules.</div>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-indigo-400 font-bold shrink-0">2.</span>
-            <span><strong className="text-gray-300">Pulled live from Basescan</strong> — this page reads your vault&apos;s transaction history directly. Nothing is cached or simulated.</span>
+          <div className="bg-gray-800/30 rounded-lg p-3">
+            <div className="font-medium text-gray-300 mb-1">Guardrail Checks</div>
+            <div className="text-gray-500">Each transaction shows whether trade limits, token allowlists, and principal protection were respected.</div>
           </div>
-          <div className="flex items-start gap-3">
-            <span className="text-indigo-400 font-bold shrink-0">3.</span>
-            <span><strong className="text-gray-300">Click any row</strong> to see the full transaction details on Basescan — gas, block, input data, everything.</span>
+          <div className="bg-gray-800/30 rounded-lg p-3">
+            <div className="font-medium text-gray-300 mb-1">Independently Verifiable</div>
+            <div className="text-gray-500">Click &ldquo;Verify on Basescan&rdquo; to see the raw transaction on the blockchain. No trust required.</div>
           </div>
         </div>
       </div>

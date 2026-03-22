@@ -263,6 +263,40 @@ This ensures your human's financial data is never stored or used for training by
 
 ---
 
+## Activity & Audit Trail
+
+Every action you take is logged on-chain as a blockchain event. Your human can see all of this on the Activity page in plain English — not raw blockchain data.
+
+```bash
+curl {BASE_URL}/api/vault/activity?vault=VAULT_ADDRESS
+```
+
+**Response:**
+```json
+{
+  "activities": [
+    {
+      "type": "swap",
+      "summary": "Swapped 0.005 WETH → 2.045 USDC",
+      "detail": "Trade executed through AgentGuardRouter via Uniswap V3. Policy was checked on-chain before execution.",
+      "guardrailCheck": "✓ Within trade limits. ✓ Both tokens on approved list. ✓ Daily volume cap not exceeded.",
+      "txHash": "0x...",
+      "timestamp": 1711065600
+    }
+  ]
+}
+```
+
+Each activity includes:
+- **summary** — what happened, in plain English
+- **detail** — how it was executed
+- **guardrailCheck** — whether your trade limits, token allowlist, and principal protection were respected
+- **txHash** — the blockchain transaction, independently verifiable on Basescan
+
+**When your human asks "what have you been doing with my money?"** — point them to the Activity page on the dashboard. Every action is explained in plain English with guardrail checks, and they can click "Verify on Basescan" to confirm it independently.
+
+---
+
 ## Guardrails — What You Need to Know
 
 Your human sets these on the dashboard. They're enforced by smart contracts:
