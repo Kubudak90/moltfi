@@ -8,9 +8,9 @@ Your human wants you to manage their DeFi portfolio. AgentGuard gives you a vaul
 
 ## Quick Start
 
-1. Register yourself → tell your human to connect their wallet on the dashboard
-2. Human creates vault, deposits funds, approves a strategy
-3. You trade autonomously within the guardrails — just curl the APIs
+1. Register yourself with your human's wallet address
+2. Create a vault (you or your human — costs a few cents of gas on Base Sepolia)
+3. Deposit funds and start trading within the guardrails
 
 ---
 
@@ -29,15 +29,46 @@ curl -X POST {BASE_URL}/api/agent/register \
   }'
 ```
 
-Then tell your human:
-> "I'm registered on AgentGuard. Go to the dashboard, connect your wallet, and you'll see me. Create a vault and deposit funds when you're ready."
+---
+
+## 2. Create a Vault
+
+The vault is a smart contract on Base that holds funds. Creating it costs a small gas fee (~$0.03).
+
+### If you're an agent (API)
+
+```bash
+curl -X POST {BASE_URL}/api/vault/create \
+  -H "Content-Type: application/json" \
+  -d '{ "maxPerTrade": "1", "dailyLimit": "5" }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "vault": "0x...",
+  "txHash": "0x...",
+  "maxPerTrade": "1",
+  "dailyLimit": "5",
+  "approvedTokens": ["WETH", "USDC"],
+  "explorer": "https://sepolia.basescan.org/tx/0x...",
+  "message": "Vault created! You can now deposit ETH with POST /api/vault/deposit."
+}
+```
+
+Tell your human: *"I created a vault on Base Sepolia. It cost a few cents in gas. You can see it on the dashboard — connect your wallet to manage guardrails."*
+
+### If you're a human (dashboard)
+
+Connect your wallet at the AgentGuard dashboard and click **Create Vault**. Your wallet will ask you to confirm the transaction.
 
 ---
 
-## 2. Check Vault Status
+## 3. Check Vault Status
 
 ```bash
-curl {BASE_URL}/api/vault/status?agent=YOUR_WALLET
+curl {BASE_URL}/api/vault/status?vault=VAULT_ADDRESS
 ```
 
 **Response:**
@@ -56,7 +87,7 @@ curl {BASE_URL}/api/vault/status?agent=YOUR_WALLET
 
 ---
 
-## 3. Deposit ETH
+## 4. Deposit ETH
 
 ```bash
 curl -X POST {BASE_URL}/api/vault/deposit \
@@ -70,15 +101,16 @@ curl -X POST {BASE_URL}/api/vault/deposit \
   "success": true,
   "txHash": "0x...",
   "amount": "0.01 ETH",
+  "vault": "0x...",
   "explorer": "https://sepolia.basescan.org/tx/0x..."
 }
 ```
 
-That's it. You send the amount, AgentGuard signs and broadcasts. You get back a TX hash and a Basescan link.
+The vault is looked up automatically from the factory. You send the amount, AgentGuard signs and broadcasts. You get back a TX hash and a Basescan link.
 
 ---
 
-## 4. Get a Swap Quote
+## 5. Get a Swap Quote
 
 ```bash
 curl -X POST {BASE_URL}/api/uniswap/quote \
@@ -94,7 +126,7 @@ Always quote before swapping so you know the expected output.
 
 ---
 
-## 5. Execute a Swap
+## 6. Execute a Swap
 
 ```bash
 curl -X POST {BASE_URL}/api/vault/swap \
@@ -121,7 +153,7 @@ The swap goes through AgentGuardRouter which checks your policy on-chain. If you
 
 ---
 
-## 6. Stake ETH (Lido)
+## 7. Stake ETH (Lido)
 
 ```bash
 curl -X POST {BASE_URL}/api/vault/stake \
@@ -143,7 +175,7 @@ ETH → stETH → wstETH. Principal is tracked — you can only trade yield abov
 
 ---
 
-## 7. Check Available Yield
+## 8. Check Available Yield
 
 ```bash
 curl {BASE_URL}/api/vault/yield?vault=VAULT_ADDRESS
@@ -153,7 +185,7 @@ Returns how much yield has accumulated above the original deposit. You can trade
 
 ---
 
-## 8. Get Market Data
+## 9. Get Market Data
 
 ```bash
 curl {BASE_URL}/api/rates
@@ -170,7 +202,7 @@ curl {BASE_URL}/api/rates
 
 ---
 
-## 9. Chat / Strategy Analysis
+## 10. Chat / Strategy Analysis
 
 ```bash
 curl -X POST {BASE_URL}/api/chat \
