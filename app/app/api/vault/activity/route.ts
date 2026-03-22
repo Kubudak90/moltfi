@@ -37,6 +37,7 @@ type ActivityItem = {
   blockNumber: number
   timestamp: number | null
   guardrailCheck: string
+  proof?: Record<string, string>
 }
 
 export async function GET(req: NextRequest) {
@@ -45,6 +46,26 @@ export async function GET(req: NextRequest) {
 
   try {
     const activities: ActivityItem[] = []
+
+    // Read current policy for proof data
+    const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
+    const POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
+    const policyAbi = [
+      { name: 'policies', type: 'function', stateMutability: 'view', inputs: [{ name: '', type: 'address' }, { name: '', type: 'address' }], outputs: [{ name: 'maxPerAction', type: 'uint256' }, { name: 'dailyLimit', type: 'uint256' }, { name: 'active', type: 'bool' }] },
+      { name: 'getDailySpent', type: 'function', stateMutability: 'view', inputs: [{ name: 'agent', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] },
+      { name: 'approvedTokens', type: 'function', stateMutability: 'view', inputs: [{ name: '', type: 'address' }, { name: '', type: 'address' }], outputs: [{ name: '', type: 'bool' }] },
+    ]
+
+    let policy: any = null
+    let dailySpent = '0'
+    try {
+      const [pol, spent] = await Promise.all([
+        client.readContract({ address: POLICY, abi: policyAbi, functionName: 'policies', args: [VAULT_FACTORY, vault as `0x${string}`] } as any),
+        client.readContract({ address: POLICY, abi: policyAbi, functionName: 'getDailySpent', args: [vault as `0x${string}`] } as any),
+      ])
+      policy = pol
+      dailySpent = formatEther(spent as bigint)
+    } catch {}
 
     // RPC limits getLogs to 10k block range — use recent history
     const currentBlock = await client.getBlockNumber()
@@ -110,14 +131,26 @@ export async function GET(req: NextRequest) {
       const amountOut = args.amountOut || 0n
       const fmtIn = tokenIn === 'USDC' ? formatUnits(amountIn, 6) : formatEther(amountIn)
       const fmtOut = tokenOut === 'USDC' ? formatUnits(amountOut, 6) : formatEther(amountOut)
+      const maxPerAction = policy ? formatEther(policy[0]) : 'unknown'
+      const dailyLimit = policy ? formatEther(policy[1]) : 'unknown'
+
       activities.push({
         type: 'swap',
         summary: `Swapped ${fmtIn} ${tokenIn} → ${fmtOut} ${tokenOut}`,
-        detail: `Trade executed through AgentGuardRouter via Uniswap V3. Policy was checked on-chain before execution.`,
+        detail: `Trade routed through AgentGuardRouter → Uniswap V3. The smart contract checked the agent's policy before allowing the swap. If the trade exceeded any limit, the transaction would have reverted and no funds would have moved.`,
         txHash: log.transactionHash || '',
         blockNumber: Number(log.blockNumber),
         timestamp: null,
-        guardrailCheck: '✓ Within trade limits. ✓ Both tokens on approved list. ✓ Daily volume cap not exceeded.',
+        guardrailCheck: `Trade size: ${fmtIn} ${tokenIn} · Max allowed per trade: ${maxPerAction} ETH · Daily spent: ${dailySpent} / ${dailyLimit} ETH`,
+        proof: {
+          'Trade size': `${fmtIn} ${tokenIn}`,
+          'Max per trade (on-chain)': `${maxPerAction} ETH`,
+          'Daily spent / limit': `${dailySpent} / ${dailyLimit} ETH`,
+          'Token approved': `${tokenIn} ✓ ${tokenOut} ✓`,
+          'Policy contract': POLICY,
+          'Router contract': ROUTER,
+          'Result': 'Transaction succeeded — guardrails passed',
+        },
       })
     }
 

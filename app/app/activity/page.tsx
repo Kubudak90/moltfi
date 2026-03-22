@@ -11,6 +11,7 @@ type Activity = {
   blockNumber: number
   timestamp: number | null
   guardrailCheck: string
+  proof?: Record<string, string>
 }
 
 const TYPE_STYLE: Record<string, { icon: string; color: string; bg: string; border: string }> = {
@@ -110,10 +111,35 @@ export default function ActivityPage() {
                       <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Guardrail check</div>
                       <p className="text-sm text-gray-300">{tx.guardrailCheck}</p>
                     </div>
+
+                    {/* Proof breakdown */}
+                    {tx.proof && (
+                      <div>
+                        <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">On-chain proof</div>
+                        <div className="bg-gray-800/50 rounded-lg divide-y divide-gray-700/50">
+                          {Object.entries(tx.proof).map(([key, val]) => (
+                            <div key={key} className="flex items-center justify-between px-3 py-2 text-xs">
+                              <span className="text-gray-500">{key}</span>
+                              <span className={`font-mono ${
+                                val.includes('✓') || val.includes('passed') ? 'text-green-400' :
+                                (val as string).startsWith('0x') ? 'text-indigo-400' : 'text-gray-300'
+                              }`}>
+                                {(val as string).startsWith('0x') ? (
+                                  <a href={`https://sepolia.basescan.org/address/${val}`} target="_blank" rel="noopener" className="hover:underline">
+                                    {(val as string).slice(0, 6)}...{(val as string).slice(-4)}
+                                  </a>
+                                ) : val}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex items-center justify-between pt-2">
                       <div>
                         <div className="text-xs text-gray-500">Transaction</div>
-                        <span className="text-xs font-mono text-gray-400">{tx.txHash}</span>
+                        <span className="text-xs font-mono text-gray-400">{tx.txHash.slice(0, 20)}...{tx.txHash.slice(-8)}</span>
                       </div>
                       <a href={`https://sepolia.basescan.org/tx/${tx.txHash}`} target="_blank" rel="noopener"
                         className="text-xs bg-gray-800 hover:bg-gray-700 text-indigo-400 px-3 py-1.5 rounded-lg transition">
