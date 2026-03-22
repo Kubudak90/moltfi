@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createWalletClient, createPublicClient, http, encodeFunctionData, parseEther, formatEther, formatUnits } from 'viem'
+import { queueTransaction } from '../../../../lib/tx-queue'
 import { privateKeyToAccount } from 'viem/accounts'
 import { baseSepolia } from 'viem/chains'
 import { lookupVault } from '../lookup'
@@ -61,9 +62,12 @@ export async function POST(req: NextRequest) {
       args: [inToken.address, outToken.address, 3000, amountRaw, BigInt(0)],
     })
 
-    // @ts-expect-error viem v2 strict types
-    const hash = await walletClient.sendTransaction({ to: vault as `0x${string}`, data })
-    const receipt = await publicClient.waitForTransactionReceipt({ hash })
+    const { hash, receipt } = await queueTransaction(async () => {
+      // @ts-expect-error viem v2 strict types
+      const h = await walletClient.sendTransaction({ to: vault as `0x${string}`, data })
+      const r = await publicClient.waitForTransactionReceipt({ hash: h })
+      return { hash: h, receipt: r }
+    })
 
     // Parse SwapExecuted event from receipt logs
     let amountOut = ''

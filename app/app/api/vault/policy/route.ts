@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createWalletClient, createPublicClient, http, parseEther, encodeFunctionData } from 'viem'
+import { queueTransaction } from '../../../../lib/tx-queue'
 import { privateKeyToAccount } from 'viem/accounts'
 import { baseSepolia } from 'viem/chains'
 
@@ -38,18 +39,20 @@ export async function POST(req: NextRequest) {
     const maxAction = parseEther(maxPerAction?.toString() || '0.5')
     const daily = parseEther(dailyLimit?.toString() || '1')
 
-    // setPolicy(agent, maxPerAction, dailyLimit) — agent is the server key itself
-    // @ts-expect-error viem v2 strict types
-    const hash = await walletClient.sendTransaction({
-      to: AGENT_POLICY,
-      data: encodeFunctionData({
-        abi: policyAbi,
-        functionName: 'setPolicy',
-        args: [account.address, maxAction, daily],
-      }),
+    const { hash, receipt } = await queueTransaction(async () => {
+      // setPolicy(agent, maxPerAction, dailyLimit) — agent is the server key itself
+      // @ts-expect-error viem v2 strict types
+      const h = await walletClient.sendTransaction({
+        to: AGENT_POLICY,
+        data: encodeFunctionData({
+          abi: policyAbi,
+          functionName: 'setPolicy',
+          args: [account.address, maxAction, daily],
+        }),
+      })
+      const r = await publicClient.waitForTransactionReceipt({ hash: h })
+      return { hash: h, receipt: r }
     })
-
-    const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
     return NextResponse.json({
       success: receipt.status === 'success',

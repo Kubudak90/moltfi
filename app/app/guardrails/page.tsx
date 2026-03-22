@@ -7,8 +7,6 @@ import { parseEther } from 'viem'
 import { baseSepolia } from 'viem/chains'
 
 const AGENT_POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
-// The agent address that the policy applies to (MoltFi server key)
-const AGENT_ADDRESS = '0x90d9c75f3761c02Bf3d892A701846F6323e9112D' as const
 
 const policyAbi = [
   {
@@ -23,7 +21,7 @@ const policyAbi = [
 ] as const
 
 export default function GuardrailsPage() {
-  const { vaults, vaultData, hasVault } = useAgentContext()
+  const { agents, vaults, vaultData, hasVault, hasAgent } = useAgentContext()
   const { address, chainId } = useAccount()
   const { switchChain } = useSwitchChain()
   const [maxPerTrade, setMaxPerTrade] = useState('')
@@ -42,10 +40,12 @@ export default function GuardrailsPage() {
 
   const policy = vaultData?.policy
   const vault = vaults[0] as string
+  const agentWallet = hasAgent ? agents[0].agentWallet as `0x${string}` : null
   const wrongNetwork = chainId !== baseSepolia.id
   const saving = isPending || txWaiting
 
   const updatePolicy = async () => {
+    if (!agentWallet) return
     if (wrongNetwork) {
       try { await switchChain({ chainId: baseSepolia.id }) } catch { return }
     }
@@ -56,7 +56,7 @@ export default function GuardrailsPage() {
       address: AGENT_POLICY,
       abi: policyAbi,
       functionName: 'setPolicy',
-      args: [AGENT_ADDRESS, max, daily],
+      args: [agentWallet, max, daily],
       chain: baseSepolia,
     })
   }
@@ -129,6 +129,30 @@ export default function GuardrailsPage() {
               </button>
             </div>
             <p className="text-xs text-gray-600">Your wallet signs this transaction directly on the AgentPolicy contract. You control the rules.</p>
+          </div>
+
+          {/* What's enforced */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-3">
+            <h3 className="text-sm font-medium text-gray-400">Enforcement</h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-400" />
+                <span className="text-gray-300">Max per trade — every swap checked on-chain before execution</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-400" />
+                <span className="text-gray-300">Daily spending limit — cumulative, resets every 24h</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-400" />
+                <span className="text-gray-300">Token allowlist — only approved tokens (WETH, USDC) can be traded</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-400" />
+                <span className="text-gray-300">Policy revocation — instantly freeze all agent trading</span>
+              </div>
+            </div>
+            <p className="text-xs text-gray-600 pt-2">All limits enforced by the AgentPolicy smart contract. The agent cannot bypass them — the transaction reverts on-chain if any limit is exceeded.</p>
           </div>
 
           {/* Contracts */}

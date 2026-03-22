@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createWalletClient, createPublicClient, http, parseEther, encodeFunctionData, decodeEventLog } from 'viem'
+import { queueTransaction } from '../../../../lib/tx-queue'
 import { privateKeyToAccount } from 'viem/accounts'
 import { baseSepolia } from 'viem/chains'
 
@@ -72,17 +73,19 @@ export async function POST(req: NextRequest) {
     const maxAction = parseEther(maxPerTrade?.toString() || '1')
     const daily = parseEther(dailyLimit?.toString() || '5')
 
-    // @ts-expect-error viem v2 strict types
-    const hash = await walletClient.sendTransaction({
-      to: VAULT_FACTORY,
-      data: encodeFunctionData({
-        abi: factoryAbi,
-        functionName: 'createVault',
-        args: [account.address, maxAction, daily, [WETH, USDC]],
-      }),
+    const { hash, receipt } = await queueTransaction(async () => {
+      // @ts-expect-error viem v2 strict types
+      const h = await walletClient.sendTransaction({
+        to: VAULT_FACTORY,
+        data: encodeFunctionData({
+          abi: factoryAbi,
+          functionName: 'createVault',
+          args: [account.address, maxAction, daily, [WETH, USDC]],
+        }),
+      })
+      const r = await publicClient.waitForTransactionReceipt({ hash: h })
+      return { hash: h, receipt: r }
     })
-
-    const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
     // Get vault address from logs
     let vaultAddress: string | null = null
