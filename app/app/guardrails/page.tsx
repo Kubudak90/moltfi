@@ -6,13 +6,14 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchCh
 import { parseEther } from 'viem'
 import { baseSepolia } from 'viem/chains'
 
+const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
 const AGENT_POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
 
-const policyAbi = [
+const factoryAbi = [
   {
-    name: 'setPolicy', type: 'function', stateMutability: 'nonpayable',
+    name: 'updatePolicy', type: 'function', stateMutability: 'nonpayable',
     inputs: [
-      { name: 'agent', type: 'address' },
+      { name: 'vault', type: 'address' },
       { name: 'maxPerAction', type: 'uint256' },
       { name: 'dailyLimit', type: 'uint256' },
     ],
@@ -39,24 +40,26 @@ export default function GuardrailsPage() {
   }
 
   const policy = vaultData?.policy
-  const vault = vaults[0] as string
-  const agentWallet = hasAgent ? agents[0].agentWallet as `0x${string}` : null
+  const vault = vaults[0] as `0x${string}`
   const wrongNetwork = chainId !== baseSepolia.id
   const saving = isPending || txWaiting
 
   const updatePolicy = async () => {
-    if (!agentWallet) return
+    if (!vault) return
     if (wrongNetwork) {
       try { await switchChain({ chainId: baseSepolia.id }) } catch { return }
     }
     const max = parseEther(maxPerTrade || policy?.maxPerAction || '0.5')
     const daily = parseEther(dailyLimit || policy?.dailyLimit || '1')
+    // Call VaultFactory.updatePolicy — this routes through the factory which owns
+    // the policy mapping. Direct calls to AgentPolicy.setPolicy would write to the
+    // wrong mapping entry and have no effect on enforcement.
     writeContract({
       account: address,
-      address: AGENT_POLICY,
-      abi: policyAbi,
-      functionName: 'setPolicy',
-      args: [agentWallet, max, daily],
+      address: VAULT_FACTORY,
+      abi: factoryAbi,
+      functionName: 'updatePolicy',
+      args: [vault, max, daily],
       chain: baseSepolia,
     })
   }
@@ -128,7 +131,7 @@ export default function GuardrailsPage() {
                 {isPending ? 'Confirm in wallet...' : txWaiting ? 'Waiting for confirmation...' : 'Update on-chain'}
               </button>
             </div>
-            <p className="text-xs text-gray-600">Your wallet signs this transaction directly on the AgentPolicy contract. You control the rules.</p>
+            <p className="text-xs text-gray-600">Your wallet signs this transaction on the VaultFactory contract, which updates the enforced policy for your vault.</p>
           </div>
 
           {/* What's enforced */}
@@ -161,6 +164,7 @@ export default function GuardrailsPage() {
             <div className="space-y-2 text-xs">
               {[
                 { label: 'AgentPolicy', addr: AGENT_POLICY as string },
+                { label: 'VaultFactory', addr: VAULT_FACTORY as string },
                 { label: 'AgentGuardRouter', addr: '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' },
                 { label: 'Vault', addr: vault },
               ].map(c => (

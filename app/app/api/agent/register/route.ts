@@ -2,12 +2,21 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join } from 'path'
 import { randomBytes } from 'crypto'
+import { privateKeyToAccount } from 'viem/accounts'
 
 const DB_PATH = join(process.cwd(), 'data', 'agents.json')
+
+// Derive the agent wallet address from the server's private key
+function getAgentWallet(): string {
+  const pk = process.env.AGENT_PRIVATE_KEY
+  if (!pk) return ''
+  return privateKeyToAccount(pk as `0x${string}`).address
+}
 
 interface AgentRegistration {
   apiKey: string
   humanWallet: string
+  agentWallet: string
   vault: string
   agentName: string
   platform: string
@@ -75,6 +84,7 @@ export async function POST(req: NextRequest) {
         registered: true,
         updated: true,
         apiKey: existing.apiKey,
+        agentWallet: existing.agentWallet || getAgentWallet(),
         vault: existing.vault || null,
         message: existing.vault
           ? 'Already registered. Vault is ready — start trading.'
@@ -104,6 +114,7 @@ export async function POST(req: NextRequest) {
     const registration: AgentRegistration = {
       apiKey,
       humanWallet: humanWallet.toLowerCase(),
+      agentWallet: getAgentWallet(),
       vault,
       agentName: agentName || 'Unknown Agent',
       platform: platform || 'unknown',
@@ -116,6 +127,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       registered: true,
       apiKey,
+      agentWallet: getAgentWallet(),
       vault: vault || null,
       message: vault
         ? `Registered and vault created at ${vault}. You can now deposit ETH and start trading. Use your API key for all requests.`
@@ -144,6 +156,7 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     agents: [{
+      agentWallet: match.agentWallet || getAgentWallet(),
       agentName: match.agentName,
       humanWallet: match.humanWallet,
       vault: match.vault,

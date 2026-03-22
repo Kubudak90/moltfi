@@ -25,7 +25,7 @@ const vaultAbi = [
 export default function DashboardClient() {
   const { address, chainId } = useAccount()
   const { switchChain } = useSwitchChain()
-  const { agents, vaults, vaultData, hasAgent, hasVault, ethPrice, rates, refreshVaults } = useAgentContext()
+  const { agents, vaults, vaultData, hasAgent, hasVault, ethPrice, rates, serverAgentWallet, refreshVaults } = useAgentContext()
   const [depositAmount, setDepositAmount] = useState('0.01')
   const [withdrawToken, setWithdrawToken] = useState<'ETH'|'WETH'|'USDC'>('ETH')
   const [withdrawAmount, setWithdrawAmount] = useState('0.01')
@@ -69,11 +69,13 @@ export default function DashboardClient() {
   }
 
   const createVault = async () => {
-    if (!agents[0]) return
+    // Use the agent wallet from registration, or the server's agent wallet
+    const agentAddr = agents[0]?.agentWallet || serverAgentWallet
+    if (!agentAddr) return
     if (!(await ensureNetwork())) return
     setTxStatus('Creating vault...')
     writeContract({ account: address, address: VAULT_FACTORY, abi: factoryAbi, functionName: 'createVault',
-      args: [agents[0].agentWallet as `0x${string}`, parseEther('1'), parseEther('5'), [WETH, USDC]], chain: baseSepolia })
+      args: [agentAddr as `0x${string}`, parseEther('1'), parseEther('5'), [WETH, USDC]], chain: baseSepolia })
   }
 
   const depositETH = async () => {
@@ -177,20 +179,29 @@ export default function DashboardClient() {
         )
       })()}
 
-      {/* Agent connected, no vault */}
-      {hasAgent && !hasVault && (
-        <div className="bg-gray-900 border border-indigo-500/30 rounded-xl p-8">
-          <div className="flex items-center gap-3 mb-6 p-3 bg-gray-800/50 rounded-lg">
-            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold">
-              {agents[0].agentName.slice(0, 2).toUpperCase()}
+      {/* No vault yet — show create button */}
+      {!hasVault && address && (
+        <div className="bg-gray-900 border border-indigo-500/30 rounded-xl p-8 text-center space-y-4">
+          {hasAgent && (
+            <div className="flex items-center gap-3 mb-4 p-3 bg-gray-800/50 rounded-lg justify-center">
+              <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold">
+                {agents[0].agentName.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="text-left">
+                <div className="font-medium text-sm">{agents[0].agentName}</div>
+                <div className="text-xs text-green-400">● Connected</div>
+              </div>
             </div>
-            <div>
-              <div className="font-medium text-sm">{agents[0].agentName}</div>
-              <div className="text-xs text-gray-500">Registered</div>
-            </div>
-            <div className="ml-auto text-xs text-green-400">● Connected</div>
-          </div>
-          <p className="text-gray-400 text-sm text-center mb-4">Vault creation is in progress. If it didn&apos;t complete, ask your agent to say &quot;create a vault&quot;.</p>
+          )}
+          <h2 className="text-xl font-bold">Create Your Vault</h2>
+          <p className="text-gray-400 text-sm max-w-md mx-auto">
+            Deploy a smart contract vault on Base Sepolia. Your wallet owns it. The agent can only trade within your guardrails.
+          </p>
+          <button onClick={createVault} disabled={!serverAgentWallet && !hasAgent}
+            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white px-8 py-3 rounded-lg text-sm font-medium transition">
+            {txStatus || 'Create Vault'}
+          </button>
+          <p className="text-xs text-gray-600">Default guardrails: 1 ETH max per trade, 5 ETH daily limit. You can change these after.</p>
         </div>
       )}
 

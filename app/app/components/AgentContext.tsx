@@ -15,6 +15,7 @@ type AgentContextType = {
   vaults: string[]
   vaultData: any
   rates: Rates | null
+  serverAgentWallet: string | null
   hasAgent: boolean
   hasVault: boolean
   ethPrice: number | null
@@ -23,6 +24,7 @@ type AgentContextType = {
 
 const AgentContext = createContext<AgentContextType>({
   agents: [], vaults: [], vaultData: null, rates: null,
+  serverAgentWallet: null,
   hasAgent: false, hasVault: false, ethPrice: null, refreshVaults: () => {},
 })
 
@@ -34,8 +36,13 @@ export function AgentProvider({ children }: { children: ReactNode }) {
   const [vaults, setVaults] = useState<string[]>([])
   const [vaultData, setVaultData] = useState<any>(null)
   const [rates, setRates] = useState<Rates | null>(null)
+  const [serverAgentWallet, setServerAgentWallet] = useState<string | null>(null)
 
-  useEffect(() => { fetch('/api/rates').then(r => r.json()).then(setRates).catch(() => {}) }, [])
+  useEffect(() => {
+    fetch('/api/rates').then(r => r.json()).then(setRates).catch(() => {})
+    // Fetch the server's agent wallet address (used as agent in vaults)
+    fetch('/api/agent/wallet').then(r => r.json()).then(d => setServerAgentWallet(d.agentWallet || null)).catch(() => {})
+  }, [])
 
   const refreshVaults = () => {
     if (!address) return
@@ -58,7 +65,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 
   return (
     <AgentContext.Provider value={{
-      agents, vaults, vaultData, rates,
+      agents, vaults, vaultData, rates, serverAgentWallet,
       hasAgent: agents.length > 0,
       hasVault: vaults.length > 0,
       ethPrice: rates?.prices?.eth ?? null,
