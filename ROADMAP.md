@@ -747,3 +747,115 @@ The AI is the intelligence layer. Without it, the user can't make decisions beca
 - Executes the chosen strategy within guardrails
 - Available via chat to explain anything, answer questions, suggest changes
 - Uses Venice for private inference — financial analysis stays private
+
+---
+
+## PRESENTATION OUTLINE
+
+### Slide 1: The Problem
+**"Everyone wants DeFi yield. Nobody knows how to do DeFi."**
+- Banks pay ~0.5%. DeFi pays 3-8%+. But DeFi is complex — protocols, slippage, gas, timing
+- You could learn it yourself (months of study, expensive mistakes)
+- You could hand your crypto to a fund (centralized trust, custody risk)
+- You could let your AI agent do it... but what stops it from draining your wallet?
+- **The gap: there's no way to say "manage my money, but stay within these limits" and have it enforced**
+
+### Slide 2: The Solution
+**"AgentGuard: Your AI manages DeFi. Smart contracts enforce the rules."**
+- AI agent handles the complexity — you don't need to understand DeFi
+- Guardrails are on-chain, in smart contracts — not in the agent's code
+- If the agent tries to exceed its limits → transaction reverts. Automatically. No human needed.
+- You stay in control without needing expertise
+
+### Slide 3: How It Works (User Flow)
+**"Three steps. That's it."**
+1. **Connect wallet, create vault** → one transaction deploys your vault with spending policy
+2. **Deposit funds** → ETH goes into the vault (principal is tracked and protected)
+3. **Approve a strategy** → AI proposes strategies, you pick one, agent starts running autonomously
+
+After that? The agent runs on its own heartbeat — checking markets, rebalancing, staking, swapping. You watch from the dashboard. Pause anytime with one click.
+
+### Slide 4: Architecture (Technical)
+**"Four smart contracts. One pipeline."**
+
+```
+User deposits ETH
+       ↓
+   AgentVault.sol ← holds funds, tracks principal
+       ↓
+   AgentPolicy.sol ← per-token limits, daily caps, per-swap max
+       ↓
+   AgentGuardRouter.sol ← wraps Uniswap, checks policy BEFORE every swap
+       ↓
+   Uniswap V3 (actual swap happens here)
+```
+
+- **VaultFactory** deploys vault + policy + token approvals in ONE transaction
+- **Principal tracking**: agent can only trade yield above what you deposited
+- **Policy enforcement**: happens at the smart contract level — agent can't bypass it even if compromised
+
+### Slide 5: The AI Layer
+**"Venice AI for private strategy analysis"**
+- Strategy generation: AI analyzes market conditions across Lido, Uniswap, and proposes 2-3 strategies
+- Each strategy comes WITH guardrails already set — user doesn't configure slippage or gas limits
+- **Zero data retention** via Venice — your financial analysis is never stored
+- Chat interface for questions ("why did you choose Lido over Uniswap?")
+- Uniswap Trading API for real-time quotes and optimal routing
+
+### Slide 6: The Agent Skill (Any AI Agent Can Use This)
+**"One skill file teaches any agent to manage your vault."**
+- `SKILL.md` — a single doc that teaches registration, deposits, swaps, staking, monitoring
+- Works with OpenClaw, or any agent framework that reads skill files
+- Agent runs on heartbeat: every 30 min, checks rates → checks yield → executes if profitable
+- All trades go through AgentGuardRouter → policy enforced on every transaction
+- **Demo: our agent (Kyro) can manage a vault right now using this skill**
+
+### Slide 7: On-Chain Proof
+**"Everything is deployed and verified on Base Sepolia."**
+
+| Contract | Address | Status |
+|----------|---------|--------|
+| VaultFactory | `0x672E...9774` | ✅ Deployed |
+| AgentPolicy | `0x6364...0Fbc` | ✅ Deployed |
+| AgentGuardRouter | `0x5Cc0...77E6` | ✅ Deployed |
+| Demo Vault | `0x3338...2279` | ✅ Created via factory |
+| Verified Swap | `0x1abc...22d1` | ✅ On Basescan |
+
+- Real contracts, real swap, real policy enforcement
+- Judges can click every link and verify on Basescan
+- Path to mainnet: change chain ID, deploy, done
+
+### Slide 8: Prize Track Alignment
+**"Built for five tracks with real integration, not just name-dropping."**
+
+| Track | What We Built |
+|-------|--------------|
+| **Venice — Private Agents** | Venice AI generates strategies + chat, zero data retention |
+| **Uniswap — Best API** | Trading API for quotes, AgentGuardRouter wraps V3 swaps |
+| **Lido — stETH Agent Treasury** | Vault stakes ETH → stETH via Lido, principal tracking = yield-only trading |
+| **Base — Autonomous Trading** | Agent runs on heartbeat, all trades on Base Sepolia |
+| **Open Track** | Full-stack: contracts + API + dashboard + AI + skill file |
+
+### Slide 9: What's Next (Post-Hackathon)
+**"From testnet to mainnet. From one agent to many."**
+- Deploy to Base mainnet
+- Add more protocols (Aave, Compound, Morpho)
+- Multi-agent support (multiple agents, one vault, separate policies)
+- Agent reputation: track performance over time
+- **The vision**: a world where everyone has an AI managing their DeFi, with smart contracts ensuring it stays within human-defined boundaries
+
+### Slide 10: The Team
+**"An AI agent and a human built this together."**
+- **Kyro** (AI agent on OpenClaw) — wrote all code: Solidity, TypeScript, Next.js. Explored 22+ sponsor technologies, built 75 demos before converging on AgentGuard
+- **Rodrigo** — product thinking, UX direction, "the user doesn't know DeFi" insight. Pushed through 5 major pivots. Handled registration (Cloudflare blocked the agent's VPS)
+- **How we work**: Rodrigo challenges ideas, Kyro builds. Every pivot made the product better.
+
+---
+
+### Presentation Tips for Rodrigo
+- **Lead with the problem** — everyone gets "I want yield but DeFi is confusing"
+- **The "aha" is slide 4** — guardrails enforced BY the blockchain, not by the agent. The agent literally cannot overspend even if it wanted to
+- **Show Basescan** — click the verified swap TX live. Real contract, real transaction, real enforcement
+- **The skill file is the multiplier** — this isn't locked to our agent. ANY AI agent can read the skill and manage a vault. That's infrastructure, not just an app
+- **Don't apologize for testnet** — every hackathon project is testnet. The contracts work. The path to mainnet is trivial (chain ID change)
+- **If asked "what's the business model?"** — vault management fees (% of yield generated), premium strategies, multi-agent coordination fees
