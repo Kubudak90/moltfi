@@ -107,28 +107,54 @@ export default function DashboardClient() {
       {/* No agent yet */}
       {!hasAgent && (() => {
         const origin = typeof window !== 'undefined' ? window.location.origin : ''
+        const skillSnippet = `# AgentGuard — Connect to ${address}
+
+Your human wants you to manage their DeFi vault on Base Sepolia.
+Base URL: ${origin}
+
+## Step 1: Register
+curl -X POST ${origin}/api/agent/register \\
+  -H "Content-Type: application/json" \\
+  -d '{"agentWallet": "YOUR_WALLET", "humanWallet": "${address}", "agentName": "YOUR_NAME"}'
+
+## Step 2: Check vault status
+curl ${origin}/api/vault/status?agent=YOUR_WALLET
+
+## Step 3: Trade (swap WETH ↔ USDC within guardrails)
+curl -X POST ${origin}/api/vault/swap \\
+  -H "Content-Type: application/json" \\
+  -d '{"tokenIn": "WETH", "tokenOut": "USDC", "amount": "0.001"}'
+
+## Step 4: Get strategy suggestion
+curl -X POST ${origin}/api/strategy/generate \\
+  -H "Content-Type: application/json" \\
+  -d '{"vault": "VAULT_ADDRESS"}'
+
+Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md`
+
+        function doCopy(text: string) {
+          if (navigator.clipboard?.writeText) {
+            navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) }).catch(() => fallbackCopy(text))
+          } else { fallbackCopy(text) }
+        }
+        function fallbackCopy(text: string) {
+          const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
+          setCopied(true); setTimeout(() => setCopied(false), 2000)
+        }
+
         return (
           <div className="bg-gray-900 border border-yellow-500/30 rounded-xl p-8">
             <h2 className="text-xl font-bold mb-2 text-center">Connect Your Agent</h2>
-            <p className="text-gray-400 mb-6 text-center text-sm">Copy this and send it to your AI agent.</p>
-            <div className="bg-gray-800/50 rounded-lg p-4 relative group cursor-pointer" onClick={() => {
-              const txt = `Register with AgentGuard as my agent. My wallet: ${address}\n\ncurl -X POST ${origin}/api/agent/register -H "Content-Type: application/json" -d '{"agentWallet": "YOUR_WALLET", "humanWallet": "${address}", "agentName": "YOUR_NAME"}'`
-              if (navigator.clipboard?.writeText) {
-                navigator.clipboard.writeText(txt).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) }).catch(() => fallbackCopy(txt))
-              } else { fallbackCopy(txt) }
-              function fallbackCopy(text: string) {
-                const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'
-                document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
-                setCopied(true); setTimeout(() => setCopied(false), 2000)
-              }
-            }}>
-              <div className="absolute top-3 right-3 text-gray-500 group-hover:text-indigo-400">
-                {copied ? <span className="text-green-400 text-xs">Copied!</span> : (
+            <p className="text-gray-400 mb-6 text-center text-sm">Copy these instructions and paste them into your AI agent&apos;s chat.</p>
+            <div className="bg-gray-800/50 rounded-lg p-4 relative group">
+              <button onClick={() => doCopy(skillSnippet)}
+                className="absolute top-3 right-3 text-gray-500 hover:text-indigo-400 transition p-1.5 rounded-lg hover:bg-gray-700/50">
+                {copied ? <span className="text-green-400 text-xs font-medium px-1">Copied!</span> : (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                 )}
-              </div>
-              <pre className="text-xs font-mono text-gray-300 whitespace-pre-wrap pr-8">{`Register with AgentGuard as my agent.\nMy wallet: ${address}`}</pre>
-              <p className="text-xs text-gray-500 mt-3">Click to copy · Paste to your agent</p>
+              </button>
+              <pre className="text-xs font-mono text-gray-300 whitespace-pre-wrap pr-8 leading-relaxed">{skillSnippet}</pre>
             </div>
             <p className="text-center text-xs text-gray-600 mt-4">Waiting for agent... (auto-refreshes)</p>
           </div>
