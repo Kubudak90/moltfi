@@ -2,9 +2,9 @@
 
 import { useAgentContext } from '../components/AgentContext'
 
-
 export default function AgentPage() {
   const { agents, hasAgent, hasVault } = useAgentContext()
+
   if (!hasVault) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-500">
@@ -19,7 +19,7 @@ export default function AgentPage() {
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Agent</h1>
-        <p className="text-sm text-gray-500 mt-1">Your agent connects via API key and sends plain English requests. MoltFi handles the rest.</p>
+        <p className="text-sm text-gray-500 mt-1">Your agent talks to MoltFi in plain English. MoltFi handles the blockchain.</p>
       </div>
 
       {hasAgent ? (
@@ -34,76 +34,46 @@ export default function AgentPage() {
             <p className="text-xs text-gray-600 mt-2">Registered {agent?.registeredAt ? new Date(agent.registeredAt).toLocaleDateString() : ''} · Authenticated via API key</p>
           </div>
 
-          {/* What the agent can do */}
+          {/* Example conversations */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h3 className="font-medium">What your agent can do</h3>
-            <div className="grid sm:grid-cols-2 gap-3 text-sm">
-              <div className="bg-gray-800/30 rounded-lg p-4 space-y-2">
-                <div className="font-medium text-indigo-400">Trade</div>
-                <p className="text-xs text-gray-500">&quot;Swap 0.01 WETH to USDC&quot;</p>
-                <p className="text-xs text-gray-600">Executes through Uniswap V3 via AgentGuardRouter. Policy checked before every swap.</p>
-              </div>
-              <div className="bg-gray-800/30 rounded-lg p-4 space-y-2">
-                <div className="font-medium text-indigo-400">Check vault</div>
-                <p className="text-xs text-gray-500">&quot;What&apos;s my balance?&quot;</p>
-                <p className="text-xs text-gray-600">Returns real on-chain balances (ETH, WETH, USDC) and current guardrail status.</p>
-              </div>
-              <div className="bg-gray-800/30 rounded-lg p-4 space-y-2">
-                <div className="font-medium text-indigo-400">Check rates</div>
-                <p className="text-xs text-gray-500">&quot;What&apos;s the price of ETH?&quot;</p>
-                <p className="text-xs text-gray-600">Live ETH price from CoinGecko, Lido staking APR, Base gas prices.</p>
-              </div>
-              <div className="bg-gray-800/30 rounded-lg p-4 space-y-2">
-                <div className="font-medium text-indigo-400">Deposit</div>
-                <p className="text-xs text-gray-500">&quot;Deposit 0.01 ETH&quot;</p>
-                <p className="text-xs text-gray-600">Sends ETH from the operational wallet into the vault smart contract.</p>
-              </div>
+            <h3 className="font-medium">Talk to MoltFi like this</h3>
+            <div className="space-y-3">
+              {[
+                { msg: 'swap 0.01 WETH to USDC', desc: 'MoltFi checks your guardrails, executes through Uniswap V3, returns a Basescan link' },
+                { msg: 'what\'s my balance?', desc: 'Returns your vault balances — ETH, WETH, USDC — pulled live from the blockchain' },
+                { msg: 'what\'s the price of ETH?', desc: 'Live ETH price, Lido staking rate, and Base gas from real APIs' },
+                { msg: 'deposit 0.01 ETH', desc: 'Adds ETH to your vault. Your balance goes up, tracked as principal.' },
+                { msg: 'show my recent trades', desc: 'On-chain trade history with guardrail check results' },
+              ].map((ex) => (
+                <div key={ex.msg} className="bg-gray-800/30 rounded-lg p-4">
+                  <div className="font-mono text-sm text-indigo-400">&quot;{ex.msg}&quot;</div>
+                  <div className="text-xs text-gray-500 mt-1.5">{ex.desc}</div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* How it works */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h3 className="font-medium">How it works</h3>
-            <div className="space-y-3 text-sm">
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-indigo-600/20 flex items-center justify-center text-xs text-indigo-400 shrink-0">1</div>
-                <div>
-                  <div className="text-gray-300">Agent sends a message</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Plain English to <code className="bg-gray-800 px-1.5 py-0.5 rounded text-xs">/api/agent</code> with API key</div>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-indigo-600/20 flex items-center justify-center text-xs text-indigo-400 shrink-0">2</div>
-                <div>
-                  <div className="text-gray-300">Venice AI understands it</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Zero-retention inference — your trade intent is never stored or logged by the AI provider</div>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-indigo-600/20 flex items-center justify-center text-xs text-indigo-400 shrink-0">3</div>
-                <div>
-                  <div className="text-gray-300">MoltFi executes on-chain</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Smart contract checks guardrails → Uniswap V3 swap → Basescan link returned</div>
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <div className="w-6 h-6 rounded-full bg-indigo-600/20 flex items-center justify-center text-xs text-indigo-400 shrink-0">4</div>
-                <div>
-                  <div className="text-gray-300">Agent gets a response</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Venice summarizes what happened in natural language, with transaction hash for verification</div>
-                </div>
-              </div>
-            </div>
+          {/* Privacy */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-3">
+            <h3 className="font-medium">Privacy</h3>
+            <p className="text-sm text-gray-400">
+              Your agent&apos;s messages are processed by Venice AI, which has zero data retention. Your trade intent — what you&apos;re about to buy or sell — is never stored by the AI provider. After execution, the trade is public on-chain and verifiable.
+            </p>
+            <p className="text-xs text-gray-500">
+              For full end-to-end privacy, run your agent on a Venice model too.{' '}
+              <a href="https://venice.ai" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">Get a Venice API key →</a>
+            </p>
           </div>
 
           {/* Quick start */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-3">
-            <h3 className="font-medium">Quick start</h3>
+            <h3 className="font-medium">Connect any agent</h3>
+            <p className="text-xs text-gray-500 mb-2">Any agent that can make HTTP calls works — OpenClaw, ChatGPT, Claude, custom bots. One endpoint, one API key.</p>
             <pre className="bg-gray-800/50 rounded-lg p-4 text-xs text-gray-300 overflow-x-auto">{`curl -X POST ${typeof window !== 'undefined' ? window.location.origin : ''}/api/agent \\
-  -H "Authorization: Bearer mf_your_key_here" \\
+  -H "Authorization: Bearer mf_your_key" \\
   -H "Content-Type: application/json" \\
   -d '{"message": "swap 0.001 WETH to USDC"}'`}</pre>
-            <p className="text-xs text-gray-600">Or use the skill script: <code className="bg-gray-800 px-1.5 py-0.5 rounded">./moltfi.sh &quot;swap 0.001 WETH to USDC&quot;</code></p>
+            <p className="text-xs text-gray-600">Or download the skill: <code className="bg-gray-800 px-1.5 py-0.5 rounded">curl -o moltfi.sh {typeof window !== 'undefined' ? window.location.origin : ''}/api/skill/script</code></p>
           </div>
         </>
       ) : (
@@ -111,7 +81,7 @@ export default function AgentPage() {
           <div className="text-4xl">🤖</div>
           <div className="text-lg font-medium">No agent connected</div>
           <p className="text-sm text-gray-500 max-w-md mx-auto">
-            Register an agent to get an API key. Your agent authenticates with this key and sends plain English requests.
+            Register an agent to get started. You&apos;ll get an API key your agent uses to talk to MoltFi.
           </p>
           <pre className="bg-gray-800/50 rounded-lg p-4 text-xs text-gray-300 text-left max-w-md mx-auto overflow-x-auto">{`curl -X POST ${typeof window !== 'undefined' ? window.location.origin : ''}/api/agent/register \\
   -H "Content-Type: application/json" \\
