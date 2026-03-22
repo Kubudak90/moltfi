@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi'
 import { parseEther } from 'viem'
 import { baseSepolia } from 'viem/chains'
@@ -28,6 +28,14 @@ export default function DashboardClient() {
   const [txStatus, setTxStatus] = useState('')
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
+  const [perf, setPerf] = useState<any>(null)
+
+  useEffect(() => {
+    if (vaults[0]) {
+      fetch(`/api/vault/performance?vault=${vaults[0]}`)
+        .then(r => r.json()).then(setPerf).catch(() => {})
+    }
+  }, [vaults])
 
   const { writeContract, data: txHash } = useWriteContract()
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash })
@@ -296,7 +304,7 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <div className="text-xs text-gray-500 uppercase tracking-wider">Portfolio</div>
-                    <div className="text-sm font-medium">{totalUsd > 0 ? `$${totalUsd.toFixed(2)}` : '—'}</div>
+                    <div className="text-lg font-bold">{totalUsd > 0 ? `$${totalUsd.toFixed(2)}` : '—'}</div>
                   </div>
 
                   {/* Allocation bar */}
@@ -307,7 +315,7 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
                     </div>
                   )}
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-2 gap-3 mb-6">
                     <div className="flex items-center justify-between bg-gray-800/30 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
                         <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
@@ -329,6 +337,68 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
                       </div>
                     </div>
                   </div>
+
+                  {/* Performance vs Benchmarks */}
+                  {perf && (
+                    <div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Performance vs Market</div>
+                      <div className="grid grid-cols-3 gap-3">
+                        <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-3 text-center">
+                          <div className="text-xs text-gray-500 mb-1">Your Vault</div>
+                          <div className={`text-lg font-bold ${
+                            parseFloat(perf.performance.tradingPnlUsd) >= 0 ? 'text-green-400' : 'text-red-400'
+                          }`}>
+                            {parseFloat(perf.performance.tradingPnlUsd) >= 0 ? '+' : ''}${perf.performance.tradingPnlUsd}
+                          </div>
+                          <div className="text-xs text-gray-600 mt-1">{perf.performance.tradeCount} trade{perf.performance.tradeCount !== 1 ? 's' : ''}</div>
+                        </div>
+                        <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-3 text-center">
+                          <div className="text-xs text-gray-500 mb-1">Lido Staking</div>
+                          <div className="text-lg font-bold text-blue-400">{perf.benchmarks.lidoApr}%</div>
+                          <div className="text-xs text-gray-600 mt-1">APR (7d SMA)</div>
+                        </div>
+                        <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-3 text-center">
+                          <div className="text-xs text-gray-500 mb-1">Hold ETH</div>
+                          <div className={`text-lg font-bold ${
+                            (rates?.prices?.eth24hChange ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                          }`}>
+                            {(rates?.prices?.eth24hChange ?? 0) >= 0 ? '+' : ''}{(rates?.prices?.eth24hChange ?? 0).toFixed(2)}%
+                          </div>
+                          <div className="text-xs text-gray-600 mt-1">24h change</div>
+                        </div>
+                      </div>
+
+                      {/* Trade history */}
+                      {perf.trades.length > 0 && (
+                        <div className="mt-4">
+                          <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">Recent Trades</div>
+                          <div className="bg-gray-800/30 rounded-lg divide-y divide-gray-700/30">
+                            {perf.trades.map((t: any, i: number) => (
+                              <div key={i} className="flex items-center justify-between px-3 py-2 text-xs">
+                                <div className="flex items-center gap-2">
+                                  <span className={`px-1.5 py-0.5 rounded font-medium ${
+                                    t.direction === 'SELL' ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'
+                                  }`}>{t.direction}</span>
+                                  <span className="text-gray-300">{t.ethAmount} ETH</span>
+                                  <span className="text-gray-600">@</span>
+                                  <span className="text-gray-400">${t.effectivePrice}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gray-600">now ${t.currentPrice}</span>
+                                  <span className={parseFloat(t.pnl) >= 0 ? 'text-green-400' : 'text-red-400'}>
+                                    {parseFloat(t.pnl) >= 0 ? '+' : ''}${t.pnl}
+                                  </span>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <p className="text-xs text-gray-600 mt-2">
+                            Traded ${perf.performance.totalTraded} total volume · Prices from Uniswap V3 on Base Sepolia (testnet rates differ from mainnet)
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )
             })()}
