@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi'
 import { parseEther } from 'viem'
 import { baseSepolia } from 'viem/chains'
 import { useAgentContext } from '../components/AgentContext'
@@ -22,6 +22,8 @@ const vaultAbi = [
 
 export default function DashboardClient() {
   const { address } = useAccount()
+  const chainId = useChainId()
+  const { switchChain } = useSwitchChain()
   const { agents, vaults, vaultData, hasAgent, hasVault, ethPrice, refreshVaults } = useAgentContext()
   const [depositAmount, setDepositAmount] = useState('0.01')
   const [txStatus, setTxStatus] = useState('')
@@ -31,19 +33,36 @@ export default function DashboardClient() {
   const { writeContract, data: txHash } = useWriteContract()
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash })
 
+  const wrongNetwork = chainId !== baseSepolia.id
+
+  const ensureNetwork = async (): Promise<boolean> => {
+    if (wrongNetwork) {
+      try {
+        await switchChain({ chainId: baseSepolia.id })
+        return true
+      } catch {
+        setError('Please switch to Base Sepolia in your wallet.')
+        return false
+      }
+    }
+    return true
+  }
+
   if (txConfirmed && txStatus) {
     setTimeout(() => { setTxStatus(''); refreshVaults() }, 1500)
   }
 
-  const createVault = () => {
+  const createVault = async () => {
     if (!agents[0]) return
+    if (!(await ensureNetwork())) return
     setTxStatus('Creating vault...')
     writeContract({ account: address, address: VAULT_FACTORY, abi: factoryAbi, functionName: 'createVault',
       args: [agents[0].agentWallet as `0x${string}`, parseEther('1'), parseEther('5'), [WETH, USDC]], chain: baseSepolia })
   }
 
-  const depositETH = () => {
+  const depositETH = async () => {
     if (!vaults[0]) return
+    if (!(await ensureNetwork())) return
     setTxStatus('Depositing ETH...')
     writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'depositETH',
       value: parseEther(depositAmount), chain: baseSepolia })
@@ -61,6 +80,18 @@ export default function DashboardClient() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
+      {wrongNetwork && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-5 flex items-center justify-between">
+          <div>
+            <div className="font-semibold text-red-300">Wrong Network</div>
+            <p className="text-sm text-red-400/80 mt-1">You&apos;re connected to the wrong network. AgentGuard runs on <strong>Base Sepolia (testnet)</strong>. No real money is involved.</p>
+          </div>
+          <button onClick={() => switchChain({ chainId: baseSepolia.id })}
+            className="bg-red-500/20 hover:bg-red-500/30 text-red-300 px-4 py-2 rounded-lg text-sm font-medium transition shrink-0">
+            Switch to Base Sepolia
+          </button>
+        </div>
+      )}
       {error && (
         <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-sm text-red-300">
           {error}<button onClick={() => setError('')} className="ml-2 text-red-400">×</button>
