@@ -33,11 +33,20 @@ export default function DashboardClient() {
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
   const [perf, setPerf] = useState<any>(null)
+  const [activity, setActivity] = useState<any[]>([])
+
+  // Load cached strategy name from localStorage
+  const [cachedStrategy, setCachedStrategy] = useState<any>(() => {
+    if (typeof window === 'undefined') return null
+    try { return JSON.parse(localStorage.getItem('ag_active_strategy') || 'null') } catch { return null }
+  })
 
   useEffect(() => {
     if (vaults[0]) {
       fetch(`/api/vault/performance?vault=${vaults[0]}`)
         .then(r => r.json()).then(setPerf).catch(() => {})
+      fetch(`/api/vault/activity?vault=${vaults[0]}`)
+        .then(r => r.json()).then(d => setActivity((d.activities || []).slice(0, 3))).catch(() => {})
     }
   }, [vaults])
 
@@ -314,24 +323,87 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
             })()}
           </div>
 
-          {/* Strategy status on vault page */}
-          <div className={`bg-gray-900 border rounded-xl p-4 flex items-center justify-between ${vaultData?.policy?.active ? 'border-green-500/20' : 'border-yellow-500/20'}`}>
-            <div className="flex items-center gap-3">
-              <div className={`w-2.5 h-2.5 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
-              <div>
-                <div className={`text-sm font-medium ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
-                  {vaultData?.policy?.active ? 'Strategy Active' : 'No Active Strategy'}
+          {/* What your money is doing */}
+          <div className={`bg-gray-900 border rounded-xl p-5 ${vaultData?.policy?.active ? 'border-green-500/20' : 'border-yellow-500/20'}`}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className={`w-2.5 h-2.5 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
+                <span className={`font-semibold ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
+                  {vaultData?.policy?.active
+                    ? (cachedStrategy?.name || 'Strategy Active')
+                    : 'No Active Strategy'}
+                </span>
+              </div>
+              <a href="/strategy" className="text-xs text-indigo-400 hover:underline">
+                {vaultData?.policy?.active ? 'Manage →' : 'Set up strategy →'}
+              </a>
+            </div>
+
+            {vaultData?.policy?.active ? (
+              <div className="space-y-3">
+                {/* Strategy description if available */}
+                {cachedStrategy?.description && (
+                  <p className="text-sm text-gray-400">{cachedStrategy.description}</p>
+                )}
+
+                {/* What each asset is doing */}
+                <div className="space-y-2">
+                  {parseFloat(vaultData?.balances?.WETH || '0') > 0 && (
+                    <div className="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                        <span className="text-sm text-gray-300">{vaultData.balances.WETH} WETH</span>
+                      </div>
+                      <span className="text-xs text-gray-500">Available to trade</span>
+                    </div>
+                  )}
+                  {parseFloat(vaultData?.balances?.ETH || '0') > 0 && (
+                    <div className="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                        <span className="text-sm text-gray-300">{vaultData.balances.ETH} ETH</span>
+                      </div>
+                      <span className="text-xs text-gray-500">Vault balance</span>
+                    </div>
+                  )}
+                  {parseFloat(vaultData?.balances?.USDC || '0') > 0 && (
+                    <div className="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                        <span className="text-sm text-gray-300">{vaultData.balances.USDC} USDC</span>
+                      </div>
+                      <span className="text-xs text-gray-500">From swap</span>
+                    </div>
+                  )}
                 </div>
-                {vaultData?.policy?.active && (
-                  <div className="text-xs text-gray-500">
-                    Max {vaultData.policy.maxPerAction} ETH/trade · {vaultData.policy.remaining} ETH remaining today
+
+                {/* Guardrails summary */}
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 pt-2 border-t border-gray-800/50">
+                  <span>Max per trade: <strong className="text-gray-400">{vaultData.policy.maxPerAction} ETH</strong></span>
+                  <span>Daily limit: <strong className="text-gray-400">{vaultData.policy.dailyLimit} ETH</strong></span>
+                  <span>Used today: <strong className="text-gray-400">{vaultData.policy.dailySpent} ETH</strong></span>
+                </div>
+
+                {/* Last activity */}
+                {activity.length > 0 && (
+                  <div className="pt-2 border-t border-gray-800/50">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-gray-500">Recent activity</span>
+                      <a href="/activity" className="text-xs text-indigo-400 hover:underline">View all →</a>
+                    </div>
+                    {activity.map((a, i) => (
+                      <div key={i} className="flex items-center justify-between text-xs py-1">
+                        <span className="text-gray-400">{a.summary}</span>
+                        <a href={`https://sepolia.basescan.org/tx/${a.txHash}`} target="_blank" rel="noopener"
+                          className="text-indigo-400 hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
-            </div>
-            <a href="/strategy" className="text-xs text-indigo-400 hover:underline">
-              {vaultData?.policy?.active ? 'View strategy →' : 'Set up strategy →'}
-            </a>
+            ) : (
+              <p className="text-sm text-gray-500">Your vault has funds but no active strategy. The agent can&apos;t trade until you approve a strategy on the <a href="/strategy" className="text-indigo-400 hover:underline">Strategy page</a>.</p>
+            )}
           </div>
 
           {/* Your Vault — below market data */}
