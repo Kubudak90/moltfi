@@ -186,7 +186,8 @@ export default function DashboardClient() {
               </div>
               <div className="bg-gray-800/30 rounded-lg p-4">
                 <div className="text-sm font-medium text-green-400 mb-2">For AI Agents</div>
-                <p className="text-xs text-gray-400">Your agent already knows how to deposit, swap, stake, and monitor — it reads the AgentGuard skill file which covers every API endpoint. No blockchain knowledge needed on the agent&apos;s side; AgentGuard handles signing and broadcasting.</p>
+                <pre className="text-xs font-mono text-gray-300 bg-gray-900/80 rounded p-2 overflow-x-auto mb-2">POST /api/vault/deposit{'\n'}{JSON.stringify({ amount: "0.01" })}</pre>
+                <p className="text-xs text-gray-500">AgentGuard handles signing and broadcasting. See the <a href="https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md#3-deposit-eth" className="text-indigo-400 hover:underline">full skill reference</a> for all endpoints.</p>
               </div>
             </div>
           </div>
