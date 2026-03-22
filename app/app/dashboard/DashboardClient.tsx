@@ -81,7 +81,14 @@ export default function DashboardClient() {
             <p className="text-gray-400 mb-6 text-center text-sm">Copy this and send it to your AI agent.</p>
             <div className="bg-gray-800/50 rounded-lg p-4 relative group cursor-pointer" onClick={() => {
               const txt = `Register with AgentGuard as my agent. My wallet: ${address}\n\ncurl -X POST ${origin}/api/agent/register -H "Content-Type: application/json" -d '{"agentWallet": "YOUR_WALLET", "humanWallet": "${address}", "agentName": "YOUR_NAME"}'`
-              navigator.clipboard?.writeText(txt).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
+              if (navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(txt).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) }).catch(() => fallbackCopy(txt))
+              } else { fallbackCopy(txt) }
+              function fallbackCopy(text: string) {
+                const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'
+                document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
+                setCopied(true); setTimeout(() => setCopied(false), 2000)
+              }
             }}>
               <div className="absolute top-3 right-3 text-gray-500 group-hover:text-indigo-400">
                 {copied ? <span className="text-green-400 text-xs">Copied!</span> : (
