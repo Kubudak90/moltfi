@@ -3,6 +3,7 @@ import { createPublicClient, http, parseAbiItem, formatEther, formatUnits } from
 import { baseSepolia } from 'viem/chains'
 
 const client = createPublicClient({ chain: baseSepolia, transport: http() })
+const ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as const
 
 const TOKEN_NAMES: Record<string, string> = {
   '0x4200000000000000000000000000000000000006': 'WETH',
@@ -49,8 +50,8 @@ export async function GET(req: NextRequest) {
     const currentBlock = await client.getBlockNumber()
     const fromBlock = currentBlock > 500000n ? currentBlock - 500000n : 0n
 
-    // Fetch all event types in parallel
-    const [deposits, withdrawals, swaps, stakes, yields, agentUpdates] = await Promise.all(
+    // Fetch vault events + router swap events in parallel
+    const vaultEvents = await Promise.all(
       EVENTS.map(event =>
         client.getLogs({
           address: vault as `0x${string}`,
@@ -60,6 +61,15 @@ export async function GET(req: NextRequest) {
         }).catch(() => [])
       )
     )
+    const [deposits, withdrawals, , stakes, yields, agentUpdates] = vaultEvents
+
+    // SwapExecuted comes from the router, filtered by agent (vault) as indexed param
+    const swaps = await client.getLogs({
+      address: ROUTER,
+      event: EVENTS[2], // SwapExecuted
+      fromBlock,
+      toBlock: 'latest',
+    }).catch(() => [])
 
     // Process deposits
     for (const log of deposits) {
