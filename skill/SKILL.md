@@ -87,6 +87,12 @@ echo '{"baseUrl": "https://moltfi.app", "apiKey": "mf_YOUR_KEY"}' > config.json
 4. **Smart contracts enforce** → AgentPolicy checks every trade against limits. Exceeds limits? Transaction reverts.
 5. **You get a response** → plain English summary with Basescan links
 
+## Privacy
+
+MoltFi uses Venice AI (zero data retention) to process your trade requests — your intent is never stored or leaked. For end-to-end privacy, run your own agent on a Venice model too. That way no AI provider sees your trading intent at any point in the chain.
+
+Get a Venice API key: https://venice.ai
+
 ## Architecture
 
 - **AgentPolicy** — on-chain spending limits (max per trade, daily cap). Human sets. Agent can't change.

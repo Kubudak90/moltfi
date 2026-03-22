@@ -112,6 +112,10 @@ export default function Home() {
             <p className="text-sm text-gray-400">
               When your agent says &quot;swap 100 ETH to USDC,&quot; that trade intent is sensitive — a regular AI provider could see it before it hits the chain. Venice AI has zero data retention: your pending trades are never stored, never leaked, never front-run. After execution, the trade is public on Basescan — transparent and verifiable.
             </p>
+            <p className="text-xs text-gray-500 mt-3">
+              For end-to-end privacy, run your own agent on a Venice model too — then no AI provider sees your intent at any point.{' '}
+              <a href="https://venice.ai" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">Get a Venice API key →</a>
+            </p>
           </div>
 
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
