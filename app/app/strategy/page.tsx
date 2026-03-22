@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { useAgentContext } from '../components/AgentContext'
 
 const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
+const POLICY_CONTRACT = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
 
 const factoryAbi = [
   { name: 'updatePolicy', type: 'function', stateMutability: 'nonpayable',
@@ -22,11 +23,20 @@ type Strategy = {
   guardrails: { maxTradeSize: string; dailyLimit: string; maxSlippage: string; protocols: string[] }
 }
 
+type Activity = {
+  type: string; summary: string; txHash: string; blockNumber: number; timestamp: number | null
+}
+
 function timeAgo(ts: number): string {
   const diff = Math.floor((Date.now() - ts) / 1000)
   if (diff < 60) return 'just now'
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`
-  return `${Math.floor(diff / 3600)}h ago`
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`
+  return `${Math.floor(diff / 86400)}d ago`
+}
+
+function shortenAddr(addr: string): string {
+  return addr.slice(0, 6) + '…' + addr.slice(-4)
 }
 
 export default function StrategyPage() {
@@ -45,21 +55,51 @@ export default function StrategyPage() {
     return parseInt(localStorage.getItem('ag_strategies_ts') || '0')
   })
   const [generating, setGenerating] = useState(false)
-  const [selected, setSelected] = useState<number | null>(null)
   const [active, setActive] = useState<Strategy | null>(() => {
     if (typeof window === 'undefined') return null
     try { return JSON.parse(localStorage.getItem('ag_active_strategy') || 'null') } catch { return null }
   })
+  const [deployTxHash, setDeployTxHash] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null
+    return localStorage.getItem('ag_deploy_tx') || null
+  })
+  const [deployedAt, setDeployedAt] = useState<number>(() => {
+    if (typeof window === 'undefined') return 0
+    return parseInt(localStorage.getItem('ag_deployed_at') || '0')
+  })
+  const [changingStrategy, setChangingStrategy] = useState(false)
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([])
+  const [activityLoading, setActivityLoading] = useState(false)
   const [txStatus, setTxStatus] = useState('')
 
   const { writeContract, data: txHash } = useWriteContract()
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash })
 
+  // Save tx hash when we get one from wagmi
+  useEffect(() => {
+    if (txHash && active) {
+      setDeployTxHash(txHash)
+      localStorage.setItem('ag_deploy_tx', txHash)
+      const now = Date.now()
+      setDeployedAt(now)
+      localStorage.setItem('ag_deployed_at', String(now))
+    }
+  }, [txHash]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Fetch recent activity when active strategy is shown
+  useEffect(() => {
+    if (!active || !vaults[0]) return
+    setActivityLoading(true)
+    fetch(`/api/vault/activity?vault=${vaults[0]}`)
+      .then(r => r.json())
+      .then(d => { setRecentActivity((d.activities || []).slice(0, 3)); setActivityLoading(false) })
+      .catch(() => setActivityLoading(false))
+  }, [active, vaults])
+
   // Check if a generation was in progress when we mounted (tab switch recovery)
   useEffect(() => {
     const inProgress = localStorage.getItem('ag_generating')
     if (inProgress === 'true' && strategies.length === 0) {
-      // Generation was interrupted by tab switch — auto-restart
       localStorage.removeItem('ag_generating')
       generate()
     }
@@ -72,7 +112,6 @@ export default function StrategyPage() {
 
     setGenerating(true)
     setStrategies([])
-    setSelected(null)
     localStorage.setItem('ag_generating', 'true')
     localStorage.removeItem('ag_strategies')
     localStorage.removeItem('ag_strategies_ts')
@@ -127,44 +166,59 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
         localStorage.setItem('ag_strategies_ts', String(now))
       }
     } catch (e: any) {
-      if (e.name === 'AbortError') return // tab switch, don't clear generating flag
+      if (e.name === 'AbortError') return
     }
     setGenerating(false)
     localStorage.removeItem('ag_generating')
   }, [vaultData, rates])
 
-  // Cleanup abort controller on unmount
   useEffect(() => {
     return () => { fetchRef.current?.abort() }
   }, [])
 
   const deploy = (s: Strategy) => {
     if (!vaults[0]) return
-    setTxStatus('Setting guardrails on-chain...')
+    setTxStatus('Confirm in your wallet — writing guardrails to the policy contract...')
     writeContract({ account: address, address: VAULT_FACTORY, abi: factoryAbi, functionName: 'updatePolicy',
       args: [vaults[0] as `0x${string}`, parseEther(s.guardrails.maxTradeSize.replace(' ETH', '')),
         parseEther(s.guardrails.dailyLimit.replace(' ETH', ''))], chain: baseSepolia })
     setActive(s)
+    setChangingStrategy(false)
     localStorage.setItem('ag_active_strategy', JSON.stringify(s))
   }
 
   const pause = () => {
     if (!vaults[0]) return
-    setTxStatus('Pausing agent...')
+    setTxStatus('Confirm in your wallet — revoking agent policy on-chain...')
     writeContract({ account: address, address: VAULT_FACTORY, abi: factoryAbi, functionName: 'revokePolicy',
       args: [vaults[0] as `0x${string}`], chain: baseSepolia })
     setActive(null)
+    setDeployTxHash(null)
+    setDeployedAt(0)
     localStorage.removeItem('ag_active_strategy')
+    localStorage.removeItem('ag_deploy_tx')
+    localStorage.removeItem('ag_deployed_at')
   }
 
   if (!address) return <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-500">Connect your wallet to view strategies.</div>
   if (!hasVault) return <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-500">Create a vault first in the Vault tab.</div>
 
+  const vaultAddr = vaults[0] || ''
+  const policyActive = vaultData?.policy?.active
+  const policyMaxPerAction = vaultData?.policy?.maxPerAction
+  const policyDailyLimit = vaultData?.policy?.dailyLimit
+  const policyDailySpent = vaultData?.policy?.dailySpent
+  const policyRemaining = vaultData?.policy?.remaining
+
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       {txStatus && (
         <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-4 text-sm text-indigo-300">
-          {txConfirmed ? '✓ Confirmed!' : txStatus}
+          {txConfirmed ? '✓ Transaction confirmed on Base Sepolia' : txStatus}
+          {txHash && (
+            <a href={`https://sepolia.basescan.org/tx/${txHash}`} target="_blank" rel="noopener"
+              className="ml-2 text-indigo-400 hover:underline">View tx →</a>
+          )}
         </div>
       )}
 
@@ -178,75 +232,152 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
         </div>
       </div>
 
-      {/* Active strategy */}
-      {active && (
+      {/* Active strategy — backed by real data */}
+      {active && !changingStrategy && (
         <div className="space-y-4">
-          {/* Success confirmation */}
-          <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4 flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
+          {/* On-chain status — real data from vault/status API */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {policyActive ? (
+                  <>
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+                    <span className="font-semibold text-green-400">Policy Active</span>
+                  </>
+                ) : (
+                  <>
+                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                    <span className="font-semibold text-yellow-400">Policy Pending</span>
+                  </>
+                )}
+              </div>
+              <span className="text-xs text-gray-500">Base Sepolia</span>
             </div>
-            <div>
-              <div className="text-sm font-medium text-green-300 mb-1">Strategy deployed — guardrails are on-chain</div>
-              <p className="text-xs text-gray-500">Your funds are safe in your vault. The agent can only trade within the limits below — enforced by the blockchain, not by us.</p>
+
+            {/* Contract links — verifiable */}
+            <div className="grid sm:grid-cols-2 gap-3 text-xs">
+              <div className="bg-gray-800/50 rounded-lg p-3">
+                <div className="text-gray-500 mb-1">Vault</div>
+                <a href={`https://sepolia.basescan.org/address/${vaultAddr}`} target="_blank" rel="noopener"
+                  className="text-indigo-400 hover:underline font-mono">{shortenAddr(vaultAddr)}</a>
+              </div>
+              <div className="bg-gray-800/50 rounded-lg p-3">
+                <div className="text-gray-500 mb-1">Policy Contract</div>
+                <a href={`https://sepolia.basescan.org/address/${POLICY_CONTRACT}`} target="_blank" rel="noopener"
+                  className="text-indigo-400 hover:underline font-mono">{shortenAddr(POLICY_CONTRACT)}</a>
+              </div>
             </div>
+
+            {/* On-chain guardrail values — read from contract */}
+            {policyActive && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div className="bg-gray-800/50 rounded-lg p-3">
+                  <div className="text-gray-500 mb-1">Max per trade</div>
+                  <div className="text-gray-200 font-medium">{policyMaxPerAction} ETH</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-3">
+                  <div className="text-gray-500 mb-1">Daily limit</div>
+                  <div className="text-gray-200 font-medium">{policyDailyLimit} ETH</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-3">
+                  <div className="text-gray-500 mb-1">Spent today</div>
+                  <div className="text-gray-200 font-medium">{policyDailySpent} ETH</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-lg p-3">
+                  <div className="text-gray-500 mb-1">Remaining today</div>
+                  <div className="text-gray-200 font-medium">{policyRemaining} ETH</div>
+                </div>
+              </div>
+            )}
+
+            {/* Deploy tx link */}
+            {deployTxHash && (
+              <div className="flex items-center gap-2 text-xs text-gray-500">
+                <span>Deployed {deployedAt ? timeAgo(deployedAt) : ''}</span>
+                <span>·</span>
+                <a href={`https://sepolia.basescan.org/tx/${deployTxHash}`} target="_blank" rel="noopener"
+                  className="text-indigo-400 hover:underline font-mono">{deployTxHash.slice(0, 10)}…</a>
+              </div>
+            )}
           </div>
 
-          {/* Active strategy card */}
-          <div className="p-6 border border-gray-800 bg-gray-900 rounded-xl">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
-                <span className="font-semibold text-green-400">Agent Running</span>
-              </div>
+          {/* Strategy details */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-3">
+              <div className="font-semibold text-lg">{active.name}</div>
               <span className="text-sm text-indigo-400 font-medium">{active.expectedYield}</span>
             </div>
-            <div className="font-medium text-lg mb-1">{active.name}</div>
             <p className="text-sm text-gray-400 mb-4">{active.description}</p>
 
             <div className="bg-gray-800/40 rounded-lg p-4 mb-4">
-              <div className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">What the agent is doing</div>
+              <div className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">What the agent does</div>
               {active.steps?.map((step, j) => (
                 <div key={j} className="flex items-start gap-2 text-sm mb-1.5">
-                  <span className="text-green-400 shrink-0">→</span>
+                  <span className="text-indigo-400 shrink-0">{j + 1}.</span>
                   <span className="text-gray-300">{step}</span>
                 </div>
               ))}
             </div>
+          </div>
 
-            <div className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">On-chain guardrails</div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-6">
-              <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Max trade: </span><span className="text-gray-300">{active.guardrails.maxTradeSize}</span></div>
-              <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Daily limit: </span><span className="text-gray-300">{active.guardrails.dailyLimit}</span></div>
-              <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Slippage: </span><span className="text-gray-300">{active.guardrails.maxSlippage}</span></div>
-              <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Protocols: </span><span className="text-gray-300">{active.guardrails.protocols.join(', ')}</span></div>
+          {/* Recent activity — real on-chain data */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm font-medium text-gray-300">Recent Vault Activity</div>
+              <button onClick={() => router.push('/activity')} className="text-xs text-indigo-400 hover:underline">View all →</button>
             </div>
-
-            <div className="flex items-center gap-3 pt-4 border-t border-gray-800">
-              <button onClick={() => { setActive(null); setStrategies([]); setSelected(null); localStorage.removeItem('ag_active_strategy'); localStorage.removeItem('ag_strategies'); localStorage.removeItem('ag_strategies_ts') }}
-                className="text-sm text-gray-500 hover:text-gray-300 transition">Change Strategy</button>
-              <div className="ml-auto relative group">
-                <button onClick={pause}
-                  className="bg-red-600/20 hover:bg-red-600/40 text-red-400 px-4 py-2 rounded-lg border border-red-500/30 transition text-sm font-medium flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  Pause Agent
-                </button>
-                <div className="absolute bottom-full right-0 mb-2 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl">
-                  Revokes the agent&apos;s trading permissions on-chain. It won&apos;t be able to make any trades until you approve a new strategy. Your funds stay in the vault — nothing moves.
-                  <div className="absolute top-full right-4 -mt-px w-2 h-2 bg-gray-800 border-r border-b border-gray-700 rotate-45" />
+            {activityLoading && <div className="text-xs text-gray-600 py-3">Reading from blockchain…</div>}
+            {!activityLoading && recentActivity.length === 0 && (
+              <div className="text-xs text-gray-600 py-3">No transactions yet. Activity will appear here as the agent executes trades through your vault.</div>
+            )}
+            {recentActivity.map(tx => (
+              <div key={tx.txHash} className="flex items-center justify-between py-2 border-t border-gray-800/50 text-sm">
+                <div className="text-gray-300">{tx.summary}</div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 shrink-0">
+                  {tx.timestamp && <span>{timeAgo(tx.timestamp * 1000)}</span>}
+                  <a href={`https://sepolia.basescan.org/tx/${tx.txHash}`} target="_blank" rel="noopener"
+                    className="text-indigo-400 hover:underline font-mono">{tx.txHash.slice(0, 8)}…</a>
                 </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-between">
+            <button onClick={() => { setChangingStrategy(true); setStrategies([]); setGeneratedAt(0) }}
+              className="bg-gray-800 hover:bg-gray-700 text-gray-300 px-5 py-2.5 rounded-lg text-sm font-medium transition">
+              Change Strategy
+            </button>
+            <div className="relative group">
+              <button onClick={pause}
+                className="bg-red-600/20 hover:bg-red-600/40 text-red-400 px-5 py-2.5 rounded-lg border border-red-500/30 transition text-sm font-medium flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Pause Agent
+              </button>
+              <div className="absolute bottom-full right-0 mb-2 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl">
+                Calls <code className="text-indigo-400">revokePolicy()</code> on the factory contract. The agent loses trading permissions on-chain — it physically can&apos;t swap until you approve a new strategy. Funds stay in the vault.
+                <div className="absolute top-full right-4 -mt-px w-2 h-2 bg-gray-800 border-r border-b border-gray-700 rotate-45" />
               </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* Changing strategy — show back button + generation */}
+      {active && changingStrategy && (
+        <button onClick={() => setChangingStrategy(false)}
+          className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-200 transition">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back to active strategy
+        </button>
+      )}
+
       {/* Empty state — no strategies yet */}
-      {!active && strategies.length === 0 && !generating && (
+      {(!active || changingStrategy) && strategies.length === 0 && !generating && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-10 text-center space-y-6">
           <div className="flex justify-center">
             <div className="w-16 h-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
@@ -256,13 +387,12 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
             </div>
           </div>
           <div>
-            <h2 className="text-lg font-semibold mb-2">Get personalized DeFi strategies</h2>
+            <h2 className="text-lg font-semibold mb-2">{changingStrategy ? 'Generate new strategies' : 'Get personalized DeFi strategies'}</h2>
             <p className="text-sm text-gray-400 max-w-md mx-auto">
               Venice AI analyzes your vault balance, current yields, and market conditions to propose strategies tailored to your portfolio.
             </p>
           </div>
 
-          {/* Privacy callout */}
           <div className="bg-purple-500/5 border border-purple-500/20 rounded-lg p-4 max-w-md mx-auto">
             <div className="flex items-start gap-3 text-left">
               <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center shrink-0 mt-0.5">
@@ -273,7 +403,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
               <div>
                 <div className="text-sm font-medium text-purple-300 mb-1">Private by design</div>
                 <p className="text-xs text-gray-500">
-                  Strategies are generated fresh each time using Venice AI with <strong className="text-gray-400">zero data retention</strong>. Your financial data is never stored — not by us, not by Venice. That&apos;s why you click the button each visit.
+                  Strategies are generated fresh each time using Venice AI with <strong className="text-gray-400">zero data retention</strong>. Your financial data is never stored — not by us, not by Venice.
                 </p>
               </div>
             </div>
@@ -281,13 +411,13 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
 
           <button onClick={generate}
             className="bg-indigo-600 hover:bg-indigo-500 px-8 py-3 rounded-lg font-medium transition text-lg">
-            Show Me Strategies
+            {changingStrategy ? 'Generate Strategies' : 'Show Me Strategies'}
           </button>
         </div>
       )}
 
       {/* Generating state */}
-      {!active && generating && (
+      {(!active || changingStrategy) && generating && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center space-y-4">
           <div className="flex justify-center">
             <svg className="w-10 h-10 animate-spin text-indigo-400" viewBox="0 0 24 24" fill="none">
@@ -304,14 +434,11 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
       )}
 
       {/* Strategy cards */}
-      {!active && strategies.length > 0 && (
+      {(!active || changingStrategy) && strategies.length > 0 && (
         <div className="space-y-4">
-          {/* Generated timestamp + privacy tooltip */}
           <div className="flex items-center justify-between text-xs text-gray-600">
             <div className="flex items-center gap-2">
-              <span>
-                {generatedAt ? `Generated ${timeAgo(generatedAt)}` : 'Cached strategies'}
-              </span>
+              <span>{generatedAt ? `Generated ${timeAgo(generatedAt)}` : 'Cached strategies'}</span>
               <div className="relative group">
                 <div className="w-4 h-4 rounded-full border border-gray-600 flex items-center justify-center cursor-help text-[10px] text-gray-500 hover:border-purple-400 hover:text-purple-400 transition">?</div>
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl">
@@ -320,7 +447,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
                     <div>
-                      <strong className="text-purple-300">Your strategies stay private.</strong> We don&apos;t store them on our servers — they&apos;re cached in your browser only. Venice AI generates them with zero data retention, so your portfolio details and trading strategies are never saved or accessible to anyone. Not even us.
+                      <strong className="text-purple-300">Your strategies stay private.</strong> We don&apos;t store them on our servers — they&apos;re cached in your browser only. Venice AI generates them with zero data retention.
                     </div>
                   </div>
                   <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-2 h-2 bg-gray-800 border-r border-b border-gray-700 rotate-45" />
@@ -359,7 +486,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
                 <div><span className="text-gray-600">Protocols: </span><span className="text-gray-400">{s.guardrails.protocols.join(', ')}</span></div>
               </div>
               <div className="flex items-center justify-between pt-3 border-t border-gray-800/50">
-                <span className="text-xs text-gray-600">Guardrails enforced on-chain</span>
+                <span className="text-xs text-gray-600">Writes guardrails to <a href={`https://sepolia.basescan.org/address/${POLICY_CONTRACT}`} target="_blank" rel="noopener" className="text-indigo-400 hover:underline">{shortenAddr(POLICY_CONTRACT)}</a></span>
                 <button onClick={() => deploy(s)}
                   className="bg-green-600 hover:bg-green-500 px-5 py-2 rounded-lg text-sm font-medium transition">
                   Approve &amp; Start Agent
@@ -368,14 +495,12 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
             </div>
           ))}
 
-          {/* Chat about strategies CTA */}
           <button onClick={() => router.push(`/chat?strategy=${encodeURIComponent(JSON.stringify(strategies))}`)}
             className="w-full bg-purple-600/10 hover:bg-purple-600/20 border border-purple-500/30 rounded-xl p-5 transition flex items-center justify-center gap-3 group">
             <svg className="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            <span className="text-purple-300 font-medium">Chat with DeFi Agent about these strategies</span>
-            <span className="ml-1 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">Beta</span>
+            <span className="text-purple-300 font-medium">Ask the DeFi Advisor about these strategies</span>
             <svg className="w-4 h-4 text-purple-500 group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
@@ -397,15 +522,15 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
           </div>
           <div className="flex items-start gap-3">
             <span className="text-indigo-400 font-bold shrink-0">3.</span>
-            <span><strong className="text-gray-300">You pick one</strong> — &quot;Approve &amp; Start Agent&quot; writes the guardrails to a smart contract on Base. These limits are now on-chain.</span>
+            <span><strong className="text-gray-300">You pick one</strong> — &quot;Approve &amp; Start Agent&quot; calls <code className="text-indigo-400 text-xs">updatePolicy()</code> on <a href={`https://sepolia.basescan.org/address/${VAULT_FACTORY}`} target="_blank" rel="noopener" className="text-indigo-400 hover:underline">{shortenAddr(VAULT_FACTORY)}</a>, writing guardrails to the <a href={`https://sepolia.basescan.org/address/${POLICY_CONTRACT}`} target="_blank" rel="noopener" className="text-indigo-400 hover:underline">policy contract</a>.</span>
           </div>
           <div className="flex items-start gap-3">
             <span className="text-indigo-400 font-bold shrink-0">4.</span>
-            <span><strong className="text-gray-300">Agent runs autonomously</strong> — it checks markets every 30 minutes, rebalances, and trades within your guardrails. If it tries to exceed them, the blockchain reverts the transaction.</span>
+            <span><strong className="text-gray-300">Agent runs autonomously</strong> — your agent checks in with our DeFi advisor, gets recommendations, and trades through the vault. If it tries to exceed guardrails, the smart contract reverts the transaction.</span>
           </div>
           <div className="flex items-start gap-3">
             <span className="text-indigo-400 font-bold shrink-0">5.</span>
-            <span><strong className="text-gray-300">Pause anytime</strong> — one click revokes the agent&apos;s policy on-chain. It can&apos;t trade until you re-enable it.</span>
+            <span><strong className="text-gray-300">Pause anytime</strong> — calls <code className="text-indigo-400 text-xs">revokePolicy()</code> on-chain. The agent can&apos;t trade until you approve a new strategy.</span>
           </div>
         </div>
       </div>
