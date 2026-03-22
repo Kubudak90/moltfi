@@ -619,16 +619,18 @@ Others doing agent wallet guardrails:
 - [x] "Approve & Start Agent" → deploys guardrails on-chain, shows "Agent Running" state
 - [x] "Pause Agent" button (revokes policy)
 - [x] Activity page with verified swap TX + Basescan link
-- [x] Chat page — full-page Venice AI conversation with suggestion prompts
+- [x] Agent page (was "Chat") — instructions to connect your own agent via skill file (no embedded chatbot)
 - [x] Market page — live ETH price, stETH APR, gas, protocol cards
-- [x] Guardrails page — explains on-chain enforcement, shows limits, daily usage, approved tokens
+- [x] Guardrails page — explains on-chain enforcement, shows limits, daily usage, approved tokens, **Private Mode toggle**
+- [x] PrivacyIndicator component — reads real private mode state, shows enforced vs standard
 - [x] Portfolio view with real on-chain balance data
 
 **API Routes:**
 - [x] `/api/agent/register` — POST/GET agent registration
 - [x] `/api/vault/status` — real on-chain vault state
+- [x] `/api/vault/private-mode` — GET/POST private mode toggle per vault
+- [x] `/api/pipeline` — Venice strategy generation, enforces Private Mode when active
 - [x] `/api/uniswap/quote` — Uniswap Trading API integration (API key configured)
-- [x] `/api/chat` — Venice AI chat (llama-3.3-70b)
 - [x] `/api/rates` — live market data (CoinGecko, Lido, Base RPC)
 - [x] `/api/skill` — serves unified SKILL.md
 - [x] `/api/policy` — on-chain policy state
@@ -646,6 +648,27 @@ Others doing agent wallet guardrails:
 - [x] 75 sponsor exploration demos (~/repos/synthesis/src/)
 - [x] Uniswap API key configured in .env.local
 - [x] Venice API key configured in .env.local
+
+### What was built March 21-22 (final push)
+
+**Private Mode — Real Guardrail (not just a badge):**
+- [x] `/api/vault/private-mode` — GET/POST endpoint, persists per-vault toggle to `data/private-mode.json`
+- [x] Guardrails page has a real toggle — flip it on, all AI inference for that vault MUST go through Venice
+- [x] `/api/pipeline` (strategy endpoint) enforces Private Mode — when active, only Venice can generate strategies
+- [x] PrivacyIndicator in nav reads real state — purple + green dot when active, gray when off
+- [x] Click indicator → detail panel shows what's enforced vs standard mode
+- [x] Skill file updated with private-mode and pipeline docs for agents
+
+**Chat → Agent page rename:**
+- [x] Tab renamed "Chat" → "Agent"
+- [x] No more embedded Venice chatbot on the website (solves two-agent identity problem)
+- [x] Agent page shows instructions to connect your own agent via skill file
+
+**Data Storage — What we store vs what we don't:**
+- `data/agents.json` — agent wallet, human wallet, name, platform, timestamp (linking only)
+- `data/private-mode.json` — vault address → boolean (preference only)
+- **NO financial data stored.** Balances read from chain. Strategies generated on-the-fly via Venice (zero retention). Trade history from chain events. Chat not logged.
+- **Note:** Pipeline endpoint receives vault balances in POST body to generate strategies. They transit our server to Venice and back but are NOT stored anywhere. Venice has zero data retention.
 
 ### What's left for submission
 - [ ] Push to GitHub (ortegarod/agentguard — repo created, Kyro is collaborator) — **NEED RODRIGO APPROVAL**
@@ -734,9 +757,9 @@ Others doing agent wallet guardrails:
 | Vault | `/dashboard` | Balances (WETH/USDC), deposit ETH, agent info, create vault |
 | Strategy | `/strategy` | AI generates 3 strategies, approve & start agent, pause agent |
 | Activity | `/activity` | Trade history with Basescan links |
-| Chat | `/chat` | Full-page Venice AI conversation, suggestion prompts |
+| Agent | `/chat` | Instructions to connect your own agent via skill file (no embedded chatbot) |
 | Market | `/market` | ETH price, stETH APR, gas, protocol cards |
-| Guardrails | `/guardrails` | How enforcement works, current limits, daily usage, approved tokens |
+| Guardrails | `/guardrails` | How enforcement works, current limits, daily usage, approved tokens, **Private Mode toggle** |
 
 ### The AI's Role (INSTRUMENTAL — not secondary, not primary, always present)
 
@@ -800,7 +823,8 @@ Agent wants to swap WETH → USDC:
 | `/api/uniswap/quote` | POST | Proxies to Uniswap Trading API (`trade-api.gateway.uniswap.org/v1/quote`) with our API key | ✅ Working (real Uniswap API) |
 | `/api/rates` | GET | Live ETH price from CoinGecko, stETH APR from Lido API, gas from Base RPC | ✅ Working (real APIs) |
 | `/api/chat` | POST | Venice AI chat endpoint — zero data retention, private inference | ✅ Working (real Venice API) |
-| `/api/pipeline` | POST | Venice AI strategy generation — analyzes rates + vault state, proposes strategies with guardrails | ✅ Working (real Venice API) |
+| `/api/pipeline` | POST | Venice AI strategy generation — analyzes rates + vault state, proposes strategies with guardrails. **Enforces Private Mode** — when active, all inference must go through Venice. | ✅ Working (real Venice API) |
+| `/api/vault/private-mode` | GET/POST | Toggle Private Mode per vault. When active, forces Venice-only inference (zero data retention). | ✅ Working |
 | `/api/policy` | GET/POST | Read or set policy on AgentPolicy contract | ✅ Working (Sepolia) |
 | `/api/agent/register` | POST | Registers an agent wallet to a vault | ✅ Working (Sepolia) |
 
@@ -830,9 +854,9 @@ The API never holds keys. It builds transactions. The agent signs them. This is 
 | **Vault** | `/dashboard` | Wallet connection (ConnectKit), vault balances (WETH/USDC), deposit button, agent status, create vault button |
 | **Strategy** | `/strategy` | Venice AI generates 2-3 strategies with guardrails baked in. User picks one → "Approve & Start Agent" → agent runs autonomously |
 | **Activity** | `/activity` | Trade history pulled from vault events, Basescan links for every TX |
-| **Chat** | `/chat` | Full Venice AI chat — ask questions about strategies, DeFi, portfolio. Private inference. |
+| **Agent** | `/chat` | Instructions to connect your own AI agent via skill file. No embedded chatbot — your agent lives on your infra. |
 | **Market** | `/market` | Live ETH price, stETH APR, gas prices, protocol cards (Lido, Uniswap) — all from real APIs |
-| **Guardrails** | `/guardrails` | Explains how on-chain enforcement works. Shows current policy limits, daily usage, approved tokens |
+| **Guardrails** | `/guardrails` | On-chain enforcement explained. Policy limits, daily usage, approved tokens. **Private Mode toggle** — forces Venice-only inference for zero data retention. |
 
 **Shared state:** `AgentContext` provider wraps all pages — wallet connection, vault data, rates, agent status all shared.
 
@@ -863,7 +887,7 @@ The API never holds keys. It builds transactions. The agent signs them. This is 
 
 | Sponsor | Integration | How Real Is It |
 |---------|------------|----------------|
-| **Venice AI** | Strategy generation + chat, zero-retention inference | ✅ Real — API key configured, responses come from Venice, financial data never stored |
+| **Venice AI** | Strategy generation + chat, zero-retention inference, **Private Mode enforcement** | ✅ Real — API key configured, Private Mode toggle forces Venice-only inference, financial data never stored. Pipeline endpoint enforces PM per-vault. |
 | **Uniswap** | Trading API for quotes via `/api/uniswap/quote`, AgentGuardRouter wraps V3 SwapRouter02 | ✅ Real — API key configured, real quotes returned, real swaps executed through router |
 | **Lido** | Vault can stake ETH → stETH, APR pulled from Lido API, principal tracking enables yield-only trading | ⚠️ Partial — APR is real (from Lido API), staking endpoint exists, but no real Lido on Sepolia so staking TX would fail on-chain |
 | **Base** | All contracts deployed on Base Sepolia, all TXs on Base | ✅ Real — verified on Basescan |
