@@ -28,19 +28,35 @@ export async function GET() {
     }
   } catch (e) { errors.push(`lido: ${e}`) }
 
-  // ETH price — CoinGecko free API
+  // ETH price — try multiple sources
   let prices: any = null
+  // Try CoinGecko first
   try {
-    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin&vs_currencies=usd&include_24hr_change=true')
+    const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum,usd-coin&vs_currencies=usd&include_24hr_change=true', { signal: AbortSignal.timeout(5000) })
     if (res.ok) {
       const data = await res.json() as any
-      prices = {
-        eth: data.ethereum?.usd,
-        eth24hChange: data.ethereum?.usd_24h_change,
-        usdc: data['usd-coin']?.usd,
+      if (data.ethereum?.usd) {
+        prices = {
+          eth: data.ethereum.usd,
+          eth24hChange: data.ethereum.usd_24h_change,
+          usdc: data['usd-coin']?.usd,
+        }
       }
     }
-  } catch (e) { errors.push(`prices: ${e}`) }
+  } catch (e) { errors.push(`coingecko: ${e}`) }
+  // Fallback: Coinbase API
+  if (!prices) {
+    try {
+      const res = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=ETH', { signal: AbortSignal.timeout(5000) })
+      if (res.ok) {
+        const data = await res.json() as any
+        const ethUsd = parseFloat(data.data?.rates?.USD)
+        if (ethUsd > 0) {
+          prices = { eth: ethUsd, eth24hChange: null, usdc: 1 }
+        }
+      }
+    } catch (e) { errors.push(`coinbase: ${e}`) }
+  }
 
   // Base gas price — real RPC call
   let baseGas: any = null
