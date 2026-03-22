@@ -407,13 +407,15 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
                           <div className="text-xs text-gray-600 mt-1">APR (7d SMA)</div>
                         </div>
                         <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-3 text-center">
-                          <div className="text-xs text-gray-500 mb-1">Hold ETH</div>
+                          <div className="text-xs text-gray-500 mb-1">Vault APY</div>
                           <div className={`text-lg font-bold ${
-                            (rates?.prices?.eth24hChange ?? 0) >= 0 ? 'text-green-400' : 'text-red-400'
+                            perf?.performance?.annualizedReturn && parseFloat(perf.performance.annualizedReturn) >= 0 ? 'text-green-400' : 'text-red-400'
                           }`}>
-                            {(rates?.prices?.eth24hChange ?? 0) >= 0 ? '+' : ''}{(rates?.prices?.eth24hChange ?? 0).toFixed(2)}%
+                            {perf?.performance?.annualizedReturn
+                              ? `${parseFloat(perf.performance.annualizedReturn) >= 0 ? '+' : ''}${perf.performance.annualizedReturn}%`
+                              : '—'}
                           </div>
-                          <div className="text-xs text-gray-600 mt-1">24h change</div>
+                          <div className="text-xs text-gray-600 mt-1">annualized</div>
                         </div>
                       </div>
 
