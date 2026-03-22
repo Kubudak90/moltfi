@@ -131,7 +131,7 @@ export default function GuardrailsPage() {
                 {isPending ? 'Confirm in wallet...' : txWaiting ? 'Waiting for confirmation...' : 'Update on-chain'}
               </button>
             </div>
-            <p className="text-xs text-gray-600">Your wallet signs this transaction on the VaultFactory contract, which updates the enforced policy for your vault.</p>
+            <p className="text-xs text-gray-600">Your wallet signs this transaction directly — the limits get written to the smart contract that enforces them on every trade.</p>
           </div>
 
           {/* What's enforced */}
@@ -155,7 +155,7 @@ export default function GuardrailsPage() {
                 <span className="text-gray-300">Policy revocation — instantly freeze all agent trading</span>
               </div>
             </div>
-            <p className="text-xs text-gray-600 pt-2">All limits enforced by the AgentPolicy smart contract. The agent cannot bypass them — the transaction reverts on-chain if any limit is exceeded.</p>
+            <p className="text-xs text-gray-600 pt-2">These aren&apos;t software settings — they&apos;re on-chain rules. If your agent exceeds any limit, the transaction reverts automatically. No funds move.</p>
           </div>
 
           {/* Contracts */}

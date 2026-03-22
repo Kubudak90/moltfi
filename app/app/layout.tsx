@@ -5,8 +5,8 @@ import { ConnectWallet } from './components/ConnectWallet'
 import { NavTabs } from './components/NavTabs'
 
 export const metadata = {
-  title: 'MoltFi — AI Vault Manager',
-  description: 'Manage your DeFi positions with an AI agent, protected by on-chain guardrails',
+  title: 'MoltFi — On-chain guardrails for AI agent trading',
+  description: 'Your agent trades within your limits. Smart contracts enforce every rule on Base.',
   icons: { icon: '/favicon.svg' },
 }
 

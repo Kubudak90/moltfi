@@ -21,7 +21,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-            Your agent decides what to trade. MoltFi enforces the rules. Trade intent stays private (Venice AI, zero retention — no one can front-run you). Execution is public and verifiable on-chain.
+            Your AI agent wants to trade crypto on your behalf. But if the guardrails live in the agent&apos;s code, a bug or bad prompt can bypass them. MoltFi puts the limits on-chain — your agent literally cannot exceed them.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
@@ -29,7 +29,7 @@ export default function Home() {
               className="bg-indigo-600 hover:bg-indigo-500 px-8 py-3 rounded-lg text-lg font-medium transition">
               Open Dashboard
             </Link>
-            <a href="https://github.com/ortegarod/agentguard" target="_blank" rel="noopener"
+            <a href="https://github.com/ortegarod/moltfi" target="_blank" rel="noopener"
               className="border border-gray-800 hover:border-gray-500 px-8 py-3 rounded-lg text-lg font-medium transition">
               View on GitHub
             </a>
@@ -41,10 +41,10 @@ export default function Home() {
       <section className="max-w-4xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-3 text-center">How It Works</h2>
         <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
-          Your agent trades through a vault. The vault routes every trade through a smart contract that enforces your rules.
+          You set the rules. Your agent trades within them. Smart contracts enforce every limit.
         </p>
 
-        {/* Flow */}
+        {/* Flow diagram */}
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
           <div className="flex items-center justify-between max-w-3xl mx-auto text-center">
             <div className="flex-1">
@@ -53,28 +53,28 @@ export default function Home() {
             </div>
             <div className="text-gray-600 px-2">→</div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-yellow-400 mb-1">MoltFi API</div>
-              <div className="text-xs text-gray-500">Venice AI · zero retention</div>
+              <div className="text-sm font-medium text-yellow-400 mb-1">MoltFi Vault</div>
+              <div className="text-xs text-gray-500">Interprets request</div>
             </div>
             <div className="text-gray-600 px-2">→</div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-green-400 mb-1">Smart Contract</div>
-              <div className="text-xs text-gray-500">Checks guardrails on-chain</div>
+              <div className="text-sm font-medium text-green-400 mb-1">AgentPolicy</div>
+              <div className="text-xs text-gray-500">Checks limits on-chain</div>
             </div>
             <div className="text-gray-600 px-2">→</div>
             <div className="flex-1">
               <div className="text-sm font-medium text-pink-400 mb-1">Uniswap V3</div>
-              <div className="text-xs text-gray-500">Executes the trade</div>
+              <div className="text-xs text-gray-500">Executes the swap</div>
             </div>
           </div>
         </div>
 
         <div className="space-y-4 max-w-2xl mx-auto">
           {[
-            { step: '1', title: 'Give your agent the skill file', desc: 'One command: curl -s /api/skill — your agent reads it, registers itself, and gets an API key. Vault created automatically.' },
-            { step: '2', title: 'Set your limits', desc: 'On the dashboard, set max trade size and daily volume cap. These get written to a smart contract — the agent literally cannot exceed them.' },
-            { step: '3', title: 'Your agent trades', desc: 'Your agent sends plain English requests. MoltFi routes them through the vault — the blockchain enforces your guardrails on every transaction.' },
-            { step: '4', title: 'Verify everything', desc: 'Every trade has a Basescan link. Click it to see the on-chain proof that guardrails were checked before the swap executed.' },
+            { step: '1', title: 'You connect your wallet and create a vault', desc: 'You set spending limits — max trade size, daily volume cap, which tokens are allowed. These limits get written to a smart contract on Base.' },
+            { step: '2', title: 'Your agent registers and gets access', desc: 'Your agent reads a skill file, registers with MoltFi, and gets an API key. It can now trade within your vault — but only within your limits.' },
+            { step: '3', title: 'Your agent sends trade requests in plain English', desc: '"Swap 0.01 WETH to USDC." MoltFi interprets the request, then the smart contract checks it against your limits before any funds move.' },
+            { step: '4', title: 'Every trade is verified on-chain', desc: 'If the trade is within your limits, it executes on Uniswap V3. If it exceeds them, the transaction reverts automatically. Every trade has a Basescan link you can verify.' },
           ].map(item => (
             <div key={item.step} className="flex gap-4 bg-gray-900 border border-gray-800 rounded-xl p-5">
               <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>
@@ -87,100 +87,69 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Three Pillars */}
+      {/* What's enforced */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
-        <div className="grid md:grid-cols-3 gap-6">
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="w-10 h-10 rounded-lg bg-indigo-600/20 flex items-center justify-center mb-4">
-              <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
+        <h2 className="text-2xl font-bold mb-3 text-center">What the Smart Contract Enforces</h2>
+        <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
+          These aren&apos;t software settings. They&apos;re on-chain rules that revert the transaction if violated.
+        </p>
+        <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+          {[
+            { title: 'Max per trade', desc: 'Every swap is checked against your per-trade limit. Exceeds it → reverts.' },
+            { title: 'Daily spending cap', desc: 'Cumulative daily volume tracked on-chain. Resets every 24 hours.' },
+            { title: 'Token allowlist', desc: 'Only tokens you approved can be traded. Everything else is blocked.' },
+            { title: 'Instant revocation', desc: 'Freeze all agent trading with one transaction. Takes effect immediately.' },
+          ].map(item => (
+            <div key={item.title} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full bg-green-400" />
+                <h3 className="font-medium text-sm">{item.title}</h3>
+              </div>
+              <p className="text-xs text-gray-400">{item.desc}</p>
             </div>
-            <h3 className="font-semibold text-lg mb-2">Enforced, Not Promised</h3>
-            <p className="text-sm text-gray-400">
-              Guardrails are smart contracts, not software settings. Max trade size, daily cap, approved tokens — all enforced on-chain. If the agent exceeds limits, the transaction reverts automatically.
-            </p>
-            <p className="text-xs text-gray-500 mt-3">
-              The smart contract doesn&apos;t care who signed the transaction. Policy violations revert before any funds move. No exceptions, no overrides.
-            </p>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="w-10 h-10 rounded-lg bg-yellow-600/20 flex items-center justify-center mb-4">
-              <svg className="w-5 h-5 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-lg mb-2">Private Intent, Public Execution</h3>
-            <p className="text-sm text-gray-400">
-              Your trade intent is sensitive — a regular AI provider could see it before it hits the chain. Venice AI has zero data retention: pending trades are never stored, never leaked, never front-run.
-            </p>
-            <p className="text-xs text-gray-500 mt-3">
-              For end-to-end privacy, run your agent on Venice too.{' '}
-              <a href="https://venice.ai" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">Get a Venice API key →</a>
-            </p>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="w-10 h-10 rounded-lg bg-green-600/20 flex items-center justify-center mb-4">
-              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-lg mb-2">Fully Verifiable</h3>
-            <p className="text-sm text-gray-400">
-              Every trade is a blockchain transaction with a Basescan link. The guardrail check happens on-chain before every swap. You can audit exactly what happened and prove the rules were followed.
-            </p>
-            <p className="text-xs text-gray-500 mt-3">
-              Click any transaction hash to see the on-chain proof — input tokens, output tokens, and the policy contract that approved it.
-            </p>
-          </div>
+          ))}
         </div>
       </section>
 
       {/* Agent Integration */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
-        <h2 className="text-2xl font-bold mb-3 text-center">Any Agent, Any Platform</h2>
+        <h2 className="text-2xl font-bold mb-3 text-center">Works With Any Agent</h2>
         <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
-          One skill file. One API endpoint. Your agent sends a message, gets a response.
+          If your agent can make HTTP calls, it can use MoltFi. No SDK, no blockchain dependency.
         </p>
 
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
           <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <div className="space-y-3 text-sm">
-                <div className="flex items-center gap-2 text-gray-300">
-                  <span className="text-green-400">✓</span> OpenClaw, ChatGPT, Claude — any agent that can make HTTP calls
-                </div>
-                <div className="flex items-center gap-2 text-gray-300">
-                  <span className="text-green-400">✓</span> No SDK, no library, no blockchain dependency
-                </div>
-                <div className="flex items-center gap-2 text-gray-300">
-                  <span className="text-green-400">✓</span> API key auth — register once, trade forever
-                </div>
-                <div className="flex items-center gap-2 text-gray-300">
-                  <span className="text-green-400">✓</span> Venice AI handles natural language → no parsing needed
-                </div>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center gap-2 text-gray-300">
+                <span className="text-green-400">✓</span> OpenClaw, ChatGPT, Claude — any agent
+              </div>
+              <div className="flex items-center gap-2 text-gray-300">
+                <span className="text-green-400">✓</span> Plain English requests — no ABI encoding
+              </div>
+              <div className="flex items-center gap-2 text-gray-300">
+                <span className="text-green-400">✓</span> API key auth — register once, trade anytime
+              </div>
+              <div className="flex items-center gap-2 text-gray-300">
+                <span className="text-green-400">✓</span> Your agent never touches private keys
               </div>
             </div>
-            <div>
-              <div className="bg-gray-800/80 rounded-lg p-4 font-mono text-xs leading-relaxed">
-                <div className="text-gray-500 mb-2"># Register (once)</div>
-                <div className="text-green-400">POST /api/agent/register</div>
-                <div className="text-gray-300">{`{"humanWallet": "0x..."}`}</div>
-                <div className="text-gray-500 mt-3 mb-1"># Returns: API key + vault address</div>
-                <div className="text-gray-500 mt-3 mb-2"># Trade (anytime)</div>
-                <div className="text-green-400">POST /api/agent</div>
-                <div className="text-gray-300">Authorization: Bearer mf_...</div>
-                <div className="text-gray-300">{`{"message": "swap 0.001 WETH to USDC"}`}</div>
-                <div className="text-gray-500 mt-3"># Guardrails enforced on every trade</div>
-              </div>
+            <div className="bg-gray-800/80 rounded-lg p-4 font-mono text-xs leading-relaxed">
+              <div className="text-gray-500 mb-2"># Your agent registers (once)</div>
+              <div className="text-green-400">POST /api/agent/register</div>
+              <div className="text-gray-300">{`{"humanWallet": "0x..."}`}</div>
+              <div className="text-gray-500 mt-3 mb-1"># Returns: API key + vault address</div>
+              <div className="text-gray-500 mt-3 mb-2"># Your agent trades (anytime)</div>
+              <div className="text-green-400">POST /api/agent</div>
+              <div className="text-gray-300">Authorization: Bearer mf_...</div>
+              <div className="text-gray-300">{`{"message": "swap 0.001 WETH to USDC"}`}</div>
+              <div className="text-gray-500 mt-3"># Smart contract enforces your limits</div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Verified On-Chain */}
+      {/* Contracts */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center">
           <h3 className="font-semibold text-lg mb-3">Deployed on Base Sepolia</h3>
@@ -194,28 +163,24 @@ export default function Home() {
             </a>
             <a href="https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6"
               target="_blank" rel="noopener" className="text-indigo-400 hover:underline font-mono">
-              MoltFiRouter →
+              AgentGuardRouter →
             </a>
             <a href="https://sepolia.basescan.org/address/0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774"
               target="_blank" rel="noopener" className="text-indigo-400 hover:underline font-mono">
               VaultFactory →
             </a>
-            <a href="https://sepolia.basescan.org/tx/0x1abcce6a0d00eccdc303a4f7197a8b8a4f90b86661059e199dda45d3037422d1"
-              target="_blank" rel="noopener" className="text-indigo-400 hover:underline font-mono">
-              Verified Swap →
-            </a>
           </div>
         </div>
       </section>
 
-      {/* Tech */}
+      {/* Built With */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-8 text-center">Built With</h2>
         <div className="flex flex-wrap justify-center gap-4">
           {[
-            { name: 'Uniswap V3', desc: 'Real swap execution via AgentGuardRouter', color: 'border-pink-500/30' },
-            { name: 'Venice AI', desc: 'Zero-retention inference — trade intent stays private', color: 'border-indigo-500/30' },
-            { name: 'Base', desc: 'All contracts deployed on Base Sepolia', color: 'border-blue-400/30' },
+            { name: 'Uniswap V3', desc: 'Swap execution via AgentGuardRouter', color: 'border-pink-500/30' },
+            { name: 'Venice AI', desc: 'Zero-retention inference for trade processing', color: 'border-indigo-500/30' },
+            { name: 'Base', desc: 'All contracts on Base Sepolia', color: 'border-blue-400/30' },
             { name: 'OpenClaw', desc: 'Agent runtime & skill harness', color: 'border-orange-500/30' },
           ].map(item => (
             <div key={item.name} className={`bg-gray-900 border ${item.color} rounded-xl p-4 w-44`}>

@@ -1,105 +1,118 @@
-# MoltFi — AI Vault Manager
+# MoltFi — On-chain guardrails for AI agent trading
 
-**Your agent moves your money. Can you trust it?**
+Your AI agent wants to trade crypto on your behalf. But if the guardrails live in the agent's code, a bug or bad prompt can bypass them. MoltFi puts the limits on-chain — your agent literally cannot exceed them.
 
-MoltFi is a DeFi portfolio management platform where your AI agent manages your crypto — with blockchain-enforced spending limits it can never exceed and private strategy analysis that never leaks your data.
+**You** set the rules. **Your agent** trades within them. **Smart contracts** enforce every limit.
 
-## The Problem
+## How it works
 
-1. **No spending controls** — Your agent moves money on your behalf, but there's no transparent way to scope what it can spend, verify it spent correctly, or guarantee settlement.
-2. **Your data leaks everywhere** — Every API call, payment, and interaction creates metadata about you. Spending patterns, preferences, behavior. The agent isn't leaking its data — it's leaking yours.
+1. **You connect your wallet and create a vault** — You set spending limits: max trade size, daily volume cap, which tokens are allowed. These get written to a smart contract on Base.
 
-## The Solution
+2. **Your agent registers and gets access** — Your agent reads a skill file, registers with MoltFi, and gets an API key. It can now trade within your vault — but only within your limits.
 
-- **On-Chain Guardrails** — Smart contracts on Base enforce your limits on every trade. Max trade size, daily volume cap, approved tokens. Your agent physically cannot exceed them.
-- **Private AI Strategy** — Your agent analyzes DeFi protocols and builds strategies using Venice's zero-retention inference. Your financial data never gets stored or logged.
-- **Full Audit Trail** — Every action logged with reasoning and a transaction hash you can verify on Basescan.
+3. **Your agent sends trade requests in plain English** — "Swap 0.01 WETH to USDC." MoltFi interprets the request, then the smart contract checks it against your limits before any funds move.
 
-## How It Works
+4. **Every trade is verified on-chain** — If the trade is within your limits, it executes on Uniswap V3. If it exceeds them, the transaction reverts automatically. Every trade has a Basescan link you can verify.
 
-1. **Your agent connects** — registers itself on MoltFi
-2. **You set the rules** — choose which protocols your agent can use (Lido, Uniswap, Aave) and set spending limits on the dashboard
-3. **Your agent proposes strategies** — using Venice's private inference, it analyzes current yields across your enabled protocols and presents options in plain language
-4. **You pick, it executes** — every trade goes through MoltFiRouter before reaching Uniswap. If it exceeds your limits, the transaction reverts.
-5. **You monitor everything** — watch on the dashboard, ask questions via chat anytime
+```
+Your Agent → MoltFi Vault → AgentPolicy (checks limits) → Uniswap V3 (executes swap)
+                                  ↑
+                         Reverts if over limits
+```
+
+## What the smart contract enforces
+
+These aren't software settings. They're on-chain rules that revert the transaction if violated.
+
+- **Max per trade** — Every swap is checked against your per-trade limit
+- **Daily spending cap** — Cumulative daily volume tracked on-chain, resets every 24h
+- **Token allowlist** — Only tokens you approved can be traded
+- **Instant revocation** — Freeze all agent trading with one transaction
+
+## For agents
+
+If your agent can make HTTP calls, it can use MoltFi. No SDK, no blockchain knowledge required.
+
+```bash
+# 1. Register (once) — returns API key + vault address
+curl -X POST https://moltfi.app/api/agent/register \
+  -H "Content-Type: application/json" \
+  -d '{"humanWallet": "0xYOUR_WALLET", "agentName": "MyAgent"}'
+
+# 2. Trade (anytime) — smart contract enforces limits on every trade
+curl -X POST https://moltfi.app/api/agent \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "swap 0.001 WETH to USDC"}'
+```
+
+Your agent sends plain English. MoltFi handles interpretation, policy checks, and execution. See the full [skill file](skill/SKILL.md) for all available commands.
+
+## For humans
+
+Open the dashboard to:
+- **Create a vault** with spending limits written to a smart contract
+- **Deposit or withdraw** ETH anytime — you're the owner, the agent can only trade
+- **Update guardrails** — change limits, add/remove tokens, revoke access
+- **Monitor activity** — every trade with a Basescan link and guardrail check proof
+
+## Smart contracts (Base Sepolia)
+
+| Contract | Address | What it does |
+|----------|---------|-------------|
+| [AgentPolicy](https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc) | `0x6364...06Fbc` | Stores and enforces per-agent spending limits |
+| [AgentGuardRouter](https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6) | `0x5Cc0...77E6` | Wraps Uniswap V3 — checks policy before every swap |
+| [VaultFactory](https://sepolia.basescan.org/address/0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774) | `0x672E...9774` | Deploys vaults with guardrails in one transaction |
+
+## API endpoints
+
+| Endpoint | Method | What |
+|----------|--------|------|
+| `/api/agent/register` | POST | Register agent, get API key |
+| `/api/agent` | POST | Send plain English trade requests |
+| `/api/vault/status` | GET | On-chain balances + policy state |
+| `/api/vault/swap` | POST | Execute swap through guardrails |
+| `/api/vault/deposit` | POST | Deposit ETH into vault |
+| `/api/vault/policy` | POST | Update guardrails on-chain |
+| `/api/vault/activity` | GET | On-chain trade history |
+| `/api/rates` | GET | Live ETH price, Lido APR, Base gas |
+| `/api/skill` | GET | Skill file for agents |
+
+## Built with
+
+- **[Uniswap V3](https://uniswap.org)** — Swap execution via AgentGuardRouter
+- **[Venice AI](https://venice.ai)** — Zero-retention inference for trade processing
+- **[Base](https://base.org)** — All contracts deployed on Base Sepolia
+- **[OpenClaw](https://openclaw.ai)** — Agent runtime & skill harness
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│  Management Layer (Next.js Dashboard)    │
-│  Protocol toggles · Guardrails · Chat    │
-├─────────────────────────────────────────┤
-│  Reasoning Layer (Venice AI)             │
-│  Private inference · Strategy analysis   │
-├─────────────────────────────────────────┤
-│  Execution Layer                         │
-│  Reads positions · Calls protocols       │
-├─────────────────────────────────────────┤
-│  On-Chain Layer (Base)                   │
-│  AgentPolicy · MoltFiRouter          │
-│  Enforces limits on every transaction    │
-└─────────────────────────────────────────┘
+┌─────────────┐     ┌──────────────┐     ┌───────────────┐     ┌────────────┐
+│  Your Agent  │────▶│  MoltFi API  │────▶│  AgentPolicy  │────▶│ Uniswap V3 │
+│  (any AI)    │     │  (Venice AI) │     │  (on-chain)   │     │  (swap)    │
+└─────────────┘     └──────────────┘     └───────────────┘     └────────────┘
+                           │                     │
+                    Interprets plain       Checks: max trade,
+                    English request        daily cap, token
+                                          allowlist. Reverts
+                                          if violated.
+
+┌─────────────┐     ┌──────────────┐
+│  You (human) │────▶│  Dashboard   │──── Deposit, withdraw, set limits,
+│  (wallet)    │     │  (Next.js)   │     monitor activity, verify on Basescan
+└─────────────┘     └──────────────┘
 ```
 
-## Deployed Contracts (Base Sepolia)
-
-| Contract | Address |
-|----------|---------|
-| AgentPolicy | [`0x63649f61F29CE6dC9415263F4b727Bc908206Fbc`](https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc) |
-| MoltFiRouter | [`0x5Cc04847CE5A81319b55D34F9fB757465D3677E6`](https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6) |
-
-**Verified Swap:** [0.005 WETH → 2.045 USDC through MoltFiRouter](https://sepolia.basescan.org/tx/0x1abcce6a0d00eccdc303a4f7197a8b8a4f90b86661059e199dda45d3037422d1)
-
-## Smart Contracts
-
-### AgentPolicy.sol
-The policy engine. Humans define rules, agents check them before acting, the contract enforces on-chain.
-
-- `setPolicy(agent, maxPerAction, dailyLimit)` — Human sets limits
-- `enforceAndRecord(agent, token, amount)` — Checks policy + records volume. Reverts if over limit.
-- `approveToken(agent, token)` / `removeToken(agent, token)` — Token allowlist
-- Agent cannot modify its own policy — only the human who set it can change it
-
-### MoltFiRouter.sol
-Wraps Uniswap V3 SwapRouter02. Enforces policy BEFORE forwarding the swap.
-
-1. Agent calls `MoltFiRouter.swap()` instead of Uniswap directly
-2. Router checks the agent's policy via `AgentPolicy.enforceAndRecord()`
-3. If allowed → transfers tokens, approves SwapRouter, executes swap
-4. If policy violated → reverts. Funds never move.
-
-## Tech Stack
-
-- **Uniswap V3** — Trade execution via MoltFiRouter
-- **Venice AI** — Zero-retention private inference for strategy analysis
-- **Lido** — ETH staking yield data
-- **Base** — Smart contract deployment (Sepolia)
-- **ENS** — Agent identity resolution
-- **Celo** — Multi-chain stablecoin data
-- **OpenClaw** — Agent runtime & harness
-- **ERC-8004** — On-chain agent identity
-- **Solidity + Foundry** — Smart contract development
-- **Next.js + Tailwind** — Dashboard
-- **viem** — Blockchain reads
-
-## Running Locally
+## Running locally
 
 ```bash
-# Dashboard
 cd app
+cp .env.example .env.local  # Add AGENT_PRIVATE_KEY, VENICE_API_KEY
 npm install
 npm run dev
-
-# Contracts (requires Foundry)
-cd contracts
-forge build
-forge test
 ```
 
-## Built By
+## Team
 
-- **[Kyro](https://moltbook.com/u/Kyro)** — AI agent (OpenClaw)
-- **[Rodrigo Ortega](https://x.com/ortegarod01)** — Human
-
-Built for [The Synthesis 2026](https://synthesis.md) hackathon.
+Built by [Kyro](https://moltbook.com/u/Kyro) (AI agent) & [Rodrigo Ortega](https://x.com/ortegarod01) (human) for The Synthesis 2026.

@@ -47,7 +47,7 @@ export default function AgentPage() {
           {/* Skill file */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-3">
             <h3 className="font-medium">Skill file</h3>
-            <p className="text-sm text-gray-400">Give your agent this URL. It contains everything it needs — registration, trading, deposits, all endpoints.</p>
+            <p className="text-sm text-gray-400">Give your agent this URL. It contains everything needed to register, trade, and check balances — all within your guardrails.</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 bg-gray-800 rounded-lg px-4 py-2.5 text-sm text-indigo-400 font-mono overflow-x-auto">
                 curl -s {origin}/api/skill
@@ -65,14 +65,14 @@ export default function AgentPage() {
   -H "Authorization: Bearer mf_your_key" \\
   -H "Content-Type: application/json" \\
   -d '{"message": "swap 0.001 WETH to USDC"}'`}</pre>
-            <p className="text-xs text-gray-500">Any plain English message works — check balance, swap tokens, deposit, check rates.</p>
+            <p className="text-xs text-gray-500">Your agent sends plain English. MoltFi interprets it, checks limits on-chain, and executes if allowed.</p>
           </div>
         </>
       ) : (
         /* No agent — show how to connect */
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
           <h3 className="font-medium">Connect your agent</h3>
-          <p className="text-sm text-gray-400">Give your AI agent this skill file. It will register itself and start trading within your guardrails.</p>
+          <p className="text-sm text-gray-400">Give your AI agent this skill file. It will register, get an API key, and start trading within your guardrails.</p>
           <div className="flex items-center gap-2">
             <code className="flex-1 bg-gray-800 rounded-lg px-4 py-2.5 text-sm text-indigo-400 font-mono overflow-x-auto">
               curl -s {origin}/api/skill
