@@ -257,18 +257,15 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-gray-800/50 rounded-lg p-5">
-                <div className="text-xs text-gray-500 mb-1">WETH Balance</div>
-                <div className="text-2xl font-bold">{vaultData?.balances?.WETH || '0'}</div>
-                {ethPrice && vaultData?.balances?.WETH && (
-                  <div className="text-xs text-gray-500 mt-1">≈ ${(parseFloat(vaultData.balances.WETH) * ethPrice).toFixed(2)}</div>
-                )}
-              </div>
-              <div className="bg-gray-800/50 rounded-lg p-5">
-                <div className="text-xs text-gray-500 mb-1">USDC Balance</div>
-                <div className="text-2xl font-bold">{vaultData?.balances?.USDC || '0'}</div>
-              </div>
+            <div className="bg-gray-800/50 rounded-lg p-5 mb-6">
+              <div className="text-xs text-gray-500 mb-1">WETH Balance</div>
+              <div className="text-2xl font-bold">{vaultData?.balances?.WETH || '0'}</div>
+              {ethPrice && vaultData?.balances?.WETH && (
+                <div className="text-xs text-gray-500 mt-1">≈ ${(parseFloat(vaultData.balances.WETH) * ethPrice).toFixed(2)}</div>
+              )}
+              {parseFloat(vaultData?.balances?.USDC || '0') > 0 && (
+                <div className="text-xs text-gray-500 mt-1">+ {vaultData?.balances?.USDC} USDC</div>
+              )}
             </div>
 
             {/* Deposit & Withdraw */}
