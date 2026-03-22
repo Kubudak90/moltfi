@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readFileSync } from 'fs'
-import { lookupByApiKey, updateVault } from './register/route'
+import { lookupByApiKey, updateVault } from '../../../lib/agents'
 
 export const dynamic = 'force-dynamic'
 export const maxDuration = 120

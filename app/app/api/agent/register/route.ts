@@ -1,62 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
-import { join } from 'path'
-import { randomBytes } from 'crypto'
-import { privateKeyToAccount } from 'viem/accounts'
-
-const DB_PATH = join(process.cwd(), 'data', 'agents.json')
-
-// Derive the agent wallet address from the server's private key
-function getAgentWallet(): string {
-  const pk = process.env.AGENT_PRIVATE_KEY
-  if (!pk) return ''
-  return privateKeyToAccount(pk as `0x${string}`).address
-}
-
-interface AgentRegistration {
-  apiKey: string
-  humanWallet: string
-  agentWallet: string
-  vault: string
-  agentName: string
-  platform: string
-  registeredAt: string
-}
-
-function loadAgents(): AgentRegistration[] {
-  try {
-    if (existsSync(DB_PATH)) {
-      return JSON.parse(readFileSync(DB_PATH, 'utf-8'))
-    }
-  } catch {}
-  return []
-}
-
-function saveAgents(agents: AgentRegistration[]) {
-  const dir = join(process.cwd(), 'data')
-  if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
-  writeFileSync(DB_PATH, JSON.stringify(agents, null, 2))
-}
-
-function generateApiKey(): string {
-  return 'mf_' + randomBytes(24).toString('hex')
-}
-
-// Look up agent by API key — used by /api/agent
-export function lookupByApiKey(apiKey: string): AgentRegistration | null {
-  const agents = loadAgents()
-  return agents.find(a => a.apiKey === apiKey) || null
-}
-
-// Update vault address for a registration
-export function updateVault(apiKey: string, vault: string) {
-  const agents = loadAgents()
-  const agent = agents.find(a => a.apiKey === apiKey)
-  if (agent) {
-    agent.vault = vault
-    saveAgents(agents)
-  }
-}
+import { loadAgents, saveAgents, generateApiKey, getAgentWallet } from '../../../../lib/agents'
+import type { AgentRegistration } from '../../../../lib/agents'
 
 export async function POST(req: NextRequest) {
   try {
@@ -105,7 +49,6 @@ export async function POST(req: NextRequest) {
         body: JSON.stringify({ maxPerTrade: '0.5', dailyLimit: '1' }),
       })
       const createData = await createRes.json()
-      // Works whether vault is new or already exists
       if (createData.vault) {
         vault = createData.vault
       }
