@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       swap: { tokenIn: tokenIn.toUpperCase(), tokenOut: tokenOut.toUpperCase(), amount },
       vault,
       explorer: `https://sepolia.basescan.org/tx/${hash}`,
-      note: 'Swap executed through AgentGuardRouter — policy was checked on-chain before execution.',
+      note: 'Swap executed through ClawFiRouter — policy was checked on-chain before execution.',
     })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })

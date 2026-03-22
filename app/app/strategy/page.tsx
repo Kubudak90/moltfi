@@ -126,7 +126,7 @@ export default function StrategyPage() {
         headers: { 'Content-Type': 'application/json' },
         signal: controller.signal,
         body: JSON.stringify({ messages: [{ role: 'user',
-          content: `You are an autonomous AI DeFi agent for AgentGuard on Base. The user has a vault with ${balance} WETH and ${usdcBalance} USDC. Current data: ETH price ${ep}, Lido stETH APR ${lidoApr}.
+          content: `You are an autonomous AI DeFi agent for ClawFi on Base. The user has a vault with ${balance} WETH and ${usdcBalance} USDC. Current data: ETH price ${ep}, Lido stETH APR ${lidoApr}.
 
 Available protocols: Lido (ETH staking via stETH), Uniswap V3 (token swaps). Only these two — do not reference any other protocols.
 

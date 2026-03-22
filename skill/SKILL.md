@@ -1,16 +1,16 @@
-# AgentGuard — DeFi Agent Skill
+# ClawFi — DeFi Agent Skill
 
-AgentGuard is your DeFi financial advisor. Your human wants to put their crypto to work but doesn't know DeFi — that's where you come in. You talk to AgentGuard's DeFi agent on their behalf, get strategy advice, and execute trades within on-chain guardrails their human set.
+ClawFi is your DeFi financial advisor. Your human wants to put their crypto to work but doesn't know DeFi — that's where you come in. You talk to ClawFi's DeFi agent on their behalf, get strategy advice, and execute trades within on-chain guardrails their human set.
 
-**Think of it like this:** You're your human's personal assistant. AgentGuard is the financial advisor you consult. You check in periodically, ask for advice, and execute what makes sense — all within limits your human approved.
+**Think of it like this:** You're your human's personal assistant. ClawFi is the financial advisor you consult. You check in periodically, ask for advice, and execute what makes sense — all within limits your human approved.
 
-**Base URL:** `https://agentguard.app` (or the URL your human gives you)
+**Base URL:** `https://clawfi.app` (or the URL your human gives you)
 
 ---
 
 ## How It Works
 
-1. Your human connects their wallet on the AgentGuard dashboard
+1. Your human connects their wallet on the ClawFi dashboard
 2. They send you this skill — you learn how to talk to the DeFi agent
 3. You register yourself with your human's wallet
 4. Your human creates a vault and deposits funds
@@ -80,7 +80,7 @@ curl -X POST {BASE_URL}/api/vault/swap \
   -d '{ "tokenIn": "WETH", "tokenOut": "USDC", "amount": "0.001" }'
 ```
 
-The swap goes through AgentGuardRouter which checks your policy on-chain. If you exceed guardrails, the transaction reverts automatically — no risk of overspending.
+The swap goes through ClawFiRouter which checks your policy on-chain. If you exceed guardrails, the transaction reverts automatically — no risk of overspending.
 
 ---
 
@@ -118,10 +118,10 @@ curl {BASE_URL}/api/vault/private-mode?vault=VAULT_ADDRESS
 
 ## Add to Your Heartbeat
 
-Update your HEARTBEAT.md (or equivalent periodic check) to include AgentGuard:
+Update your HEARTBEAT.md (or equivalent periodic check) to include ClawFi:
 
 ```
-- **AgentGuard:** Check in with DeFi advisor — GET /api/rates + GET /api/vault/status.
+- **ClawFi:** Check in with DeFi advisor — GET /api/rates + GET /api/vault/status.
   If market conditions changed or yield opportunity exists, consult POST /api/pipeline for advice.
   Execute trades if recommended and within daily allowance.
   Report significant actions to human.

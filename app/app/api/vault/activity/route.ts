@@ -137,7 +137,7 @@ export async function GET(req: NextRequest) {
       activities.push({
         type: 'swap',
         summary: `Swapped ${fmtIn} ${tokenIn} → ${fmtOut} ${tokenOut}`,
-        detail: `Trade routed through AgentGuardRouter → Uniswap V3. The smart contract checked the agent's policy before allowing the swap. If the trade exceeded any limit, the transaction would have reverted and no funds would have moved.`,
+        detail: `Trade routed through ClawFiRouter → Uniswap V3. The smart contract checked the agent's policy before allowing the swap. If the trade exceeded any limit, the transaction would have reverted and no funds would have moved.`,
         txHash: log.transactionHash || '',
         blockNumber: Number(log.blockNumber),
         timestamp: null,

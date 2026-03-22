@@ -19,7 +19,7 @@ export default function ChatPage() {
 
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
 
-  const systemContext = `You are AgentGuard's DeFi Agent — a financial advisor that specializes in DeFi. You're powered by Venice AI with zero data retention.
+  const systemContext = `You are ClawFi's DeFi Agent — a financial advisor that specializes in DeFi. You're powered by Venice AI with zero data retention.
 
 You serve two roles:
 1. When an AI agent calls you through the API, you advise on trades and strategy — agent to agent.
@@ -34,7 +34,7 @@ Current vault data:
 Available protocols: Uniswap V3 (swaps), Lido (staking). Only these two.
 
 Be concise, plain English, no jargon. The human may not know DeFi.
-If they ask how the agent-to-agent flow works: their personal AI agent (on OpenClaw or any platform) installs the AgentGuard skill, then periodically consults you for advice and executes trades through the vault — all within on-chain guardrails the human set.`
+If they ask how the agent-to-agent flow works: their personal AI agent (on OpenClaw or any platform) installs the ClawFi skill, then periodically consults you for advice and executes trades through the vault — all within on-chain guardrails the human set.`
 
   // Handle strategy context from URL params
   useEffect(() => {
@@ -166,7 +166,7 @@ If they ask how the agent-to-agent flow works: their personal AI agent (on OpenC
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-indigo-400 font-bold shrink-0">2.</span>
-                <span>Your agent reads the AgentGuard skill and knows how to consult our DeFi advisor</span>
+                <span>Your agent reads the ClawFi skill and knows how to consult our DeFi advisor</span>
               </div>
               <div className="flex items-start gap-3">
                 <span className="text-indigo-400 font-bold shrink-0">3.</span>
@@ -186,7 +186,7 @@ If they ask how the agent-to-agent flow works: their personal AI agent (on OpenC
           {/* Skill file */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <h3 className="font-semibold mb-2">Send this to your agent</h3>
-            <p className="text-sm text-gray-500 mb-4">Your agent reads this skill file and instantly knows how to use AgentGuard — register, check markets, execute trades, add to heartbeat.</p>
+            <p className="text-sm text-gray-500 mb-4">Your agent reads this skill file and instantly knows how to use ClawFi — register, check markets, execute trades, add to heartbeat.</p>
             <div className="bg-gray-950 rounded-lg p-4 font-mono text-sm text-gray-300 relative group">
               <div className="break-all">{baseUrl}/api/skill</div>
               <button onClick={() => { navigator.clipboard.writeText(`${baseUrl}/api/skill`); }}
@@ -202,8 +202,8 @@ If they ask how the agent-to-agent flow works: their personal AI agent (on OpenC
             <h3 className="font-semibold mb-2">OpenClaw quick setup</h3>
             <p className="text-sm text-gray-500 mb-4">Tell your OpenClaw agent:</p>
             <div className="bg-gray-950 rounded-lg p-4 text-sm text-gray-300 relative group">
-              <div className="italic">&quot;Read the AgentGuard skill at {baseUrl}/api/skill and register with my wallet {address ? address : 'YOUR_WALLET'}. Then add AgentGuard check-ins to your heartbeat.&quot;</div>
-              <button onClick={() => { navigator.clipboard.writeText(`Read the AgentGuard skill at ${baseUrl}/api/skill and register with my wallet ${address || 'YOUR_WALLET'}. Then add AgentGuard check-ins to your heartbeat.`); }}
+              <div className="italic">&quot;Read the ClawFi skill at {baseUrl}/api/skill and register with my wallet {address ? address : 'YOUR_WALLET'}. Then add ClawFi check-ins to your heartbeat.&quot;</div>
+              <button onClick={() => { navigator.clipboard.writeText(`Read the ClawFi skill at ${baseUrl}/api/skill and register with my wallet ${address || 'YOUR_WALLET'}. Then add ClawFi check-ins to your heartbeat.`); }}
                 className="absolute top-2 right-2 bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white px-2 py-1 rounded text-xs transition opacity-0 group-hover:opacity-100">
                 Copy
               </button>
