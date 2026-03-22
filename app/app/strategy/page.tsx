@@ -277,11 +277,27 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
       {/* Strategy cards */}
       {!active && strategies.length > 0 && (
         <div className="space-y-4">
-          {/* Generated timestamp */}
+          {/* Generated timestamp + privacy tooltip */}
           <div className="flex items-center justify-between text-xs text-gray-600">
-            <span>
-              {generatedAt ? `Generated ${timeAgo(generatedAt)}` : 'Cached strategies'}
-            </span>
+            <div className="flex items-center gap-2">
+              <span>
+                {generatedAt ? `Generated ${timeAgo(generatedAt)}` : 'Cached strategies'}
+              </span>
+              <div className="relative group">
+                <div className="w-4 h-4 rounded-full border border-gray-600 flex items-center justify-center cursor-help text-[10px] text-gray-500 hover:border-purple-400 hover:text-purple-400 transition">?</div>
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                    <div>
+                      <strong className="text-purple-300">Your strategies stay private.</strong> We don&apos;t store them on our servers — they&apos;re cached in your browser only. Venice AI generates them with zero data retention, so your portfolio details and trading strategies are never saved or accessible to anyone. Not even us.
+                    </div>
+                  </div>
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px w-2 h-2 bg-gray-800 border-r border-b border-gray-700 rotate-45" />
+                </div>
+              </div>
+            </div>
             <button onClick={generate} disabled={generating}
               className="text-gray-500 hover:text-gray-300 transition flex items-center gap-1">
               <svg className={`w-3.5 h-3.5 ${generating ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
