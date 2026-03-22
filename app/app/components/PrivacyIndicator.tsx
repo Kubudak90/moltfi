@@ -59,21 +59,19 @@ export function PrivacyIndicator() {
           <div className="space-y-3 text-xs text-gray-400">
             {privateMode ? (
               <>
-                <p className="text-gray-300">
-                  The server checks <code className="text-indigo-400 bg-gray-800 px-1 rounded">data/private-mode.json</code> on every AI request. When enabled, only Venice AI is called. If Venice is unreachable, the request fails with a 503 — it never falls back to another provider.
+                <p className="text-gray-300 mb-2">
+                  When your agent asks for strategy advice, only Venice AI can answer. Venice doesn&apos;t save your conversations or use them for training — when the response is sent, the data is gone.
                 </p>
-                <div className="flex items-start gap-2">
-                  <span className="text-green-400 mt-0.5">✓</span>
-                  <div>
-                    <span className="text-gray-300 font-medium">Venice: zero data retention</span>
-                    <p className="mt-0.5">Per <a href="https://venice.ai/privacy" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">Venice&apos;s privacy policy</a> — requests are not logged or used for training.</p>
-                  </div>
-                </div>
-                <p className="text-gray-600">Note: vault balances and trades are public blockchain data. Privacy applies to AI analysis and strategy reasoning only.</p>
+                <p className="text-gray-300 mb-2">
+                  If Venice goes down, the request fails rather than quietly switching to another provider.
+                </p>
+                <p className="text-gray-500">
+                  Your trades are still on a public blockchain — private mode protects the AI thinking behind them, not the trades themselves.
+                </p>
               </>
             ) : (
               <p className="text-gray-300">
-                AI requests can use any available provider. Enable Private Mode on the <a href="/guardrails" className="text-indigo-400 hover:underline">Guardrails page</a> to restrict all inference to Venice AI.
+                Your agent can use any AI provider for strategy advice. Turn on Private Mode in <a href="/guardrails" className="text-indigo-400 hover:underline">Guardrails</a> to lock it to Venice AI only.
               </p>
             )}
           </div>
