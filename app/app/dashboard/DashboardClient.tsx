@@ -205,63 +205,23 @@ export default function DashboardClient() {
               const weth = parseFloat(vaultData?.balances?.WETH || '0')
               const usdc = parseFloat(vaultData?.balances?.USDC || '0')
               const eth = parseFloat(vaultData?.balances?.ETH || '0')
-              const price = ethPrice || perf?.portfolio?.ethPrice || 0
+              const price = ethPrice || 0
               const totalEth = eth + weth
               const totalUsd = price ? (totalEth * price + usdc) : 0
-              const returnPct = perf?.performance?.returnPct ? parseFloat(perf.performance.returnPct) : null
-              const hasEnoughHistory = perf?.performance?.annualizedReturn != null
-              const tradeCount = perf?.performance?.tradeCount || 0
 
               return (
                 <div className="space-y-4">
-                  {/* Top row: ETH price, Lido rate, your return */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-gray-800/50 rounded-lg p-3">
-                      <div className="text-xs text-gray-500 mb-1">ETH</div>
-                      <div className="text-lg font-bold">{ethPrice ? `$${ethPrice.toLocaleString()}` : '—'}</div>
-                      {rates?.prices?.eth24hChange != null && (
-                        <div className={`text-xs ${rates.prices.eth24hChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {rates.prices.eth24hChange >= 0 ? '+' : ''}{rates.prices.eth24hChange.toFixed(2)}%
+                  {/* Portfolio value — hero */}
+                  <div className="bg-gray-800/50 rounded-lg p-5">
+                    <div className="text-xs text-gray-500 mb-1">Total Balance</div>
+                    <div className="text-3xl font-bold">{totalUsd > 0 ? `$${totalUsd.toFixed(2)}` : '—'}</div>
+                    <div className="flex items-center gap-4 mt-3 text-sm">
+                      {totalEth > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 rounded-full bg-indigo-600" />
+                          <span className="text-gray-400">{totalEth.toFixed(4)} ETH</span>
                         </div>
                       )}
-                    </div>
-                    <div className="bg-gray-800/50 rounded-lg p-3">
-                      <div className="text-xs text-gray-500 mb-1">Lido APR</div>
-                      <div className="text-lg font-bold">{rates?.lido ? `${rates.lido.smaApr.toFixed(2)}%` : '—'}</div>
-                      <div className="text-xs text-gray-600">market rate</div>
-                    </div>
-                    <div className="bg-gray-800/50 rounded-lg p-3">
-                      <div className="text-xs text-gray-500 mb-1">Your Return</div>
-                      {tradeCount === 0 ? (
-                        <>
-                          <div className="text-lg font-bold text-gray-600">—</div>
-                          <div className="text-xs text-gray-600">no trades yet</div>
-                        </>
-                      ) : returnPct !== null ? (
-                        <>
-                          <div className={`text-lg font-bold ${returnPct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                            {returnPct >= 0 ? '+' : ''}{returnPct.toFixed(2)}%
-                          </div>
-                          <div className="text-xs text-gray-600">
-                            {hasEnoughHistory ? `${perf.performance.annualizedReturn}% ann.` : `${tradeCount} trade${tradeCount !== 1 ? 's' : ''}`}
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="text-lg font-bold text-gray-600">—</div>
-                          <div className="text-xs text-gray-600">{tradeCount} trade{tradeCount !== 1 ? 's' : ''}</div>
-                        </>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Portfolio value + allocation */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-sm">
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-indigo-600" />
-                        <span className="text-gray-400">{totalEth.toFixed(4)} ETH</span>
-                      </div>
                       {usdc > 0 && (
                         <div className="flex items-center gap-1.5">
                           <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -269,96 +229,63 @@ export default function DashboardClient() {
                         </div>
                       )}
                     </div>
-                    <div className="text-sm font-medium">{totalUsd > 0 ? `$${totalUsd.toFixed(2)}` : ''}</div>
                   </div>
 
-                  {/* Note about testnet pricing */}
-                  {tradeCount > 0 && (
-                    <p className="text-xs text-gray-600">
-                      Returns based on {tradeCount} trade{tradeCount !== 1 ? 's' : ''} · ${perf?.performance?.totalTraded || '0'} volume · Base Sepolia testnet (prices differ from mainnet)
-                    </p>
+                  {/* Market snapshot */}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-gray-800/50 rounded-lg p-3">
+                      <div className="text-xs text-gray-500 mb-1">ETH Price</div>
+                      <div className="text-lg font-bold">{ethPrice ? `$${ethPrice.toLocaleString()}` : '—'}</div>
+                      {rates?.prices?.eth24hChange != null && (
+                        <div className={`text-xs ${rates.prices.eth24hChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          {rates.prices.eth24hChange >= 0 ? '+' : ''}{rates.prices.eth24hChange.toFixed(2)}% 24h
+                        </div>
+                      )}
+                    </div>
+                    <div className="bg-gray-800/50 rounded-lg p-3">
+                      <div className="text-xs text-gray-500 mb-1">Lido APR</div>
+                      <div className="text-lg font-bold">{rates?.lido ? `${rates.lido.smaApr.toFixed(2)}%` : '—'}</div>
+                      <div className="text-xs text-gray-600">staking rate</div>
+                    </div>
+                  </div>
+
+                  {/* Strategy status — link to strategy page */}
+                  <div className={`rounded-lg p-3 flex items-center justify-between ${vaultData?.policy?.active ? 'bg-green-500/10 border border-green-500/20' : 'bg-yellow-500/10 border border-yellow-500/20'}`}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
+                      <span className={`text-sm font-medium ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
+                        {vaultData?.policy?.active ? 'Agent Active' : 'No Strategy Set'}
+                      </span>
+                      {vaultData?.policy?.active && (
+                        <span className="text-xs text-gray-500 ml-2">
+                          Max {vaultData.policy.maxPerAction} ETH/trade · {vaultData.policy.remaining} ETH left today
+                        </span>
+                      )}
+                    </div>
+                    <a href="/strategy" className="text-xs text-indigo-400 hover:underline">
+                      {vaultData?.policy?.active ? 'Manage →' : 'Set up →'}
+                    </a>
+                  </div>
+
+                  {/* Recent activity */}
+                  {activity.length > 0 && (
+                    <div className="pt-2">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-gray-500">Recent Activity</span>
+                        <a href="/activity" className="text-xs text-indigo-400 hover:underline">View all →</a>
+                      </div>
+                      {activity.map((a, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs py-1.5">
+                          <span className="text-gray-400">{a.summary}</span>
+                          <a href={`https://sepolia.basescan.org/tx/${a.txHash}`} target="_blank" rel="noopener"
+                            className="text-indigo-400 hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
+                        </div>
+                      ))}
+                    </div>
                   )}
                 </div>
               )
             })()}
-          </div>
-
-          {/* What your money is doing */}
-          <div className={`bg-gray-900 border rounded-xl p-5 ${vaultData?.policy?.active ? 'border-green-500/20' : 'border-yellow-500/20'}`}>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <div className={`w-2.5 h-2.5 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
-                <span className={`font-semibold ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
-                  {vaultData?.policy?.active
-                    ? 'Trading Policy Active'
-                    : 'No Active Policy'}
-                </span>
-              </div>
-              <a href="/strategy" className="text-xs text-indigo-400 hover:underline">
-                {vaultData?.policy?.active ? 'Manage →' : 'Set up strategy →'}
-              </a>
-            </div>
-
-            {vaultData?.policy?.active ? (
-              <div className="space-y-3">
-                {/* What each asset is doing */}
-                <div className="space-y-2">
-                  {parseFloat(vaultData?.balances?.WETH || '0') > 0 && (
-                    <div className="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-indigo-600" />
-                        <span className="text-sm text-gray-300">{vaultData.balances.WETH} WETH</span>
-                      </div>
-                      <span className="text-xs text-gray-500">Available to trade</span>
-                    </div>
-                  )}
-                  {parseFloat(vaultData?.balances?.ETH || '0') > 0 && (
-                    <div className="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-indigo-600" />
-                        <span className="text-sm text-gray-300">{vaultData.balances.ETH} ETH</span>
-                      </div>
-                      <span className="text-xs text-gray-500">Vault balance</span>
-                    </div>
-                  )}
-                  {parseFloat(vaultData?.balances?.USDC || '0') > 0 && (
-                    <div className="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500" />
-                        <span className="text-sm text-gray-300">{vaultData.balances.USDC} USDC</span>
-                      </div>
-                      <span className="text-xs text-gray-500">From swap</span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Guardrails summary */}
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 pt-2 border-t border-gray-800/50">
-                  <span>Max per trade: <strong className="text-gray-400">{vaultData.policy.maxPerAction} ETH</strong></span>
-                  <span>Daily limit: <strong className="text-gray-400">{vaultData.policy.dailyLimit} ETH</strong></span>
-                  <span>Used today: <strong className="text-gray-400">{vaultData.policy.dailySpent} ETH</strong></span>
-                </div>
-
-                {/* Last activity */}
-                {activity.length > 0 && (
-                  <div className="pt-2 border-t border-gray-800/50">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-gray-500">Recent activity</span>
-                      <a href="/activity" className="text-xs text-indigo-400 hover:underline">View all →</a>
-                    </div>
-                    {activity.map((a, i) => (
-                      <div key={i} className="flex items-center justify-between text-xs py-1">
-                        <span className="text-gray-400">{a.summary}</span>
-                        <a href={`https://sepolia.basescan.org/tx/${a.txHash}`} target="_blank" rel="noopener"
-                          className="text-indigo-400 hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              <p className="text-sm text-gray-500">Your vault has funds but no trading policy. The agent can&apos;t trade until you approve one on the <a href="/strategy" className="text-indigo-400 hover:underline">Strategy page</a>.</p>
-            )}
           </div>
 
           {/* Your Vault — below market data */}

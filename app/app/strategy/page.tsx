@@ -304,7 +304,7 @@ ${cachedStrategy ? `Current strategy: ${cachedStrategy.name} — ${cachedStrateg
               )}
             </div>
 
-            {cachedStrategy && (
+            {cachedStrategy ? (
               <div className="mb-5">
                 <p className="text-sm text-gray-300 mb-3">{cachedStrategy.description}</p>
                 {cachedStrategy.steps?.length > 0 && (
@@ -318,6 +318,10 @@ ${cachedStrategy ? `Current strategy: ${cachedStrategy.name} — ${cachedStrateg
                     ))}
                   </div>
                 )}
+              </div>
+            ) : (
+              <div className="mb-5">
+                <p className="text-sm text-gray-400">The agent is trading within on-chain guardrails. Generate a new strategy to update limits.</p>
               </div>
             )}
 
