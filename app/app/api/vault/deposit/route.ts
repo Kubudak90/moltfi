@@ -35,8 +35,7 @@ export async function POST(req: NextRequest) {
 
     const value = parseEther(amount.toString())
 
-    // Wrap ETH → WETH, then transfer WETH to vault
-    // This ensures the vault holds WETH (which it tracks for balances)
+    // Wrap ETH → WETH
     const wrapHash = await walletClient.sendTransaction({
       to: WETH,
       value,
@@ -44,6 +43,10 @@ export async function POST(req: NextRequest) {
     })
     await publicClient.waitForTransactionReceipt({ hash: wrapHash })
 
+    // Wait for nonce to update
+    await new Promise(r => setTimeout(r, 1000))
+
+    // Transfer WETH to vault (vault tracks WETH for balances)
     const transferHash = await walletClient.sendTransaction({
       to: WETH,
       data: encodeFunctionData({
