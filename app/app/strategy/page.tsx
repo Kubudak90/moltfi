@@ -215,6 +215,33 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] }) })
             className="text-sm text-gray-500 hover:text-gray-300 transition">Regenerate strategies</button>
         </div>
       )}
+
+      {/* How strategies work */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <h3 className="font-semibold mb-3">How Strategies Work</h3>
+        <div className="space-y-3 text-sm text-gray-400">
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">1.</span>
+            <span><strong className="text-gray-300">AI analyzes markets</strong> — Venice AI checks current ETH price, Lido staking yields, gas costs, and your vault balance. Analysis is private — zero data retention.</span>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">2.</span>
+            <span><strong className="text-gray-300">AI proposes strategies with guardrails</strong> — each strategy comes with built-in limits (max trade size, daily cap). You don&apos;t need to configure anything technical.</span>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">3.</span>
+            <span><strong className="text-gray-300">You pick one</strong> — &quot;Approve &amp; Start Agent&quot; writes the guardrails to a smart contract on Base. These limits are now on-chain.</span>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">4.</span>
+            <span><strong className="text-gray-300">Agent runs autonomously</strong> — it checks markets every 30 minutes, rebalances, and trades within your guardrails. If it tries to exceed them, the blockchain reverts the transaction.</span>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">5.</span>
+            <span><strong className="text-gray-300">Pause anytime</strong> — one click revokes the agent&apos;s policy on-chain. It can&apos;t trade until you re-enable it.</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

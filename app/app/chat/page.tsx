@@ -40,6 +40,10 @@ export default function ChatPage() {
         </div>
       </div>
 
+      <div className="bg-gray-800/30 border border-gray-800 rounded-lg px-4 py-3 mb-4 text-xs text-gray-500">
+        <strong className="text-gray-400">Private AI chat</strong> — powered by Venice with zero data retention. Your financial questions, portfolio details, and strategy discussions are never stored or used for training. Just describe what you want in plain English.
+      </div>
+
       <div className="flex-1 overflow-y-auto space-y-4 mb-4 bg-gray-900 border border-gray-800 rounded-xl p-6">
         {messages.length === 0 && (
           <div className="space-y-3 pt-8">

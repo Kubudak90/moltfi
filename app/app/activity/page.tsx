@@ -28,6 +28,25 @@ export default function ActivityPage() {
       </div>
 
       <p className="text-center text-sm text-gray-600">More activity will appear as your agent trades.</p>
+
+      {/* How activity tracking works */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <h3 className="font-semibold mb-3">How Activity Tracking Works</h3>
+        <div className="space-y-3 text-sm text-gray-400">
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">1.</span>
+            <span><strong className="text-gray-300">Every trade goes through AgentGuardRouter</strong> — the smart contract logs what was swapped, how much, and the transaction hash.</span>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">2.</span>
+            <span><strong className="text-gray-300">Policy checks happen on-chain</strong> — before each swap, the contract verifies the trade is within your guardrails. If not, it reverts. No exceptions.</span>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">3.</span>
+            <span><strong className="text-gray-300">Full audit trail on Basescan</strong> — click any transaction to see the exact details on the blockchain explorer. This can&apos;t be edited or faked.</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }

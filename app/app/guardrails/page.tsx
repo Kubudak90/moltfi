@@ -85,7 +85,32 @@ export default function GuardrailsPage() {
             </div>
           ))}
         </div>
-        <p className="text-xs text-gray-600 mt-3">Your agent can only interact with these tokens.</p>
+        <p className="text-xs text-gray-600 mt-3">Your agent can only interact with these tokens. Adding new tokens requires a contract update from the vault owner.</p>
+      </div>
+
+      {/* Why on-chain matters */}
+      <div className="bg-gray-900 border border-indigo-500/20 rounded-xl p-6">
+        <h3 className="font-semibold mb-3">Why On-Chain Guardrails Matter</h3>
+        <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-400">
+          <div>
+            <div className="font-medium text-gray-300 mb-1">Off-chain guardrails (how others do it)</div>
+            <ul className="space-y-1 text-xs">
+              <li>• Limits checked in the agent&apos;s own code</li>
+              <li>• A prompt injection or bug can bypass them</li>
+              <li>• No way for the user to verify enforcement</li>
+              <li>• Agent could modify its own limits</li>
+            </ul>
+          </div>
+          <div>
+            <div className="font-medium text-indigo-400 mb-1">On-chain guardrails (AgentGuard)</div>
+            <ul className="space-y-1 text-xs">
+              <li>• Limits enforced by smart contract on Base</li>
+              <li>• Agent can&apos;t bypass — code is immutable on-chain</li>
+              <li>• Anyone can verify by reading the contract</li>
+              <li>• Only the human wallet can change limits</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   )

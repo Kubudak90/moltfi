@@ -53,7 +53,25 @@ export default function MarketPage() {
         </div>
       </div>
 
-      <p className="text-xs text-gray-600 text-center">All data fetched live from on-chain sources and protocol APIs</p>
+      {/* How market data is used */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <h3 className="font-semibold mb-3">How Your Agent Uses This Data</h3>
+        <div className="space-y-3 text-sm text-gray-400">
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">→</span>
+            <span><strong className="text-gray-300">ETH price</strong> — decides when to swap between WETH and USDC. Drops signal buying opportunities; spikes signal taking profit.</span>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">→</span>
+            <span><strong className="text-gray-300">Lido APR</strong> — compared against other yield sources. If staking yield beats trading returns, agent may stake more ETH via Lido.</span>
+          </div>
+          <div className="flex items-start gap-3">
+            <span className="text-indigo-400 font-bold shrink-0">→</span>
+            <span><strong className="text-gray-300">Gas price</strong> — low gas means cheaper transactions. Agent waits for low gas to maximize returns on each trade.</span>
+          </div>
+        </div>
+        <p className="text-xs text-gray-600 mt-4">All data from live APIs: CoinGecko (ETH price), Lido (stETH APR), Base RPC (gas). No cached or simulated data.</p>
+      </div>
     </div>
   )
 }

@@ -126,49 +126,107 @@ export default function DashboardClient() {
 
       {/* Vault active */}
       {hasVault && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <h2 className="text-xl font-semibold">Vault</h2>
-              <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-                className="text-xs text-indigo-400 hover:underline">Basescan →</a>
-            </div>
-            {hasAgent && (
-              <div className="flex items-center gap-2 text-xs">
-                <div className="w-2 h-2 rounded-full bg-green-400" />
-                <span className="text-gray-400">{agents[0].agentName}</span>
-                <span className="text-gray-600 font-mono">{agents[0].agentWallet.slice(0, 6)}...{agents[0].agentWallet.slice(-4)}</span>
+        <>
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl font-semibold">Vault</h2>
+                <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
+                  className="text-xs text-indigo-400 hover:underline">Basescan →</a>
               </div>
-            )}
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div className="bg-gray-800/50 rounded-lg p-5">
-              <div className="text-xs text-gray-500 mb-1">WETH Balance</div>
-              <div className="text-2xl font-bold">{vaultData?.balances?.WETH || '0'}</div>
-              {ethPrice && vaultData?.balances?.WETH && (
-                <div className="text-xs text-gray-500 mt-1">≈ ${(parseFloat(vaultData.balances.WETH) * ethPrice).toFixed(2)}</div>
+              {hasAgent && (
+                <div className="flex items-center gap-2 text-xs">
+                  <div className="w-2 h-2 rounded-full bg-green-400" />
+                  <span className="text-gray-400">{agents[0].agentName}</span>
+                  <span className="text-gray-600 font-mono">{agents[0].agentWallet.slice(0, 6)}...{agents[0].agentWallet.slice(-4)}</span>
+                </div>
               )}
             </div>
-            <div className="bg-gray-800/50 rounded-lg p-5">
-              <div className="text-xs text-gray-500 mb-1">USDC Balance</div>
-              <div className="text-2xl font-bold">{vaultData?.balances?.USDC || '0'}</div>
+
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="bg-gray-800/50 rounded-lg p-5">
+                <div className="text-xs text-gray-500 mb-1">WETH Balance</div>
+                <div className="text-2xl font-bold">{vaultData?.balances?.WETH || '0'}</div>
+                {ethPrice && vaultData?.balances?.WETH && (
+                  <div className="text-xs text-gray-500 mt-1">≈ ${(parseFloat(vaultData.balances.WETH) * ethPrice).toFixed(2)}</div>
+                )}
+              </div>
+              <div className="bg-gray-800/50 rounded-lg p-5">
+                <div className="text-xs text-gray-500 mb-1">USDC Balance</div>
+                <div className="text-2xl font-bold">{vaultData?.balances?.USDC || '0'}</div>
+              </div>
+            </div>
+
+            {/* Human deposit */}
+            <div className="mb-4">
+              <div className="text-xs text-gray-500 mb-2 font-medium">Deposit from your wallet</div>
+              <div className="flex gap-3">
+                <div className="relative flex-1">
+                  <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
+                    step="0.001" min="0" placeholder="0.01"
+                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-14" />
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500">ETH</span>
+                </div>
+                <button onClick={depositETH}
+                  className="bg-indigo-600 hover:bg-indigo-500 px-6 py-2.5 rounded-lg text-sm font-medium transition">
+                  Deposit
+                </button>
+              </div>
+              <p className="text-xs text-gray-600 mt-2">Your wallet will ask to confirm. Deposited ETH becomes the vault&apos;s principal — your agent can only trade yield above this amount.</p>
             </div>
           </div>
 
-          <div className="flex gap-3">
-            <div className="relative flex-1">
-              <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
-                step="0.001" min="0" placeholder="0.01"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-14" />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500">ETH</span>
+          {/* How deposits work */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h3 className="font-semibold mb-3">How Deposits Work</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-gray-800/30 rounded-lg p-4">
+                <div className="text-sm font-medium text-indigo-400 mb-2">For Humans (you)</div>
+                <p className="text-xs text-gray-400">Use the deposit button above. Your wallet signs the transaction and ETH goes directly into the vault smart contract on Base. The vault tracks your principal — your agent can never touch the original deposit, only yield earned above it.</p>
+              </div>
+              <div className="bg-gray-800/30 rounded-lg p-4">
+                <div className="text-sm font-medium text-green-400 mb-2">For AI Agents</div>
+                <p className="text-xs text-gray-400 mb-2">Your agent deposits with a simple API call — no blockchain knowledge needed:</p>
+                <pre className="text-xs font-mono text-gray-300 bg-gray-900/80 rounded p-2 overflow-x-auto">POST /api/vault/deposit{'\n'}{JSON.stringify({ amount: "0.01" })}</pre>
+                <p className="text-xs text-gray-500 mt-2">AgentGuard signs and broadcasts the transaction. Agent gets back a TX hash and Basescan link.</p>
+              </div>
             </div>
-            <button onClick={depositETH}
-              className="bg-indigo-600 hover:bg-indigo-500 px-6 py-2.5 rounded-lg text-sm font-medium transition">
-              Deposit
-            </button>
           </div>
-        </div>
+
+          {/* What your agent can do */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h3 className="font-semibold mb-3">What Your Agent Can Do</h3>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-indigo-600/20 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-xs text-indigo-400">↔</span>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Swap tokens</div>
+                  <p className="text-xs text-gray-500">Trade WETH ↔ USDC through Uniswap, with policy enforced by AgentGuardRouter on every trade</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-blue-600/20 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-xs text-blue-400">⬆</span>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Stake ETH via Lido</div>
+                  <p className="text-xs text-gray-500">Convert ETH to stETH for ~3% APR yield. Principal is tracked — only yield above deposit can be traded</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <div className="w-6 h-6 rounded-full bg-green-600/20 flex items-center justify-center shrink-0 mt-0.5">
+                  <span className="text-xs text-green-400">◉</span>
+                </div>
+                <div>
+                  <div className="text-sm font-medium">Monitor &amp; rebalance</div>
+                  <p className="text-xs text-gray-500">Checks market conditions every 30 minutes and rebalances when profitable — all within your guardrails</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   )
