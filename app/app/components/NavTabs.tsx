@@ -6,9 +6,9 @@ import { usePathname } from 'next/navigation'
 const tabs: { href: string; label: string; badge?: string }[] = [
   { href: '/dashboard', label: 'Vault' },
   { href: '/strategy', label: 'Strategy' },
+  { href: '/guardrails', label: 'Guardrails' },
   { href: '/activity', label: 'Activity' },
   { href: '/chat', label: 'DeFi Agent', badge: 'Beta' },
-  { href: '/guardrails', label: 'Guardrails' },
 ]
 
 export function NavTabs() {
