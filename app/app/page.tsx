@@ -91,7 +91,7 @@ export default function Home() {
             <div className="text-gray-600 px-2">→</div>
             <div className="flex-1">
               <div className="text-sm font-medium text-purple-400 mb-1">DeFi Agent</div>
-              <div className="text-xs text-gray-500">Venice analysis + execution</div>
+              <div className="text-xs text-gray-500">Venice AI · zero retention</div>
             </div>
             <div className="text-gray-600 px-2">→</div>
             <div className="flex-1">
