@@ -146,30 +146,7 @@ export default function DashboardClient() {
       {/* No agent yet */}
       {!hasAgent && (() => {
         const origin = typeof window !== 'undefined' ? window.location.origin : ''
-        const skillSnippet = `# MoltFi — Connect to ${address}
-
-Your human wants you to manage their DeFi vault on Base Sepolia.
-Base URL: ${origin}
-
-## Step 1: Register
-curl -X POST ${origin}/api/agent/register \\
-  -H "Content-Type: application/json" \\
-  -d '{"agentWallet": "YOUR_WALLET", "humanWallet": "${address}", "agentName": "YOUR_NAME"}'
-
-## Step 2: Check vault status
-curl ${origin}/api/vault/status?agent=YOUR_WALLET
-
-## Step 3: Trade (swap WETH ↔ USDC within guardrails)
-curl -X POST ${origin}/api/vault/swap \\
-  -H "Content-Type: application/json" \\
-  -d '{"tokenIn": "WETH", "tokenOut": "USDC", "amount": "0.001"}'
-
-## Step 4: Get strategy suggestion
-curl -X POST ${origin}/api/strategy/generate \\
-  -H "Content-Type: application/json" \\
-  -d '{"vault": "VAULT_ADDRESS"}'
-
-Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
+        const skillSnippet = `Read this skill file and follow the instructions to manage my DeFi vault:\ncurl -s ${origin}/api/skill\n\nMy wallet: ${address}`
 
         function doCopy(text: string) {
           if (navigator.clipboard?.writeText) {
@@ -185,7 +162,7 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
         return (
           <div className="bg-gray-900 border border-yellow-500/30 rounded-xl p-8">
             <h2 className="text-xl font-bold mb-2 text-center">Connect Your Agent</h2>
-            <p className="text-gray-400 mb-6 text-center text-sm">Copy these instructions and paste them into your AI agent&apos;s chat.</p>
+            <p className="text-gray-400 mb-6 text-center text-sm">Copy this and paste it into your AI agent&apos;s chat.</p>
             <div className="bg-gray-800/50 rounded-lg p-4 relative group">
               <button onClick={() => doCopy(skillSnippet)}
                 className="absolute top-3 right-3 text-gray-500 hover:text-indigo-400 transition p-1.5 rounded-lg hover:bg-gray-700/50">
