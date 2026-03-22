@@ -36,13 +36,18 @@ export async function GET(req: NextRequest) {
       client.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [vault as `0x${string}`] }),
     ])
 
-    // Get ETH price
+    // Get ETH price — try CoinGecko, fallback to Coinbase
     let ethPrice = 0
     try {
-      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
-      const data = await res.json()
-      ethPrice = data.ethereum.usd
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', { signal: AbortSignal.timeout(5000) })
+      if (res.ok) { const data = await res.json(); ethPrice = data.ethereum?.usd || 0 }
     } catch {}
+    if (!ethPrice) {
+      try {
+        const res = await fetch('https://api.coinbase.com/v2/exchange-rates?currency=ETH', { signal: AbortSignal.timeout(5000) })
+        if (res.ok) { const data = await res.json(); ethPrice = parseFloat(data.data?.rates?.USD) || 0 }
+      } catch {}
+    }
 
     // Get Lido APR
     let lidoApr = 0
@@ -109,9 +114,13 @@ export async function GET(req: NextRequest) {
     const hoursSinceFirst = (blocksSinceFirst * 2) / 3600 // ~2s blocks on Base
     const daysSinceFirst = Math.max(hoursSinceFirst / 24, 0.01)
 
-    // Annualized return (if we have trades)
-    const annualizedReturn = totalUsd > 0 && tradingPnlUsd !== 0
-      ? (tradingPnlUsd / totalUsd) * (365 / daysSinceFirst) * 100
+    // Return calculation — don't annualize unless we have enough history
+    // Show actual P&L % for short periods, only annualize after 7+ days
+    const returnPct = totalUsd > 0 && tradingPnlUsd !== 0
+      ? (tradingPnlUsd / totalUsd) * 100
+      : null
+    const annualizedReturn = daysSinceFirst >= 7 && returnPct !== null
+      ? returnPct * (365 / daysSinceFirst)
       : null
 
     return NextResponse.json({
@@ -128,6 +137,7 @@ export async function GET(req: NextRequest) {
         totalTraded: totalTraded.toFixed(2),
         tradeCount: trades.length,
         daysSinceFirst: daysSinceFirst.toFixed(2),
+        returnPct: returnPct !== null ? returnPct.toFixed(2) : null,
         annualizedReturn: annualizedReturn !== null ? annualizedReturn.toFixed(2) : null,
       },
       benchmarks: {
