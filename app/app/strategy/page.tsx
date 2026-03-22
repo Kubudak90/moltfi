@@ -190,7 +190,28 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
             </div>
             <div>
               <div className="text-sm font-medium text-green-300 mb-1">Strategy deployed — guardrails are on-chain</div>
-              <p className="text-xs text-gray-500">Your funds are safe in your vault. The agent can only trade within the limits below — enforced by the blockchain, not by us. If it tries to exceed them, the transaction automatically fails.</p>
+              <p className="text-xs text-gray-500">Your funds are safe in your vault. The agent can only trade within the limits below — enforced by the blockchain, not by us.</p>
+            </div>
+          </div>
+
+          {/* Agent-to-agent explanation */}
+          <div className="bg-indigo-500/5 border border-indigo-500/20 rounded-xl p-5">
+            <div className="flex items-start gap-4">
+              <div className="flex items-center gap-2 shrink-0 mt-1">
+                <div className="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-xs font-bold text-indigo-400">You</div>
+                <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                <div className="w-8 h-8 rounded-full bg-purple-500/20 border border-purple-500/30 flex items-center justify-center text-xs font-bold text-purple-400">AI</div>
+                <svg className="w-4 h-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" /></svg>
+                <div className="w-8 h-8 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center text-[10px] font-bold text-green-400">DeFi</div>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-300 mb-1">Your agent consults our DeFi advisor automatically</div>
+                <p className="text-xs text-gray-500 mb-3">Your AI agent checks in with the AgentGuard DeFi advisor on each heartbeat — getting market analysis, yield opportunities, and trade recommendations. You just talk to your agent. It handles the rest.</p>
+                <a href="/chat" className="inline-flex items-center gap-1.5 text-xs text-indigo-400 hover:text-indigo-300 transition">
+                  <span>Set up your agent</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </a>
+              </div>
             </div>
           </div>
 
