@@ -159,7 +159,7 @@ export default function DashboardClient() {
                   </div>
                 )}
               </div>
-              <p className="text-xs text-gray-600 mt-2">This is your money. Only your wallet can withdraw funds or change guardrails.</p>
+              <p className="text-xs text-gray-600 mt-2">Your vault is a smart contract on Base that holds your funds. Only your wallet can withdraw or change guardrails — not even AgentGuard can touch it.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-6">
