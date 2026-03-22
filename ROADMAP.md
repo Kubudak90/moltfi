@@ -91,14 +91,16 @@ Agent → MoltFi API → AgentGuardRouter.swap()
 
 ## SPONSOR INTEGRATIONS (honest)
 
-| Sponsor | Integration | Real? |
-|---------|------------|-------|
-| Uniswap V3 | AgentGuardRouter wraps SwapRouter02, real swaps verified | ✅ |
-| Venice AI | Private inference for natural language understanding, zero retention | ✅ |
-| Lido | APR from Lido API, vault supports staking + principal tracking | ⚠️ APR real, staking not on testnet |
-| Base | All contracts on Base Sepolia | ✅ |
-| ERC-8004 | Token #34950 minted | ✅ |
-| OpenClaw | Agent runtime + harness | ✅ |
+| Sponsor | Integration | Prize Track? | Real? |
+|---------|------------|--------------|-------|
+| Uniswap V3 | AgentGuardRouter wraps SwapRouter02, real swaps verified | Up to $5,000 | ✅ |
+| Venice AI | Private inference for NLU, zero data retention | Sponsor (TBD) | ✅ |
+| Base | All contracts on Base Sepolia | Platform | ✅ |
+| OpenClaw | Agent runtime + skill harness | Sponsor | ✅ |
+
+**Removed:**
+- Lido — only fetching APR number, not real integration, no confirmed bounty, staking doesn't work on testnet
+- ERC-8004 — not integrated in the codebase
 
 ---
 

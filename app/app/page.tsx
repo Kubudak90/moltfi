@@ -215,8 +215,7 @@ export default function Home() {
           {[
             { name: 'Uniswap V3', desc: 'Real swap execution via AgentGuardRouter', color: 'border-pink-500/30' },
             { name: 'Venice AI', desc: 'Zero-retention inference — trade intent stays private', color: 'border-indigo-500/30' },
-            { name: 'Lido', desc: 'Live staking APR data for market context', color: 'border-blue-500/30' },
-            { name: 'Base', desc: 'All contracts deployed on Base', color: 'border-blue-400/30' },
+            { name: 'Base', desc: 'All contracts deployed on Base Sepolia', color: 'border-blue-400/30' },
             { name: 'OpenClaw', desc: 'Agent runtime & skill harness', color: 'border-orange-500/30' },
           ].map(item => (
             <div key={item.name} className={`bg-gray-900 border ${item.color} rounded-xl p-4 w-44`}>
