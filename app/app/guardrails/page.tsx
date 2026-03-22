@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useAccount, useWalletClient } from 'wagmi'
+import { useAccount, useWalletClient, useChainId, useSwitchChain } from 'wagmi'
 import { parseEther, encodeFunctionData } from 'viem'
+import { baseSepolia } from 'viem/chains'
 import { useAgentContext } from '../components/AgentContext'
 
 const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
@@ -33,8 +34,11 @@ function StatusBadge({ active, label }: { active: boolean; label: string }) {
 
 export default function GuardrailsPage() {
   const { address } = useAccount()
+  const chainId = useChainId()
+  const { switchChain } = useSwitchChain()
   const { data: walletClient } = useWalletClient()
   const { vaults, vaultData, hasVault, refreshVaults } = useAgentContext()
+  const wrongNetwork = chainId !== baseSepolia.id
 
   // Private Mode
   const [privateMode, setPrivateMode] = useState(false)
@@ -418,15 +422,17 @@ export default function GuardrailsPage() {
                 Discard
               </button>
               <button
-                onClick={deployChanges}
-                disabled={deploying || !walletClient}
+                onClick={wrongNetwork ? () => switchChain({ chainId: baseSepolia.id }) : deployChanges}
+                disabled={deploying || (!walletClient && !wrongNetwork)}
                 className={`px-6 py-2 text-sm font-semibold rounded-lg transition ${
-                  deploying
+                  wrongNetwork
+                    ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30'
+                    : deploying
                     ? 'bg-indigo-500/50 text-indigo-200 cursor-wait'
                     : 'bg-indigo-600 hover:bg-indigo-500 text-white'
                 }`}
               >
-                {deploying ? 'Deploying...' : 'Deploy Changes'}
+                {wrongNetwork ? 'Switch to Base Sepolia' : deploying ? 'Deploying...' : 'Deploy Changes'}
               </button>
             </div>
           </div>
