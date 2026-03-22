@@ -8,6 +8,7 @@
     "demo:guard": "npx tsx src/demo/guard-check.ts"
   },
   "dependencies": {
+    "tailwindcss": "^4.2.2",
     "viem": "^2.23.0"
   },
   "devDependencies": {

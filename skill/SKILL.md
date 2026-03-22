@@ -1,95 +1,127 @@
-# MoltFi
+# MoltFi — AI DeFi Vault Manager
 
-DeFi vault management via natural language. Your human deposits crypto, you manage it within on-chain guardrails.
-
-## Config
-
-Settings in `config.json` (same directory as this file):
-- `baseUrl` — your human's MoltFi instance URL
-- `vault` — vault contract address (your human gives you this from the dashboard)
+MoltFi manages DeFi vaults on Base with on-chain spending policy enforcement. Venice AI (private inference, zero data retention) powers all strategy and reasoning. Uniswap V3 executes trades. Smart contracts enforce limits — the agent cannot exceed them.
 
 ## Quick Start
 
-Ask your human: **"What's your MoltFi URL and vault address?"**
+### 1. Register (one time)
 
 ```bash
-cat > config.json << 'EOF'
+curl -X POST https://moltfi.app/api/agent/register \
+  -H "Content-Type: application/json" \
+  -d '{"humanWallet": "0xYOUR_WALLET", "agentName": "MyAgent"}'
+```
+
+Response includes your `apiKey` and `vault` address. Save the API key — you'll need it for every request.
+
+Registration automatically creates a vault with default policy (0.5 ETH max per trade, 1 ETH daily limit, WETH+USDC approved).
+
+### 2. Talk to MoltFi (every interaction)
+
+```bash
+curl -X POST https://moltfi.app/api/agent \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -d '{"message": "check my vault"}'
+```
+
+That's it. Send any message in plain English. MoltFi's AI agent figures out what to do.
+
+### Examples
+
+```bash
+# Check balances and policy
+{"message": "check my vault"}
+
+# Get market data
+{"message": "what are the current rates?"}
+
+# Execute a swap (policy enforced on-chain)
+{"message": "swap 0.001 WETH to USDC"}
+
+# Deposit ETH
+{"message": "deposit 0.01 ETH"}
+
+# Get strategy advice
+{"message": "what strategy should I use?"}
+
+# Ask anything
+{"message": "should I rebalance my portfolio?"}
+```
+
+### Response Format
+
+```json
 {
-  "baseUrl": "https://their-moltfi-url",
-  "vault": "0xTheirVaultAddress"
+  "reply": "Your vault holds 0.03 ETH, 0.004 WETH, 0.94 USDC...",
+  "model": "zai-org-glm-4.7",
+  "provider": "venice",
+  "dataRetention": "none",
+  "toolCalled": "check_vault"
 }
-EOF
 ```
 
-Verify:
-```bash
-scripts/moltfi.sh "check my vault"
-```
+## Bash Script
 
-## Usage
-
-Everything is natural language. Just run the script with what you want to do:
+For agents that prefer a script:
 
 ```bash
-# Check vault
-scripts/moltfi.sh "check my vault"
-scripts/moltfi.sh "what's my balance?"
+# Install
+curl -o moltfi.sh https://moltfi.app/api/skill/script
+chmod +x moltfi.sh
 
-# Check market
-scripts/moltfi.sh "what are the current rates?"
-scripts/moltfi.sh "what's ETH price?"
+# Configure
+echo '{"baseUrl": "https://moltfi.app", "apiKey": "mf_YOUR_KEY"}' > config.json
 
-# Trade
-scripts/moltfi.sh "swap 0.001 WETH to USDC"
-scripts/moltfi.sh "buy USDC with 0.01 WETH"
-
-# Stake
-scripts/moltfi.sh "stake 0.01 ETH"
-
-# Check yield
-scripts/moltfi.sh "what's my yield?"
-
-# Deposit
-scripts/moltfi.sh "deposit 0.01 ETH"
-
-# Activity
-scripts/moltfi.sh "show recent activity"
-
-# Ask the DeFi advisor anything
-scripts/moltfi.sh "should I rebalance?"
-scripts/moltfi.sh "is staking a good idea right now?"
+# Use
+./moltfi.sh "check my vault"
+./moltfi.sh "swap 0.001 WETH to USDC"
+./moltfi.sh "what strategy should I use?"
 ```
 
-If the script doesn't recognize the command, it forwards your question to the DeFi advisor (Venice AI, zero data retention).
+## How It Works
 
-## Heartbeat
+1. **You register** → vault created on Base with spending policy
+2. **You send a message** → MoltFi's AI agent (Venice, private inference) decides what to do
+3. **Agent calls tools** → check vault, get rates, swap tokens, generate strategies
+4. **Smart contracts enforce** → AgentPolicy checks every trade against limits. Exceeds limits? Transaction reverts.
+5. **You get a response** → plain English summary with Basescan links
 
-Add to your heartbeat check:
+## Architecture
 
-```bash
-scripts/moltfi.sh "check my vault"
+- **AgentPolicy** — on-chain spending limits (max per trade, daily cap). Human sets. Agent can't change.
+- **AgentGuardRouter** — wraps Uniswap V3. Checks policy before every swap.
+- **AgentVault** — holds funds. Only the agent can trade (through the router). Only the human can withdraw.
+- **Venice AI** — private inference, zero data retention. All strategy reasoning is private. All trades are public blockchain transactions.
+
+## Sponsor Tech
+
+- **Venice AI** — private strategy generation and reasoning (zero data retention)
+- **Uniswap V3** — token swaps via AgentGuardRouter (Trading API for quotes)
+- **Lido** — stETH APR data, vault supports staking (stakeETH → wstETH, principal tracking)
+- **Base** — all contracts deployed on Base Sepolia
+- **ERC-8004** — on-chain agent identity
+
+## OpenClaw Integration
+
+Add to your agent's HEARTBEAT.md for autonomous vault monitoring:
+
+```markdown
+## MoltFi Vault Check
+- Run: `moltfi.sh "check my vault and current rates"`
+- If ETH dropped >5% and holding WETH: `moltfi.sh "swap all WETH to USDC"`
+- If ETH rose >5% and holding USDC: `moltfi.sh "swap half USDC to WETH"`
 ```
 
-If the vault has an active policy and market conditions look interesting, ask the advisor:
+## Contracts (Base Sepolia)
 
-```bash
-scripts/moltfi.sh "should I make any trades?"
-```
+| Contract | Address |
+|----------|---------|
+| VaultFactory | `0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774` |
+| AgentPolicy | `0x63649f61F29CE6dC9415263F4b727Bc908206Fbc` |
+| AgentGuardRouter | `0x5Cc04847CE5A81319b55D34F9fB757465D3677E6` |
 
-## Guardrails
+## Links
 
-Your human sets these on the dashboard. They're enforced by smart contracts:
-
-- **Max trade size** — largest single trade allowed
-- **Daily volume limit** — total trading per 24h
-- **Approved tokens** — which tokens you can touch
-
-You cannot change guardrails. If you exceed them, the transaction reverts automatically.
-
-## Privacy
-
-When Private Mode is enabled on the dashboard, all AI analysis goes through Venice AI (zero data retention). Check status:
-
-```bash
-scripts/moltfi.sh "private mode status"
-```
+- Dashboard: https://moltfi.app
+- GitHub: https://github.com/ortegarod/moltfi

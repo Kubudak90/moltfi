@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { readFileSync, writeFileSync, existsSync } from 'fs'
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs'
 import { join } from 'path'
+import { randomBytes } from 'crypto'
 
 const DB_PATH = join(process.cwd(), 'data', 'agents.json')
 
 interface AgentRegistration {
+  apiKey: string
   agentWallet: string
   humanWallet: string
+  vault: string
   agentName: string
   platform: string
   registeredAt: string
@@ -23,53 +26,90 @@ function loadAgents(): AgentRegistration[] {
 
 function saveAgents(agents: AgentRegistration[]) {
   const dir = join(process.cwd(), 'data')
-  if (!existsSync(dir)) {
-    const { mkdirSync } = require('fs')
-    mkdirSync(dir, { recursive: true })
-  }
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true })
   writeFileSync(DB_PATH, JSON.stringify(agents, null, 2))
+}
+
+function generateApiKey(): string {
+  return 'mf_' + randomBytes(24).toString('hex')
+}
+
+// Look up agent by API key — used by /api/agent
+export function lookupByApiKey(apiKey: string): AgentRegistration | null {
+  const agents = loadAgents()
+  return agents.find(a => a.apiKey === apiKey) || null
+}
+
+// Update vault address for a registration
+export function updateVault(apiKey: string, vault: string) {
+  const agents = loadAgents()
+  const agent = agents.find(a => a.apiKey === apiKey)
+  if (agent) {
+    agent.vault = vault
+    saveAgents(agents)
+  }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json()
-    const { agentWallet, humanWallet, agentName, platform } = body
+    const { humanWallet, agentName, platform } = await req.json()
 
-    if (!agentWallet || !humanWallet) {
+    if (!humanWallet) {
       return NextResponse.json(
-        { error: 'agentWallet and humanWallet are required' },
+        { error: 'humanWallet is required (the wallet that owns the vault)' },
         { status: 400 }
       )
     }
 
     const agents = loadAgents()
 
-    // Check if agent already registered
+    // Check if already registered
     const existing = agents.find(
-      a => a.agentWallet.toLowerCase() === agentWallet.toLowerCase()
+      a => a.humanWallet.toLowerCase() === humanWallet.toLowerCase()
     )
 
     if (existing) {
-      // Update human wallet if changed
-      existing.humanWallet = humanWallet
-      existing.agentName = agentName || existing.agentName
+      if (agentName) existing.agentName = agentName
       saveAgents(agents)
+
       return NextResponse.json({
         registered: true,
         updated: true,
-        agentWallet: existing.agentWallet,
-        humanWallet: existing.humanWallet,
-        message: 'Agent registration updated. Tell your human to connect their wallet at the MoltFi dashboard.'
+        apiKey: existing.apiKey,
+        vault: existing.vault || null,
+        message: existing.vault
+          ? 'Already registered. Vault is ready — start trading.'
+          : 'Already registered. Say "create a vault" to get started.',
       })
     }
 
-    // New registration
+    // New registration — generate API key, then create vault
+    const apiKey = generateApiKey()
+
+    // Create or find vault on-chain
+    let vault = ''
+    try {
+      const origin = req.nextUrl.origin
+      const createRes = await fetch(`${origin}/api/vault/create`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maxPerTrade: '0.5', dailyLimit: '1' }),
+      })
+      const createData = await createRes.json()
+      // Works whether vault is new or already exists
+      if (createData.vault) {
+        vault = createData.vault
+      }
+    } catch {}
+
     const registration: AgentRegistration = {
-      agentWallet: agentWallet.toLowerCase(),
+      apiKey,
+      agentWallet: '',
       humanWallet: humanWallet.toLowerCase(),
+      vault,
       agentName: agentName || 'Unknown Agent',
       platform: platform || 'unknown',
-      registeredAt: new Date().toISOString()
+      registeredAt: new Date().toISOString(),
     }
 
     agents.push(registration)
@@ -77,35 +117,36 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       registered: true,
-      agentWallet: registration.agentWallet,
-      humanWallet: registration.humanWallet,
-      message: 'Agent registered. Tell your human to connect their wallet at the MoltFi dashboard to create a vault.'
+      apiKey,
+      vault: vault || null,
+      message: vault
+        ? `Registered and vault created at ${vault}. You can now deposit ETH and start trading. Use your API key for all requests.`
+        : 'Registered but vault creation failed. Say "create a vault" to try again.',
     }, { status: 201 })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }
 
-// Get agents for a human wallet
 export async function GET(req: NextRequest) {
   const humanWallet = req.nextUrl.searchParams.get('humanWallet')
-  const agentWallet = req.nextUrl.searchParams.get('agentWallet')
+
+  if (!humanWallet) {
+    return NextResponse.json({ error: 'Provide humanWallet query param' }, { status: 400 })
+  }
 
   const agents = loadAgents()
+  const match = agents.find(
+    a => a.humanWallet.toLowerCase() === humanWallet.toLowerCase()
+  )
 
-  if (humanWallet) {
-    const matches = agents.filter(
-      a => a.humanWallet.toLowerCase() === humanWallet.toLowerCase()
-    )
-    return NextResponse.json({ agents: matches })
+  if (!match) {
+    return NextResponse.json({ registered: false })
   }
 
-  if (agentWallet) {
-    const match = agents.find(
-      a => a.agentWallet.toLowerCase() === agentWallet.toLowerCase()
-    )
-    return NextResponse.json({ agent: match || null })
-  }
-
-  return NextResponse.json({ error: 'Provide humanWallet or agentWallet query param' }, { status: 400 })
+  return NextResponse.json({
+    registered: true,
+    vault: match.vault,
+    agentName: match.agentName,
+  })
 }

@@ -222,8 +222,6 @@ export default function Home() {
             { name: 'Venice AI', desc: 'Zero-retention private inference', color: 'border-indigo-500/30' },
             { name: 'Lido', desc: 'ETH staking yields', color: 'border-blue-500/30' },
             { name: 'Base', desc: 'Smart contract deployment', color: 'border-blue-400/30' },
-            { name: 'ENS', desc: 'Agent identity resolution', color: 'border-cyan-500/30' },
-            { name: 'Celo', desc: 'Multi-chain stablecoin data', color: 'border-green-500/30' },
             { name: 'OpenClaw', desc: 'Agent runtime & harness', color: 'border-orange-500/30' },
             { name: 'ERC-8004', desc: 'On-chain agent identity', color: 'border-yellow-500/30' },
           ].map(item => (
