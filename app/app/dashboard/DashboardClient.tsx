@@ -18,6 +18,8 @@ const factoryAbi = [
 
 const vaultAbi = [
   { name: 'depositETH', type: 'function', stateMutability: 'payable', inputs: [], outputs: [] },
+  { name: 'withdrawETH', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'amount', type: 'uint256' }], outputs: [] },
+  { name: 'withdrawToken', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'token', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [] },
 ] as const
 
 export default function DashboardClient() {
@@ -25,6 +27,8 @@ export default function DashboardClient() {
   const { switchChain } = useSwitchChain()
   const { agents, vaults, vaultData, hasAgent, hasVault, ethPrice, rates, refreshVaults } = useAgentContext()
   const [depositAmount, setDepositAmount] = useState('0.01')
+  const [withdrawToken, setWithdrawToken] = useState<'ETH'|'WETH'|'USDC'>('ETH')
+  const [withdrawAmount, setWithdrawAmount] = useState('')
   const [txStatus, setTxStatus] = useState('')
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
@@ -75,6 +79,22 @@ export default function DashboardClient() {
     setTxStatus('Depositing ETH...')
     writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'depositETH',
       value: parseEther(depositAmount), chain: baseSepolia })
+  }
+
+  const withdraw = async () => {
+    if (!vaults[0] || !withdrawAmount) return
+    if (!(await ensureNetwork())) return
+    setTxStatus(`Withdrawing ${withdrawToken}...`)
+    if (withdrawToken === 'ETH') {
+      writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdrawETH',
+        args: [parseEther(withdrawAmount)], chain: baseSepolia })
+    } else {
+      const token = withdrawToken === 'WETH' ? WETH : USDC
+      const decimals = withdrawToken === 'USDC' ? 6 : 18
+      const amount = BigInt(Math.floor(parseFloat(withdrawAmount) * (10 ** decimals)))
+      writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdrawToken',
+        args: [token, amount], chain: baseSepolia })
+    }
   }
 
   if (!address) {
@@ -243,22 +263,45 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
               </div>
             </div>
 
-            {/* Human deposit */}
-            <div className="mb-4">
-              <div className="text-xs text-gray-500 mb-2 font-medium">Deposit from your wallet</div>
-              <div className="flex gap-3">
-                <div className="relative flex-1">
-                  <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
-                    step="0.001" min="0" placeholder="0.01"
-                    className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-14" />
-                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500">ETH</span>
+            {/* Deposit & Withdraw */}
+            <div className="grid md:grid-cols-2 gap-4 mb-4">
+              <div>
+                <div className="text-xs text-gray-500 mb-2 font-medium">Deposit</div>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
+                      step="0.001" min="0" placeholder="0.01"
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-12" />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">ETH</span>
+                  </div>
+                  <button onClick={depositETH}
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition">
+                    Deposit
+                  </button>
                 </div>
-                <button onClick={depositETH}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
-                  Deposit
-                </button>
+                <p className="text-xs text-gray-600 mt-1.5">ETH becomes vault principal — agent can only trade yield above it.</p>
               </div>
-              <p className="text-xs text-gray-600 mt-2">Your wallet will ask to confirm. Deposited ETH becomes the vault&apos;s principal — your agent can only trade yield above this amount.</p>
+              <div>
+                <div className="text-xs text-gray-500 mb-2 font-medium">Withdraw</div>
+                <div className="flex gap-2">
+                  <div className="relative flex-1">
+                    <input type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
+                      step="0.001" min="0" placeholder="0.01"
+                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-16" />
+                    <select value={withdrawToken} onChange={e => setWithdrawToken(e.target.value as any)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 bg-gray-700 border-none rounded text-xs text-gray-300 py-1 px-1.5 focus:outline-none">
+                      <option value="ETH">ETH</option>
+                      <option value="WETH">WETH</option>
+                      <option value="USDC">USDC</option>
+                    </select>
+                  </div>
+                  <button onClick={withdraw}
+                    className="bg-gray-700 hover:bg-gray-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition">
+                    Withdraw
+                  </button>
+                </div>
+                <p className="text-xs text-gray-600 mt-1.5">Owner-only — funds go back to your wallet.</p>
+              </div>
             </div>
           </div>
 
