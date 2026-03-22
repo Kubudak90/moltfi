@@ -262,22 +262,39 @@ export default function DashboardClient() {
                     </div>
                   </div>
 
-                  {/* Strategy status */}
-                  <div className={`rounded-lg p-3 flex items-center justify-between ${vaultData?.policy?.active ? 'bg-green-500/10 border border-green-500/20' : 'bg-yellow-500/10 border border-yellow-500/20'}`}>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
-                      <span className={`text-sm font-medium ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
-                        {vaultData?.policy?.active ? 'Agent Active' : 'No Strategy Set'}
-                      </span>
-                      {vaultData?.policy?.active && (
-                        <span className="text-xs text-gray-500 ml-2">
-                          Max {vaultData.policy.maxPerAction} ETH/trade · {vaultData.policy.remaining} ETH left today
+                  {/* Guardrails */}
+                  <div className="bg-gray-800/30 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
+                        <span className={`text-sm font-medium ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
+                          {vaultData?.policy?.active ? 'Guardrails Active' : 'No Guardrails Set'}
                         </span>
-                      )}
+                      </div>
                     </div>
-                    <a href="/strategy" className="text-xs text-indigo-400 hover:underline">
-                      {vaultData?.policy?.active ? 'Manage →' : 'Set up →'}
-                    </a>
+                    {vaultData?.policy?.active && (
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Max per trade</div>
+                          <div className="text-sm font-medium text-gray-200">{vaultData.policy.maxPerAction} ETH</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Daily limit</div>
+                          <div className="text-sm font-medium text-gray-200">{vaultData.policy.dailyLimit} ETH</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Used today</div>
+                          <div className="text-sm font-medium text-gray-200">{vaultData.policy.dailySpent} ETH</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Remaining</div>
+                          <div className="text-sm font-medium text-gray-200">{vaultData.policy.remaining} ETH</div>
+                        </div>
+                      </div>
+                    )}
+                    {!vaultData?.policy?.active && (
+                      <p className="text-xs text-gray-500">No trading policy set. The agent cannot trade until guardrails are configured.</p>
+                    )}
                   </div>
 
                   {/* Deposit */}

@@ -65,20 +65,7 @@ const TOOLS = [
       },
     },
   },
-  {
-    type: 'function' as const,
-    function: {
-      name: 'generate_strategy',
-      description: 'Generate DeFi strategies based on current vault state and market conditions. Venice AI analyzes the portfolio and proposes strategies with guardrails. Use when user asks for strategy advice, wants to rebalance, or asks what to do with their money.',
-      parameters: {
-        type: 'object',
-        properties: {
-          prompt: { type: 'string', description: 'Optional specific request (e.g. "conservative strategy" or "maximize yield")' },
-        },
-        required: [],
-      },
-    },
-  },
+
   {
     type: 'function' as const,
     function: {
@@ -103,59 +90,26 @@ const TOOLS = [
       parameters: { type: 'object', properties: {}, required: [] },
     },
   },
-  {
-    type: 'function' as const,
-    function: {
-      name: 'get_strategy',
-      description: 'Get the currently active strategy for this vault — what the agent is supposed to be doing, including steps, guardrails, and when it was activated.',
-      parameters: { type: 'object', properties: {}, required: [] },
-    },
-  },
-  {
-    type: 'function' as const,
-    function: {
-      name: 'set_strategy',
-      description: 'Save a new active strategy for the vault. Use after generating a strategy the user approves. Includes name, description, steps, and guardrails.',
-      parameters: {
-        type: 'object',
-        properties: {
-          name: { type: 'string', description: 'Strategy name (e.g. "Conservative Yield")' },
-          description: { type: 'string', description: 'Plain English description of what the agent will do' },
-          expectedYield: { type: 'string', description: 'Expected yield range (e.g. "2-4% APR")' },
-          steps: { type: 'array', items: { type: 'string' }, description: 'What the agent will actively do' },
-          guardrails: {
-            type: 'object',
-            properties: {
-              maxTradeSize: { type: 'string' },
-              dailyLimit: { type: 'string' },
-              protocols: { type: 'array', items: { type: 'string' } },
-            },
-          },
-        },
-        required: ['name', 'description', 'steps', 'guardrails'],
-      },
-    },
-  },
+
 ]
 
-const SYSTEM_PROMPT = `You are MoltFi, a private DeFi vault manager on Base.
+const SYSTEM_PROMPT = `You are MoltFi, a DeFi vault on Base with on-chain guardrails.
 
 How it works:
-- Human registers → vault is created automatically with on-chain spending policy
-- You manage their vault: check balances, generate strategies, execute swaps
+- The human's AI agent sends you trade requests in plain English
+- You execute trades through a vault with on-chain spending policy enforcement
+- The smart contract checks every trade against the guardrails (max per trade, daily limit) — if it exceeds limits, the transaction reverts
 - All reasoning is private (Venice AI, zero data retention). All trades are public blockchain transactions.
-- The smart contract enforces spending limits — you cannot exceed them even if you try
-- Supported: WETH↔USDC swaps via Uniswap V3, ETH deposits, strategy generation
+- Supported: WETH↔USDC swaps via Uniswap V3, ETH deposits
+
+You don't decide what to trade — the agent does. You enforce the rules and execute.
 
 Rules:
 - Always use tools to get real data. Never guess balances or prices.
-- For swaps: confirm what the user wants, then execute.
+- For swaps: execute what the agent asks. The guardrails protect the vault.
 - Be concise — 1-3 sentences plus the relevant data.
 - If a tool fails, explain clearly what went wrong.
-- Include Basescan links for any transaction.
-- When asked for strategies, use generate_strategy to get AI-powered analysis.
-- After generating a strategy the user likes, use set_strategy to save it as the active strategy.
-- When running autonomously, use get_strategy to know what you're supposed to be doing, then act on it.`
+- Include Basescan links for any transaction.`
 
 // ─── Tool execution ───
 async function executeTool(name: string, args: any, origin: string, vault: string, apiKey: string): Promise<string> {
@@ -185,25 +139,7 @@ async function executeTool(name: string, args: any, origin: string, vault: strin
         })
         return await res.text()
       }
-      case 'generate_strategy': {
-        // Get vault balances first for context
-        let balances = null
-        try {
-          const statusRes = await fetch(`${origin}/api/vault/status?vault=${vault}`)
-          const statusData = await statusRes.json()
-          balances = statusData.balances
-        } catch {}
 
-        const res = await fetch(`${origin}/api/pipeline`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            balances,
-            prompt: args.prompt || 'Generate 3 strategies: safe, balanced, and aggressive.',
-          }),
-        })
-        return await res.text()
-      }
       case 'get_activity': {
         const res = await fetch(`${origin}/api/vault/activity?vault=${vault}`)
         return await res.text()
@@ -224,18 +160,7 @@ async function executeTool(name: string, args: any, origin: string, vault: strin
         }
         return JSON.stringify(data)
       }
-      case 'get_strategy': {
-        const res = await fetch(`${origin}/api/vault/strategy?vault=${vault}`)
-        return await res.text()
-      }
-      case 'set_strategy': {
-        const res = await fetch(`${origin}/api/vault/strategy`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ vault, strategy: args }),
-        })
-        return await res.text()
-      }
+
       default:
         return JSON.stringify({ error: `Unknown tool: ${name}` })
     }
