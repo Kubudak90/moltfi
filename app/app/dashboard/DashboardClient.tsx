@@ -128,19 +128,38 @@ export default function DashboardClient() {
       {hasVault && (
         <>
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <h2 className="text-xl font-semibold">Vault</h2>
-                <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-                  className="text-xs text-indigo-400 hover:underline">Basescan →</a>
-              </div>
-              {hasAgent && (
-                <div className="flex items-center gap-2 text-xs">
-                  <div className="w-2 h-2 rounded-full bg-green-400" />
-                  <span className="text-gray-400">{agents[0].agentName}</span>
-                  <span className="text-gray-600 font-mono">{agents[0].agentWallet.slice(0, 6)}...{agents[0].agentWallet.slice(-4)}</span>
+            {/* Vault identity — prominent */}
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold mb-3">Your Vault</h2>
+              <div className="bg-gray-800/50 rounded-lg p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="text-xs text-gray-500 uppercase tracking-wider">Vault Contract</div>
+                  <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
+                    className="text-xs text-indigo-400 hover:underline">View on Basescan →</a>
                 </div>
-              )}
+                <div className="font-mono text-sm text-white break-all">{vaults[0]}</div>
+
+                <div className="border-t border-gray-700 pt-3 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Owner</div>
+                    <div className="font-mono text-sm text-white break-all">{address}</div>
+                  </div>
+                </div>
+
+                {hasAgent && (
+                  <div className="border-t border-gray-700 pt-3 flex items-center justify-between">
+                    <div>
+                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Agent</div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-400" />
+                        <span className="text-sm text-white">{agents[0].agentName}</span>
+                        <span className="text-xs text-gray-500 font-mono">{agents[0].agentWallet}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-600 mt-2">This is your money. Only your wallet can withdraw funds or change guardrails.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-6">
