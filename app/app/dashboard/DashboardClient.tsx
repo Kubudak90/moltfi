@@ -197,10 +197,8 @@ export default function DashboardClient() {
       {/* Vault active */}
       {hasVault && (
         <>
-          {/* Overview */}
+          {/* Vault — single combined section */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-4">Overview</h3>
-
             {(() => {
               const weth = parseFloat(vaultData?.balances?.WETH || '0')
               const usdc = parseFloat(vaultData?.balances?.USDC || '0')
@@ -210,8 +208,23 @@ export default function DashboardClient() {
               const totalUsd = price ? (totalEth * price + usdc) : 0
 
               return (
-                <div className="space-y-4">
-                  {/* Portfolio value — hero */}
+                <div className="space-y-5">
+                  {/* Header with vault links */}
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold">Your Vault</h2>
+                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                      <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
+                        className="font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
+                      {hasAgent && (
+                        <span className="flex items-center gap-1">
+                          <div className="w-2 h-2 rounded-full bg-green-400" />
+                          {agents[0].agentName}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Balance hero */}
                   <div className="bg-gray-800/50 rounded-lg p-5">
                     <div className="text-xs text-gray-500 mb-1">Total Balance</div>
                     <div className="text-3xl font-bold">{totalUsd > 0 ? `$${totalUsd.toFixed(2)}` : '—'}</div>
@@ -249,7 +262,7 @@ export default function DashboardClient() {
                     </div>
                   </div>
 
-                  {/* Strategy status — link to strategy page */}
+                  {/* Strategy status */}
                   <div className={`rounded-lg p-3 flex items-center justify-between ${vaultData?.policy?.active ? 'bg-green-500/10 border border-green-500/20' : 'bg-yellow-500/10 border border-yellow-500/20'}`}>
                     <div className="flex items-center gap-2">
                       <div className={`w-2 h-2 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
@@ -267,86 +280,25 @@ export default function DashboardClient() {
                     </a>
                   </div>
 
-                  {/* Recent activity */}
-                  {activity.length > 0 && (
-                    <div className="pt-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-gray-500">Recent Activity</span>
-                        <a href="/activity" className="text-xs text-indigo-400 hover:underline">View all →</a>
-                      </div>
-                      {activity.map((a, i) => (
-                        <div key={i} className="flex items-center justify-between text-xs py-1.5">
-                          <span className="text-gray-400">{a.summary}</span>
-                          <a href={`https://sepolia.basescan.org/tx/${a.txHash}`} target="_blank" rel="noopener"
-                            className="text-indigo-400 hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
+                  {/* Deposit */}
+                  <div className="grid md:grid-cols-2 gap-4 pt-2 border-t border-gray-800/50">
+                    <div>
+                      <div className="text-xs text-gray-500 mb-2 font-medium">Deposit</div>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
+                            step="0.001" min="0" placeholder="0.01"
+                            className="w-full bg-gray-800 border border-gray-800 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-12" />
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">ETH</span>
                         </div>
-                      ))}
+                        <button onClick={depositETH}
+                          className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition">
+                          Deposit
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1.5">ETH becomes vault principal — agent can only trade yield above it.</p>
                     </div>
-                  )}
-                </div>
-              )
-            })()}
-          </div>
-
-          {/* Your Vault — below market data */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <div className="mb-6">
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold">Your Vault</h2>
-                <span className="text-xs text-gray-600">Smart contract on Base</span>
-              </div>
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">Contract</span>
-                  <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-                    className="font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-gray-500">Owner</span>
-                  <a href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener"
-                    className="font-mono text-white hover:text-indigo-400">{address?.slice(0, 6)}...{address?.slice(-4)}</a>
-                </div>
-                {hasAgent && (
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-400" />
-                    <span className="text-xs text-gray-500">Agent</span>
-                    <a href={`https://sepolia.basescan.org/address/${agents[0].agentWallet}`} target="_blank" rel="noopener"
-                      className="font-mono text-white hover:text-indigo-400">{agents[0].agentName}</a>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-gray-800/50 rounded-lg p-5 mb-6">
-              <div className="text-xs text-gray-500 mb-1">WETH Balance</div>
-              <div className="text-2xl font-bold">{vaultData?.balances?.WETH || '0'}</div>
-              {(ethPrice || perf?.portfolio?.ethPrice) && vaultData?.balances?.WETH && (
-                <div className="text-xs text-gray-500 mt-1">≈ ${(parseFloat(vaultData.balances.WETH) * (ethPrice || perf?.portfolio?.ethPrice)).toFixed(2)}</div>
-              )}
-              {parseFloat(vaultData?.balances?.USDC || '0') > 0 && (
-                <div className="text-xs text-gray-500 mt-1">+ {vaultData?.balances?.USDC} USDC</div>
-              )}
-            </div>
-
-            {/* Deposit & Withdraw */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div>
-                <div className="text-xs text-gray-500 mb-2 font-medium">Deposit</div>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
-                      step="0.001" min="0" placeholder="0.01"
-                      className="w-full bg-gray-800 border border-gray-800 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-12" />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">ETH</span>
-                  </div>
-                  <button onClick={depositETH}
-                    className="bg-indigo-600 hover:bg-indigo-600 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition">
-                    Deposit
-                  </button>
-                </div>
-                <p className="text-xs text-gray-600 mt-1.5">ETH becomes vault principal — agent can only trade yield above it.</p>
-              </div>
-              <div>
+                    <div>
                 <div className="text-xs text-gray-500 mb-2 font-medium">Withdraw</div>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
@@ -368,6 +320,26 @@ export default function DashboardClient() {
                 <p className="text-xs text-gray-600 mt-1.5">Owner-only — funds go back to your wallet.</p>
               </div>
             </div>
+
+                  {/* Recent activity */}
+                  {activity.length > 0 && (
+                    <div className="pt-3 border-t border-gray-800/50">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-gray-500">Recent Activity</span>
+                        <a href="/activity" className="text-xs text-indigo-400 hover:underline">View all →</a>
+                      </div>
+                      {activity.map((a, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs py-1.5">
+                          <span className="text-gray-400">{a.summary}</span>
+                          <a href={`https://sepolia.basescan.org/tx/${a.txHash}`} target="_blank" rel="noopener"
+                            className="text-indigo-400 hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
           </div>
 
           {/* How deposits work */}
