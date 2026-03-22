@@ -8,7 +8,6 @@ const tabs = [
   { href: '/strategy', label: 'Strategy' },
   { href: '/activity', label: 'Activity' },
   { href: '/chat', label: 'Agent' },
-  { href: '/market', label: 'Market' },
   { href: '/guardrails', label: 'Guardrails' },
 ]
 

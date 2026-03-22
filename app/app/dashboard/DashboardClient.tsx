@@ -23,7 +23,7 @@ const vaultAbi = [
 export default function DashboardClient() {
   const { address, chainId } = useAccount()
   const { switchChain } = useSwitchChain()
-  const { agents, vaults, vaultData, hasAgent, hasVault, ethPrice, refreshVaults } = useAgentContext()
+  const { agents, vaults, vaultData, hasAgent, hasVault, ethPrice, rates, refreshVaults } = useAgentContext()
   const [depositAmount, setDepositAmount] = useState('0.01')
   const [txStatus, setTxStatus] = useState('')
   const [error, setError] = useState('')
@@ -252,6 +252,86 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
               </div>
               <p className="text-xs text-gray-600 mt-2">Your wallet will ask to confirm. Deposited ETH becomes the vault&apos;s principal — your agent can only trade yield above this amount.</p>
             </div>
+          </div>
+
+          {/* Market + Portfolio */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h3 className="font-semibold mb-4">Market & Portfolio</h3>
+
+            {/* Market stats row */}
+            <div className="grid grid-cols-3 gap-3 mb-6">
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <div className="text-xs text-gray-500 mb-1">ETH Price</div>
+                <div className="text-xl font-bold">{ethPrice ? `$${ethPrice.toLocaleString()}` : '—'}</div>
+                {rates?.prices?.eth24hChange != null && (
+                  <div className={`text-xs mt-1 ${rates.prices.eth24hChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {rates.prices.eth24hChange >= 0 ? '+' : ''}{rates.prices.eth24hChange.toFixed(2)}% (24h)
+                  </div>
+                )}
+              </div>
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <div className="text-xs text-gray-500 mb-1">Lido stETH APR</div>
+                <div className="text-xl font-bold">{rates?.lido ? `${rates.lido.smaApr.toFixed(2)}%` : '—'}</div>
+                <div className="text-xs text-gray-600 mt-1">7-day SMA</div>
+              </div>
+              <div className="bg-gray-800/50 rounded-lg p-4">
+                <div className="text-xs text-gray-500 mb-1">Base Gas</div>
+                <div className="text-xl font-bold">{rates?.baseGas ? rates.baseGas.gwei : '—'}</div>
+                <div className="text-xs text-gray-600 mt-1">gwei</div>
+              </div>
+            </div>
+
+            {/* Portfolio breakdown */}
+            {(() => {
+              const weth = parseFloat(vaultData?.balances?.WETH || '0')
+              const usdc = parseFloat(vaultData?.balances?.USDC || '0')
+              const eth = parseFloat(vaultData?.balances?.ETH || '0')
+              const wethUsd = ethPrice ? weth * ethPrice : 0
+              const ethUsd = ethPrice ? eth * ethPrice : 0
+              const totalUsd = wethUsd + usdc + ethUsd
+              const wethPct = totalUsd > 0 ? ((wethUsd + ethUsd) / totalUsd * 100) : 0
+              const usdcPct = totalUsd > 0 ? (usdc / totalUsd * 100) : 0
+
+              return (
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="text-xs text-gray-500 uppercase tracking-wider">Portfolio</div>
+                    <div className="text-sm font-medium">{totalUsd > 0 ? `$${totalUsd.toFixed(2)}` : '—'}</div>
+                  </div>
+
+                  {/* Allocation bar */}
+                  {totalUsd > 0 && (
+                    <div className="w-full h-3 rounded-full bg-gray-800 overflow-hidden mb-4 flex">
+                      {wethPct > 0 && <div className="bg-indigo-500 h-full transition-all" style={{ width: `${wethPct}%` }} />}
+                      {usdcPct > 0 && <div className="bg-green-500 h-full transition-all" style={{ width: `${usdcPct}%` }} />}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center justify-between bg-gray-800/30 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+                        <span className="text-sm text-gray-300">ETH / WETH</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">{(eth + weth).toFixed(4)}</div>
+                        {totalUsd > 0 && <div className="text-xs text-gray-500">{wethPct.toFixed(0)}%</div>}
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between bg-gray-800/30 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                        <span className="text-sm text-gray-300">USDC</span>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-medium">{usdc > 0 ? usdc.toFixed(2) : '0'}</div>
+                        {totalUsd > 0 && <div className="text-xs text-gray-500">{usdcPct.toFixed(0)}%</div>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
           </div>
 
           {/* How deposits work */}
