@@ -260,8 +260,8 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
             <div className="bg-gray-800/50 rounded-lg p-5 mb-6">
               <div className="text-xs text-gray-500 mb-1">WETH Balance</div>
               <div className="text-2xl font-bold">{vaultData?.balances?.WETH || '0'}</div>
-              {ethPrice && vaultData?.balances?.WETH && (
-                <div className="text-xs text-gray-500 mt-1">≈ ${(parseFloat(vaultData.balances.WETH) * ethPrice).toFixed(2)}</div>
+              {(ethPrice || perf?.portfolio?.ethPrice) && vaultData?.balances?.WETH && (
+                <div className="text-xs text-gray-500 mt-1">≈ ${(parseFloat(vaultData.balances.WETH) * (ethPrice || perf?.portfolio?.ethPrice)).toFixed(2)}</div>
               )}
               {parseFloat(vaultData?.balances?.USDC || '0') > 0 && (
                 <div className="text-xs text-gray-500 mt-1">+ {vaultData?.balances?.USDC} USDC</div>
@@ -342,8 +342,9 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
               const weth = parseFloat(vaultData?.balances?.WETH || '0')
               const usdc = parseFloat(vaultData?.balances?.USDC || '0')
               const eth = parseFloat(vaultData?.balances?.ETH || '0')
-              const wethUsd = ethPrice ? weth * ethPrice : 0
-              const ethUsd = ethPrice ? eth * ethPrice : 0
+              const price = ethPrice || perf?.portfolio?.ethPrice || 0
+              const wethUsd = price ? weth * price : 0
+              const ethUsd = price ? eth * price : 0
               const totalUsd = wethUsd + usdc + ethUsd
               const wethPct = totalUsd > 0 ? ((wethUsd + ethUsd) / totalUsd * 100) : 0
               const usdcPct = totalUsd > 0 ? (usdc / totalUsd * 100) : 0
@@ -356,7 +357,7 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
                   </div>
 
                   {/* Allocation bar */}
-                  {totalUsd > 0 && (
+                  {totalUsd > 0 && price > 0 && (
                     <div className="w-full h-3 rounded-full bg-gray-800 overflow-hidden mb-4 flex">
                       {wethPct > 0 && <div className="bg-indigo-500 h-full transition-all" style={{ width: `${wethPct}%` }} />}
                       {usdcPct > 0 && <div className="bg-green-500 h-full transition-all" style={{ width: `${usdcPct}%` }} />}
