@@ -216,6 +216,37 @@ export default function DashboardClient() {
                       className="text-xs font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
                   </div>
 
+                  {/* Access — who can interact with this vault */}
+                  <div className="flex flex-wrap gap-3">
+                    <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2">
+                      <div className="w-2 h-2 rounded-full bg-indigo-400" />
+                      <div>
+                        <div className="text-xs text-gray-500">Owner</div>
+                        <a href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener"
+                          className="text-xs font-mono text-gray-300 hover:text-indigo-400">{address?.slice(0, 6)}...{address?.slice(-4)}</a>
+                      </div>
+                      <span className="text-xs text-gray-600 ml-1">deposit · withdraw · set limits</span>
+                    </div>
+                    {hasAgent && (
+                      <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2">
+                        <div className="w-2 h-2 rounded-full bg-green-400" />
+                        <div>
+                          <div className="text-xs text-gray-500">Agent</div>
+                          <span className="text-xs font-mono text-gray-300">{agents[0].agentName}</span>
+                        </div>
+                        <span className="text-xs text-gray-600 ml-1">trade · deposit (within guardrails)</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2">
+                      <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                      <div>
+                        <div className="text-xs text-gray-500">Managed by</div>
+                        <span className="text-xs text-gray-300">MoltFi</span>
+                      </div>
+                      <span className="text-xs text-gray-600 ml-1">executes trades on-chain</span>
+                    </div>
+                  </div>
+
                   {/* Balance hero */}
                   <div className="bg-gray-800/50 rounded-lg p-5">
                     <div className="text-xs text-gray-500 mb-1">Total Balance</div>
