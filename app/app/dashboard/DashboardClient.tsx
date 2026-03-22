@@ -314,6 +314,26 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
             })()}
           </div>
 
+          {/* Strategy status on vault page */}
+          <div className={`bg-gray-900 border rounded-xl p-4 flex items-center justify-between ${vaultData?.policy?.active ? 'border-green-500/20' : 'border-yellow-500/20'}`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-2.5 h-2.5 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
+              <div>
+                <div className={`text-sm font-medium ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
+                  {vaultData?.policy?.active ? 'Strategy Active' : 'No Active Strategy'}
+                </div>
+                {vaultData?.policy?.active && (
+                  <div className="text-xs text-gray-500">
+                    Max {vaultData.policy.maxPerAction} ETH/trade · {vaultData.policy.remaining} ETH remaining today
+                  </div>
+                )}
+              </div>
+            </div>
+            <a href="/strategy" className="text-xs text-indigo-400 hover:underline">
+              {vaultData?.policy?.active ? 'View strategy →' : 'Set up strategy →'}
+            </a>
+          </div>
+
           {/* Your Vault — below market data */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <div className="mb-6">
