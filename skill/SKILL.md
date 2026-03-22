@@ -208,6 +208,29 @@ Once your human approves a strategy, you run on your own:
 
 ---
 
+## Private Mode
+
+Check if your vault has Private Mode enabled:
+```bash
+curl {BASE_URL}/api/vault/private-mode?vault=VAULT_ADDRESS
+```
+
+When Private Mode is active, **all strategy generation must go through the AgentGuard pipeline** (which routes through Venice AI with zero data retention). Do NOT use your own AI provider for strategy analysis — use the pipeline endpoint:
+
+```bash
+curl -X POST {BASE_URL}/api/pipeline \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vault": "VAULT_ADDRESS",
+    "balances": { "WETH": "0.5", "USDC": "100" },
+    "prompt": "Generate a safe yield strategy"
+  }'
+```
+
+This ensures your human's financial data is never stored or used for training by any AI provider.
+
+---
+
 ## Guardrails — What You Need to Know
 
 Your human sets these on the dashboard. They're enforced by smart contracts:

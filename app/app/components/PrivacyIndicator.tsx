@@ -3,14 +3,26 @@
 import { useState, useEffect } from 'react'
 import { useAccount } from 'wagmi'
 import { usePathname } from 'next/navigation'
+import { useAgentContext } from './AgentContext'
 
 export function PrivacyIndicator() {
   const { isConnected } = useAccount()
+  const { vaults } = useAgentContext()
   const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [showDetail, setShowDetail] = useState(false)
+  const [privateMode, setPrivateMode] = useState(false)
 
   useEffect(() => setMounted(true), [])
+
+  // Check private mode status
+  useEffect(() => {
+    if (!vaults?.[0]) return
+    fetch(`/api/vault/private-mode?vault=${vaults[0]}`)
+      .then(r => r.json())
+      .then(d => setPrivateMode(d.privateMode))
+      .catch(() => {})
+  }, [vaults])
 
   // Only show on app pages (not landing)
   if (!mounted || pathname === '/' || !isConnected) return null
@@ -19,13 +31,20 @@ export function PrivacyIndicator() {
     <div className="relative">
       <button
         onClick={() => setShowDetail(!showDetail)}
-        className="flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/20 rounded-full px-3 py-1 text-xs text-purple-300 hover:bg-purple-500/20 transition"
+        className={`flex items-center gap-1.5 border rounded-full px-3 py-1 text-xs transition ${
+          privateMode
+            ? 'bg-purple-500/10 border-purple-500/20 text-purple-300 hover:bg-purple-500/20'
+            : 'bg-gray-800/50 border-gray-700 text-gray-500 hover:bg-gray-800'
+        }`}
       >
         <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          <path strokeLinecap="round" strokeLinejoin="round" d={privateMode
+            ? "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            : "M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"
+          } />
         </svg>
-        <span>Private Mode</span>
-        <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+        <span>{privateMode ? 'Private Mode' : 'Standard Mode'}</span>
+        {privateMode && <div className="w-1.5 h-1.5 rounded-full bg-green-400" />}
       </button>
 
       {showDetail && (
@@ -34,35 +53,47 @@ export function PrivacyIndicator() {
             <svg className="w-5 h-5 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
-            <span className="font-semibold text-sm">Private Mode Active</span>
-            <div className="ml-auto flex items-center gap-1 text-xs text-green-400">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
-              Enabled
+            <span className="font-semibold text-sm">{privateMode ? 'Private Mode Active' : 'Standard Mode'}</span>
+            <div className={`ml-auto flex items-center gap-1 text-xs ${privateMode ? 'text-green-400' : 'text-gray-500'}`}>
+              <div className={`w-1.5 h-1.5 rounded-full ${privateMode ? 'bg-green-400' : 'bg-gray-600'}`} />
+              {privateMode ? 'Enforced' : 'Off'}
             </div>
           </div>
 
           <div className="space-y-3 text-xs text-gray-400">
-            <div className="flex items-start gap-2">
-              <span className="text-green-400 mt-0.5">✓</span>
-              <div>
-                <span className="text-gray-300 font-medium">Zero data retention</span>
-                <p className="mt-0.5">Venice AI processes your requests and immediately discards them. No logs, no training data, no storage.</p>
+            {privateMode ? (
+              <>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400 mt-0.5">✓</span>
+                  <div>
+                    <span className="text-gray-300 font-medium">Venice-only inference enforced</span>
+                    <p className="mt-0.5">All strategy generation for this vault must go through Venice AI. Other providers are blocked.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400 mt-0.5">✓</span>
+                  <div>
+                    <span className="text-gray-300 font-medium">Zero data retention</span>
+                    <p className="mt-0.5">Venice processes your requests and immediately discards them. No logs, no training data, no storage.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400 mt-0.5">✓</span>
+                  <div>
+                    <span className="text-gray-300 font-medium">Financial data stays private</span>
+                    <p className="mt-0.5">Portfolio balances, strategies, and analysis are never retained by any AI provider.</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="flex items-start gap-2">
+                <span className="text-gray-600 mt-0.5">○</span>
+                <div>
+                  <span className="text-gray-300 font-medium">Standard mode</span>
+                  <p className="mt-0.5">Your agent can use any AI provider. Enable Private Mode on the Guardrails page to enforce Venice-only inference.</p>
+                </div>
               </div>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="text-green-400 mt-0.5">✓</span>
-              <div>
-                <span className="text-gray-300 font-medium">Financial data stays private</span>
-                <p className="mt-0.5">Your portfolio balances, trading strategies, and chat history are never exposed to or retained by any AI provider.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="text-green-400 mt-0.5">✓</span>
-              <div>
-                <span className="text-gray-300 font-medium">On-device inference ready</span>
-                <p className="mt-0.5">Venice supports local model inference — your data never leaves your machine.</p>
-              </div>
-            </div>
+            )}
           </div>
 
           <div className="mt-4 pt-3 border-t border-gray-800 flex items-center justify-between">
