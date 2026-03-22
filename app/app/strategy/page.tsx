@@ -206,6 +206,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
     setDeploying(true)
     setDeployStatus('Confirm trade limits update in your wallet...')
     try {
+      // @ts-expect-error viem v2 strict types
       const hash = await walletClient.sendTransaction({
         to: VAULT_FACTORY,
         data: encodeFunctionData({

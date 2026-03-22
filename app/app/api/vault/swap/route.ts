@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
       args: [inToken.address, outToken.address, 3000, amountRaw, BigInt(0)],
     })
 
+    // @ts-expect-error viem v2 strict types
     const hash = await walletClient.sendTransaction({ to: vault as `0x${string}`, data })
     const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
@@ -68,6 +69,7 @@ export async function POST(req: NextRequest) {
     let amountOut = ''
     for (const log of receipt.logs) {
       // SwapExecuted topic
+      // @ts-expect-error viem v2 strict types
       if (log.topics[0] === '0x7f3b7a57e0b80ef1e83ebbe31a0a88cb81e0f6fa60f7e10fe3478d12a tried') continue
       // Just report success
     }

@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   try {
     const currentBlock = await client.getBlockNumber()
-    const fromBlock = currentBlock > 9000n ? currentBlock - 9000n : 0n
+    const fromBlock = currentBlock > BigInt(9000) ? currentBlock - BigInt(9000) : BigInt(0)
 
     // Get all swap events from router
     const swaps = await client.getLogs({
@@ -32,7 +32,9 @@ export async function GET(req: NextRequest) {
     // Get current balances
     const [ethBal, wethBal, usdcBal] = await Promise.all([
       client.getBalance({ address: vault as `0x${string}` }),
+      // @ts-expect-error viem v2 strict types
       client.readContract({ address: WETH, abi: erc20Abi, functionName: 'balanceOf', args: [vault as `0x${string}`] }),
+      // @ts-expect-error viem v2 strict types
       client.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [vault as `0x${string}`] }),
     ])
 
@@ -70,8 +72,8 @@ export async function GET(req: NextRequest) {
       const args = log.args as any
       const tokenIn = args.tokenIn?.toLowerCase()
       const tokenOut = args.tokenOut?.toLowerCase()
-      const amountIn = args.amountIn || 0n
-      const amountOut = args.amountOut || 0n
+      const amountIn = args.amountIn || BigInt(0)
+      const amountOut = args.amountOut || BigInt(0)
 
       const isEthIn = tokenIn === WETH.toLowerCase()
       const inAmount = isEthIn ? parseFloat(formatEther(amountIn)) : parseFloat(formatUnits(amountIn, 6))

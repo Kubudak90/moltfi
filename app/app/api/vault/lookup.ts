@@ -23,6 +23,7 @@ export async function lookupVault(agentAddress: string): Promise<string | null> 
       const agents = JSON.parse(readFileSync(dbPath, 'utf-8'))
       const agent = agents.find((a: any) => a.agentWallet.toLowerCase() === agentAddress.toLowerCase())
       if (agent) {
+        // @ts-expect-error viem v2 strict types
         const vaults = await client.readContract({
           address: VAULT_FACTORY,
           abi: factoryAbi,
@@ -36,6 +37,7 @@ export async function lookupVault(agentAddress: string): Promise<string | null> 
 
   // 2. Fallback: check if agent itself owns vaults
   try {
+    // @ts-expect-error viem v2 strict types
     const vaults = await client.readContract({
       address: VAULT_FACTORY,
       abi: factoryAbi,

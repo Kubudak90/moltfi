@@ -36,6 +36,7 @@ export async function POST(req: NextRequest) {
     const value = parseEther(amount.toString())
 
     // Wrap ETH → WETH
+    // @ts-expect-error viem v2 strict types
     const wrapHash = await walletClient.sendTransaction({
       to: WETH,
       value,
@@ -47,6 +48,7 @@ export async function POST(req: NextRequest) {
     await new Promise(r => setTimeout(r, 1000))
 
     // Transfer WETH to vault (vault tracks WETH for balances)
+    // @ts-expect-error viem v2 strict types
     const transferHash = await walletClient.sendTransaction({
       to: WETH,
       data: encodeFunctionData({

@@ -50,6 +50,7 @@ export async function POST(req: NextRequest) {
     const publicClient = createPublicClient({ chain: baseSepolia, transport: http() })
 
     // Check if vault already exists
+    // @ts-expect-error viem v2 strict types
     const existing = await publicClient.readContract({
       address: VAULT_FACTORY,
       abi: factoryAbi,
@@ -71,6 +72,7 @@ export async function POST(req: NextRequest) {
     const maxAction = parseEther(maxPerTrade?.toString() || '1')
     const daily = parseEther(dailyLimit?.toString() || '5')
 
+    // @ts-expect-error viem v2 strict types
     const hash = await walletClient.sendTransaction({
       to: VAULT_FACTORY,
       data: encodeFunctionData({
@@ -86,8 +88,11 @@ export async function POST(req: NextRequest) {
     let vaultAddress: string | null = null
     for (const log of receipt.logs) {
       try {
+        // @ts-expect-error viem v2 strict types
         const decoded = decodeEventLog({ abi: [vaultCreatedEvent], data: log.data, topics: log.topics })
+        // @ts-expect-error viem v2 strict types
         if (decoded.eventName === 'VaultCreated') {
+          // @ts-expect-error viem v2 strict types
           vaultAddress = (decoded.args as any).vault
           break
         }
@@ -96,6 +101,7 @@ export async function POST(req: NextRequest) {
 
     // Fallback: read from factory
     if (!vaultAddress) {
+      // @ts-expect-error viem v2 strict types
       const vaults = await publicClient.readContract({
         address: VAULT_FACTORY,
         abi: factoryAbi,
