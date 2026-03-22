@@ -209,15 +209,31 @@ Once your human approves a strategy:
 4. **Log your reasoning** — your human sees activity on the dashboard
 
 ### Recommended Heartbeat Routine
+
+**If you're on OpenClaw**, add this to your HEARTBEAT.md:
+```
+## AgentGuard Vault Check
+1. Check vault: curl {BASE_URL}/api/vault/status?agent=YOUR_WALLET
+2. Check rates: curl {BASE_URL}/api/rates
+3. If yield opportunity exists and daily allowance remains:
+   a. Quote the swap: POST /api/uniswap/quote
+   b. Execute if profitable: POST /api/vault/swap
+4. Log actions to daily memory file
+```
+
+**Full heartbeat flow:**
 ```
 Every 30 minutes:
 1. GET /api/rates → check market conditions
 2. GET /api/vault/status → check balances and remaining daily allowance
-3. If yield opportunity > current position by meaningful margin:
-   a. GET /api/uniswap/quote → check swap price
+3. GET /api/vault/yield → check available yield above principal
+4. If yield opportunity > current position by meaningful margin:
+   a. GET /api/uniswap/quote → check swap price and gas
    b. POST /api/vault/swap → execute if within guardrails
-4. If ETH price dropped significantly:
+5. If ETH price dropped significantly:
    a. Consider staking more via Lido for yield protection
+   b. POST /api/vault/stake → stake ETH
+6. Report significant actions to your human
 ```
 
 ---
