@@ -197,7 +197,25 @@ export default function DashboardClient() {
       {/* Vault active */}
       {hasVault && (
         <>
-          {/* Vault — single combined section */}
+          {/* Market data — above the vault */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+              <div className="text-xs text-gray-500 mb-1">ETH Price</div>
+              <div className="text-lg font-bold">{ethPrice ? `$${ethPrice.toLocaleString()}` : '—'}</div>
+              {rates?.prices?.eth24hChange != null && (
+                <div className={`text-xs ${rates.prices.eth24hChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                  {rates.prices.eth24hChange >= 0 ? '+' : ''}{rates.prices.eth24hChange.toFixed(2)}% 24h
+                </div>
+              )}
+            </div>
+            <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+              <div className="text-xs text-gray-500 mb-1">Staking Rate (Lido)</div>
+              <div className="text-lg font-bold">{rates?.lido ? `${rates.lido.smaApr.toFixed(2)}%` : '—'}</div>
+              <div className="text-xs text-gray-600">current APR</div>
+            </div>
+          </div>
+
+          {/* Vault */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             {(() => {
               const weth = parseFloat(vaultData?.balances?.WETH || '0')
@@ -243,24 +261,6 @@ export default function DashboardClient() {
                           <span className="text-gray-400">{eth.toFixed(4)} ETH + {weth.toFixed(4)} WETH</span>
                         </div>
                       )}
-                    </div>
-                  </div>
-
-                  {/* Market snapshot */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="bg-gray-800/50 rounded-lg p-3">
-                      <div className="text-xs text-gray-500 mb-1">ETH Price</div>
-                      <div className="text-lg font-bold">{ethPrice ? `$${ethPrice.toLocaleString()}` : '—'}</div>
-                      {rates?.prices?.eth24hChange != null && (
-                        <div className={`text-xs ${rates.prices.eth24hChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
-                          {rates.prices.eth24hChange >= 0 ? '+' : ''}{rates.prices.eth24hChange.toFixed(2)}% 24h
-                        </div>
-                      )}
-                    </div>
-                    <div className="bg-gray-800/50 rounded-lg p-3">
-                      <div className="text-xs text-gray-500 mb-1">Lido APR</div>
-                      <div className="text-lg font-bold">{rates?.lido ? `${rates.lido.smaApr.toFixed(2)}%` : '—'}</div>
-                      <div className="text-xs text-gray-600">staking rate</div>
                     </div>
                   </div>
 
