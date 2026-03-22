@@ -58,7 +58,7 @@ export default function ActivityPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Activity</h1>
-          <p className="text-sm text-gray-500">What your agent has done with your money — in plain English</p>
+          <p className="text-sm text-gray-500">On-chain transactions from your vault</p>
         </div>
         <div className="text-right">
           <div className="text-xs text-gray-500">{activities.length} transaction{activities.length !== 1 ? 's' : ''}</div>
@@ -165,27 +165,7 @@ export default function ActivityPage() {
         </div>
       )}
 
-      {/* What this page is */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h3 className="font-semibold mb-3">Your Audit Trail</h3>
-        <p className="text-sm text-gray-400 mb-4">
-          Every row above is a real blockchain transaction. This isn&apos;t a log file your agent writes — it&apos;s data pulled directly from Base. Your agent can&apos;t edit or hide anything here.
-        </p>
-        <div className="grid sm:grid-cols-3 gap-4 text-xs">
-          <div className="bg-gray-800/30 rounded-lg p-3">
-            <div className="font-medium text-gray-300 mb-1">Plain English</div>
-            <div className="text-gray-500">Every action is explained — what happened, why, and whether it followed your rules.</div>
-          </div>
-          <div className="bg-gray-800/30 rounded-lg p-3">
-            <div className="font-medium text-gray-300 mb-1">Guardrail Checks</div>
-            <div className="text-gray-500">Each transaction shows whether trade limits, token allowlists, and principal protection were respected.</div>
-          </div>
-          <div className="bg-gray-800/30 rounded-lg p-3">
-            <div className="font-medium text-gray-300 mb-1">Independently Verifiable</div>
-            <div className="text-gray-500">Click &ldquo;Verify on Basescan&rdquo; to see the raw transaction on the blockchain. No trust required.</div>
-          </div>
-        </div>
-      </div>
+
     </div>
   )
 }
