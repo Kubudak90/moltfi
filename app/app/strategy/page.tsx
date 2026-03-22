@@ -52,11 +52,26 @@ export default function StrategyPage() {
   const policyDailySpent = vaultData?.policy?.dailySpent
   const policyRemaining = vaultData?.policy?.remaining
 
-  // Cached strategy details (optional enrichment on top of on-chain truth)
+  // Cached strategy details — localStorage first, then fetch from server
   const [cachedStrategy, setCachedStrategy] = useState<Strategy | null>(() => {
     if (typeof window === 'undefined') return null
     try { return JSON.parse(localStorage.getItem('ag_active_strategy') || 'null') } catch { return null }
   })
+
+  // Load strategy from server if not in localStorage
+  useEffect(() => {
+    if (!cachedStrategy && vaults[0]) {
+      fetch(`/api/vault/strategy?vault=${vaults[0]}`)
+        .then(r => r.json())
+        .then(d => {
+          if (d.strategy) {
+            setCachedStrategy(d.strategy)
+            localStorage.setItem('ag_active_strategy', JSON.stringify(d.strategy))
+          }
+        })
+        .catch(() => {})
+    }
+  }, [cachedStrategy, vaults])
   const [strategies, setStrategies] = useState<Strategy[]>(() => {
     if (typeof window === 'undefined') return []
     try { return JSON.parse(localStorage.getItem('ag_strategies') || '[]') } catch { return [] }
@@ -192,6 +207,14 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
     setCachedStrategy(s)
     setShowGenerate(false)
     localStorage.setItem('ag_active_strategy', JSON.stringify(s))
+    // Persist to server so it survives browser clears
+    if (vaults[0]) {
+      fetch('/api/vault/strategy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vault: vaults[0], strategy: s }),
+      }).catch(() => {})
+    }
   }
 
   const pause = () => {
@@ -205,6 +228,14 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
     localStorage.removeItem('ag_active_strategy')
     localStorage.removeItem('ag_deploy_tx')
     localStorage.removeItem('ag_deployed_at')
+    // Clear from server
+    if (vaults[0]) {
+      fetch('/api/vault/strategy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ vault: vaults[0], strategy: null }),
+      }).catch(() => {})
+    }
   }
 
   if (!address) return <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-500">Connect your wallet to view strategies.</div>
@@ -417,16 +448,43 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
       {/* GENERATING                                   */}
       {/* ============================================ */}
       {(showGenerate || !policyActive) && generating && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center space-y-4">
-          <div className="flex justify-center">
-            <svg className="w-10 h-10 animate-spin text-indigo-400" viewBox="0 0 24 24" fill="none">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-8 space-y-6">
+          <div className="flex items-center gap-4">
+            <svg className="w-8 h-8 animate-spin text-indigo-400 shrink-0" viewBox="0 0 24 24" fill="none">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
             </svg>
+            <div>
+              <p className="text-gray-200 font-medium">Generating strategies via Venice AI</p>
+              <p className="text-xs text-gray-500 mt-1">You can switch tabs — this keeps running in the background.</p>
+            </div>
           </div>
-          <div>
-            <p className="text-gray-300 font-medium">Analyzing protocols, yields, and market conditions</p>
-            <p className="text-sm text-gray-500 mt-1">Venice AI is reviewing your vault — this takes a few seconds.</p>
+
+          {/* Show what was sent to Venice */}
+          <div className="bg-gray-800/40 rounded-lg p-4 space-y-2">
+            <div className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2">Analyzing</div>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                <span className="text-gray-400">Vault: {vaultData?.balances?.WETH || '0'} WETH, {vaultData?.balances?.USDC || '0'} USDC</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                <span className="text-gray-400">ETH: {rates?.prices?.eth ? `$${rates.prices.eth.toLocaleString()}` : 'loading...'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                <span className="text-gray-400">Lido APR: {rates?.lido ? `${rates.lido.smaApr.toFixed(2)}%` : 'loading...'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400" />
+                <span className="text-gray-400">Protocols: Lido, Uniswap V3</span>
+              </div>
+            </div>
+            <p className="text-xs text-purple-400 mt-2 flex items-center gap-1.5">
+              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+              Sent privately to Venice AI — zero data retention
+            </p>
           </div>
         </div>
       )}
@@ -523,31 +581,11 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
         </div>
       )}
 
-      {/* How strategies work */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-        <h3 className="font-semibold mb-3">How Strategies Work</h3>
-        <div className="space-y-3 text-sm text-gray-400">
-          <div className="flex items-start gap-3">
-            <span className="text-indigo-400 font-bold shrink-0">1.</span>
-            <span><strong className="text-gray-300">AI analyzes markets</strong> — Venice AI checks current ETH price, Lido staking yields, gas costs, and your vault balance. Analysis is private — zero data retention.</span>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="text-indigo-400 font-bold shrink-0">2.</span>
-            <span><strong className="text-gray-300">AI proposes strategies with guardrails</strong> — each strategy comes with built-in limits (max trade size, daily cap). You don&apos;t need to configure anything technical.</span>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="text-indigo-400 font-bold shrink-0">3.</span>
-            <span><strong className="text-gray-300">You pick one</strong> — &quot;Approve &amp; Start Agent&quot; calls <code className="text-indigo-400 text-xs">updatePolicy()</code> on <a href={`https://sepolia.basescan.org/address/${VAULT_FACTORY}`} target="_blank" rel="noopener" className="text-indigo-400 hover:underline">{shortenAddr(VAULT_FACTORY)}</a>, writing guardrails to the <a href={`https://sepolia.basescan.org/address/${POLICY_CONTRACT}`} target="_blank" rel="noopener" className="text-indigo-400 hover:underline">policy contract</a>.</span>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="text-indigo-400 font-bold shrink-0">4.</span>
-            <span><strong className="text-gray-300">Agent runs autonomously</strong> — your agent checks in with the DeFi advisor, gets recommendations, and trades through the vault. If it tries to exceed guardrails, the smart contract reverts.</span>
-          </div>
-          <div className="flex items-start gap-3">
-            <span className="text-indigo-400 font-bold shrink-0">5.</span>
-            <span><strong className="text-gray-300">Pause anytime</strong> — calls <code className="text-indigo-400 text-xs">revokePolicy()</code> on-chain. The agent can&apos;t trade until you approve a new strategy.</span>
-          </div>
-        </div>
+      {/* How it works — compact */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+        <p className="text-xs text-gray-500">
+          Venice AI analyzes your vault privately (zero retention) and proposes strategies with guardrails baked in. When you approve, the limits are written to the <a href={`https://sepolia.basescan.org/address/${POLICY_CONTRACT}`} target="_blank" rel="noopener" className="text-indigo-400 hover:underline">policy contract</a> on-chain. Your agent trades within those limits — if it tries to exceed them, the blockchain reverts the transaction. Pause anytime to revoke the policy.
+        </p>
       </div>
     </div>
   )
