@@ -17,12 +17,19 @@ const client = createPublicClient({ chain: baseSepolia, transport: http() })
 export async function lookupVault(agentAddress: string): Promise<string | null> {
   const dbPath = join(process.cwd(), 'data', 'agents.json')
 
-  // 1. Find human wallet from agent registration
+  // 1. Find vault from agent registration (check agentWallet or direct vault field)
   if (existsSync(dbPath)) {
     try {
       const agents = JSON.parse(readFileSync(dbPath, 'utf-8'))
-      const agent = agents.find((a: any) => a.agentWallet.toLowerCase() === agentAddress.toLowerCase())
+      // Match by agentWallet or humanWallet
+      const agent = agents.find((a: any) =>
+        (a.agentWallet && a.agentWallet.toLowerCase() === agentAddress.toLowerCase()) ||
+        a.humanWallet.toLowerCase() === agentAddress.toLowerCase()
+      )
       if (agent) {
+        // If registration has a vault stored, use it directly
+        if (agent.vault) return agent.vault
+        // Otherwise look up from factory
         // @ts-expect-error viem v2 strict types
         const vaults = await client.readContract({
           address: VAULT_FACTORY,
