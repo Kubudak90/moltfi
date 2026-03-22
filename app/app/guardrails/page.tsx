@@ -208,7 +208,7 @@ export default function GuardrailsPage() {
             </svg>
             <div>
               <h3 className="text-lg font-semibold">Private Mode</h3>
-              <p className="text-xs text-gray-500">Forces all AI strategy generation through Venice (zero data retention)</p>
+              <p className="text-xs text-gray-500">Restricts MoltFi&apos;s server-side AI to Venice only (they don&apos;t save your data)</p>
             </div>
           </div>
           <button
@@ -220,24 +220,22 @@ export default function GuardrailsPage() {
           </button>
         </div>
         {privateMode ? (
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2 text-yellow-300">
-              <span className="text-green-400">✓</span>
-              <span>All AI analysis routed through Venice AI only</span>
+          <div className="space-y-3 text-sm">
+            <p className="text-gray-300">
+              When your agent calls MoltFi to get strategy advice or chat with the DeFi advisor, <strong>our server</strong> uses Venice AI to generate the response. Venice doesn&apos;t save your conversations or use them for training.
+            </p>
+            <p className="text-gray-300">
+              If Venice is down, the request fails — we won&apos;t quietly switch to another AI provider.
+            </p>
+            <div className="bg-gray-800/50 rounded-lg p-3 text-xs text-gray-500 space-y-1">
+              <p><strong className="text-gray-400">What this covers:</strong> Strategy generation and DeFi advisor responses on the MoltFi server.</p>
+              <p><strong className="text-gray-400">What this doesn&apos;t cover:</strong> Your own AI agent. Whatever model your agent runs on (GPT-4, Claude, etc.) is controlled by your agent platform, not by us.</p>
+              <p><strong className="text-gray-400">What&apos;s always public:</strong> Your vault balances and trades are on the blockchain — anyone can see them.</p>
             </div>
-            <div className="flex items-center gap-2 text-yellow-300">
-              <span className="text-green-400">✓</span>
-              <span>Strategy reasoning is never stored — Venice has zero data retention</span>
-            </div>
-            <div className="flex items-center gap-2 text-yellow-300">
-              <span className="text-green-400">✓</span>
-              <span>Non-Venice AI requests return an error instead of falling back</span>
-            </div>
-            <p className="text-xs text-gray-600 mt-2">Note: vault balances and trades are on a public blockchain — privacy applies to AI analysis, not on-chain data.</p>
           </div>
         ) : (
           <p className="text-sm text-gray-500">
-            AI analysis may use any available provider. Enable to restrict all inference to Venice AI (zero data retention).
+            When your agent calls MoltFi for strategy advice, our server can use any AI provider. Enable this to restrict our server to Venice AI only (they don&apos;t save your data).
           </p>
         )}
       </div>
