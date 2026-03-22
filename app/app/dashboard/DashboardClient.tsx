@@ -216,35 +216,21 @@ export default function DashboardClient() {
                       className="text-xs font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
                   </div>
 
-                  {/* Access — who can interact with this vault */}
-                  <div className="flex flex-wrap gap-3">
-                    <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2">
+                  {/* Access */}
+                  <div className="flex items-center gap-4 text-xs">
+                    <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full bg-indigo-400" />
-                      <div>
-                        <div className="text-xs text-gray-500">Owner</div>
-                        <a href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener"
-                          className="text-xs font-mono text-gray-300 hover:text-indigo-400">{address?.slice(0, 6)}...{address?.slice(-4)}</a>
-                      </div>
-                      <span className="text-xs text-gray-600 ml-1">deposit · withdraw · set limits</span>
+                      <span className="text-gray-500">Owner</span>
+                      <a href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener"
+                        className="font-mono text-indigo-400 hover:underline">{address?.slice(0, 6)}...{address?.slice(-4)}</a>
                     </div>
                     {hasAgent && (
-                      <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full bg-green-400" />
-                        <div>
-                          <div className="text-xs text-gray-500">Agent</div>
-                          <span className="text-xs font-mono text-gray-300">{agents[0].agentName}</span>
-                        </div>
-                        <span className="text-xs text-gray-600 ml-1">trade · deposit (within guardrails)</span>
+                        <span className="text-gray-500">Agent</span>
+                        <span className="text-gray-300">{agents[0].agentName}</span>
                       </div>
                     )}
-                    <div className="flex items-center gap-2 bg-gray-800/50 rounded-lg px-3 py-2">
-                      <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                      <div>
-                        <div className="text-xs text-gray-500">Managed by</div>
-                        <span className="text-xs text-gray-300">MoltFi</span>
-                      </div>
-                      <span className="text-xs text-gray-600 ml-1">executes trades on-chain</span>
-                    </div>
                   </div>
 
                   {/* Balance hero */}
@@ -285,63 +271,43 @@ export default function DashboardClient() {
                     </div>
                   </div>
 
-                  {/* On-Chain Guardrails — verifiable proof */}
+                  {/* Guardrails */}
                   {vaultData?.policy?.active ? (
-                    <div className="bg-gray-800/30 border border-green-500/10 rounded-lg p-4 space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-green-400">On-Chain Enforcement</span>
-                        <a href={`https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc#readContract`}
-                          target="_blank" rel="noopener"
-                          className="text-xs text-indigo-400 hover:underline">Verify on Basescan →</a>
-                      </div>
-
-                      {/* The actual limits — from chain, not from us */}
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="bg-gray-900/50 rounded-lg p-3">
-                          <div className="text-xs text-gray-500 mb-1">Max per trade</div>
-                          <div className="text-lg font-bold text-gray-200">{vaultData.policy.maxPerAction} ETH</div>
-                          <div className="text-xs text-gray-600 mt-1">Exceeds this → TX reverts</div>
+                    <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-4 space-y-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                          <div className="text-xs text-gray-500">Max per trade</div>
+                          <div className="text-lg font-bold">{vaultData.policy.maxPerAction} ETH</div>
                         </div>
-                        <div className="bg-gray-900/50 rounded-lg p-3">
-                          <div className="text-xs text-gray-500 mb-1">Daily limit</div>
-                          <div className="text-lg font-bold text-gray-200">{vaultData.policy.dailyLimit} ETH</div>
-                          <div className="text-xs text-gray-600 mt-1">{vaultData.policy.dailySpent} used · {vaultData.policy.remaining} left</div>
+                        <div>
+                          <div className="text-xs text-gray-500">Daily limit</div>
+                          <div className="text-lg font-bold">{vaultData.policy.dailyLimit} ETH</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500">Used today</div>
+                          <div className="text-lg font-bold">{vaultData.policy.dailySpent} ETH</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500">Remaining</div>
+                          <div className="text-lg font-bold text-green-400">{vaultData.policy.remaining} ETH</div>
                         </div>
                       </div>
-
-                      {/* How it works — the enforcement chain */}
-                      <div className="bg-gray-900/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-500 mb-2">Enforcement chain (every trade)</div>
-                        <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
-                          <span className="bg-gray-800 px-2 py-1 rounded">Trade request</span>
-                          <span className="text-gray-600">→</span>
-                          <a href={`https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6`}
-                            target="_blank" rel="noopener"
-                            className="bg-gray-800 px-2 py-1 rounded text-indigo-400 hover:underline">AgentGuardRouter</a>
-                          <span className="text-gray-600">→</span>
-                          <a href={`https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc`}
-                            target="_blank" rel="noopener"
-                            className="bg-gray-800 px-2 py-1 rounded text-indigo-400 hover:underline">AgentPolicy check</a>
-                          <span className="text-gray-600">→</span>
-                          <span className="bg-gray-800 px-2 py-1 rounded text-green-400">Uniswap V3</span>
-                        </div>
-                        <p className="text-xs text-gray-600 mt-2">If AgentPolicy check fails, the entire transaction reverts — no funds move. These are smart contracts, not software settings.</p>
-                      </div>
-
-                      {/* Contract addresses — anyone can verify */}
-                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
-                        <span>Policy: <a href="https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc" target="_blank" rel="noopener" className="text-indigo-400/70 hover:underline font-mono">0x6364...06Fbc</a></span>
-                        <span>Router: <a href="https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6" target="_blank" rel="noopener" className="text-indigo-400/70 hover:underline font-mono">0x5Cc0...77E6</a></span>
-                        <span>Vault: <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener" className="text-indigo-400/70 hover:underline font-mono">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a></span>
+                      <div className="flex items-center justify-between pt-2 border-t border-gray-800/50 text-xs">
+                        <span className="text-gray-600">
+                          Enforced by <a href="https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc#readContract" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">AgentPolicy</a> — any trade exceeding limits reverts on-chain
+                        </span>
+                        <a href="/strategy" className="text-indigo-400 hover:underline shrink-0 ml-2">Change limits →</a>
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-gray-800/30 border border-yellow-500/10 rounded-lg p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                        <span className="text-sm font-medium text-yellow-400">No Guardrails Set</span>
+                    <div className="bg-gray-800/30 border border-yellow-500/20 rounded-lg p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-sm font-medium text-yellow-400">No guardrails set</div>
+                          <div className="text-xs text-gray-500 mt-1">The agent cannot trade until limits are configured.</div>
+                        </div>
+                        <a href="/strategy" className="text-xs text-indigo-400 hover:underline">Set limits →</a>
                       </div>
-                      <p className="text-xs text-gray-500">No trading policy on-chain. The agent cannot trade until guardrails are configured.</p>
                     </div>
                   )}
 
