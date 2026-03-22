@@ -234,19 +234,7 @@ export default function DashboardClient() {
                       className="text-xs font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
                   </div>
 
-                  {/* Access */}
-                  <div className="flex items-center gap-4 text-xs">
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-indigo-400" />
-                      <span className="text-gray-500">Your wallet</span>
-                      <a href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener"
-                        className="font-mono text-indigo-400 hover:underline">{address?.slice(0, 6)}...{address?.slice(-4)}</a>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                      <span className="text-gray-500">Managed by MoltFi</span>
-                    </div>
-                  </div>
+                  
 
                   {/* Balance hero */}
                   <div className="bg-gray-800/50 rounded-lg p-5">
@@ -261,10 +249,7 @@ export default function DashboardClient() {
                         </>
                       )
                     })()}
-                    <div className="flex items-center gap-4 mt-3 text-xs text-gray-500">
-                      {totalEth > 0 && <span>{totalEth.toFixed(4)} ETH</span>}
-                      {usdc > 0 && <span>{usdc.toFixed(2)} USDC</span>}
-                    </div>
+                    
                   </div>
 
                   {/* Guardrails summary */}
@@ -302,7 +287,7 @@ export default function DashboardClient() {
                           Deposit
                         </button>
                       </div>
-                      <p className="text-xs text-gray-600 mt-1.5">ETH becomes vault principal — agent can only trade yield above it.</p>
+                      <p className="text-xs text-gray-600 mt-1.5">Sends ETH from your wallet into the vault contract.</p>
                     </div>
                     <div>
                 <div className="text-xs text-gray-500 mb-2 font-medium">Withdraw</div>
@@ -348,21 +333,7 @@ export default function DashboardClient() {
             })()}
           </div>
 
-          {/* How deposits work */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-3">How Deposits Work</h3>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-gray-800/30 rounded-lg p-4">
-                <div className="text-sm font-medium text-indigo-400 mb-2">For Humans (you)</div>
-                <p className="text-xs text-gray-400">Use the deposit button above. Your wallet signs the transaction and ETH goes directly into the vault smart contract on Base. The vault tracks your principal — your agent can never touch the original deposit, only yield earned above it.</p>
-              </div>
-              <div className="bg-gray-800/30 rounded-lg p-4">
-                <div className="text-sm font-medium text-green-400 mb-2">For AI Agents</div>
-                <pre className="text-xs font-mono text-gray-300 bg-gray-900/80 rounded p-2 overflow-x-auto mb-2">POST /api/vault/deposit{'\n'}{JSON.stringify({ amount: "0.01" })}</pre>
-                <p className="text-xs text-gray-500">MoltFi handles signing and broadcasting. See the <a href="https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md#3-deposit-eth" className="text-indigo-400 hover:underline">full skill reference</a> for all endpoints.</p>
-              </div>
-            </div>
-          </div>
+
         </>
       )}
     </div>

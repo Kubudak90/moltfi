@@ -1,19 +1,29 @@
 'use client'
 
 import { useAgentContext } from '../components/AgentContext'
+import { useState } from 'react'
 
 export default function AgentPage() {
   const { agents, hasAgent, hasVault, vaults } = useAgentContext()
+  const [copied, setCopied] = useState(false)
+
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
   if (!hasVault) {
     return (
       <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-500">
-        Create a vault first, then connect your agent.
+        Connect your wallet and create a vault first.
       </div>
     )
   }
 
   const agent = hasAgent ? agents[0] : null
+
+  const copySkillCmd = () => {
+    navigator.clipboard.writeText(`curl -s ${origin}/api/skill`)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
@@ -21,49 +31,57 @@ export default function AgentPage() {
 
       {hasAgent ? (
         <>
-          {/* Status */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-3 h-3 rounded-full bg-green-400" />
-              <span className="font-medium">{agent?.agentName}</span>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-4 text-xs">
-              <div>
-                <span className="text-gray-500">Registered</span>
-                <div className="text-gray-300 mt-0.5">{agent?.registeredAt ? new Date(agent.registeredAt).toLocaleDateString() : '—'}</div>
+          {/* Connected agent */}
+          <div className="bg-gray-900 border border-green-500/20 rounded-xl p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-green-400" />
+                <span className="font-medium">{agent?.agentName}</span>
+                <span className="text-xs text-gray-500">connected</span>
               </div>
-              <div>
-                <span className="text-gray-500">Vault</span>
-                <div className="mt-0.5">
-                  <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-                    className="font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
-                </div>
-              </div>
-              <div>
-                <span className="text-gray-500">Auth</span>
-                <div className="text-gray-300 mt-0.5">API key (mf_...)</div>
-              </div>
+              <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
+                className="text-xs font-mono text-indigo-400 hover:underline">vault {(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
             </div>
           </div>
 
-          {/* Connection info */}
+          {/* Skill file */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-3">
-            <h3 className="font-medium">Connect your agent</h3>
-            <pre className="bg-gray-800/50 rounded-lg p-4 text-xs text-gray-300 overflow-x-auto">{`curl -X POST ${typeof window !== 'undefined' ? window.location.origin : ''}/api/agent \\
+            <h3 className="font-medium">Skill file</h3>
+            <p className="text-sm text-gray-400">Give your agent this URL. It contains everything it needs — registration, trading, deposits, all endpoints.</p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 bg-gray-800 rounded-lg px-4 py-2.5 text-sm text-indigo-400 font-mono overflow-x-auto">
+                curl -s {origin}/api/skill
+              </code>
+              <button onClick={copySkillCmd} className="bg-gray-800 hover:bg-gray-700 px-3 py-2.5 rounded-lg text-sm transition shrink-0">
+                {copied ? '✓' : 'Copy'}
+              </button>
+            </div>
+          </div>
+
+          {/* Example usage */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-3">
+            <h3 className="font-medium">Example request</h3>
+            <pre className="bg-gray-800/50 rounded-lg p-4 text-xs text-gray-300 overflow-x-auto">{`curl -X POST ${origin}/api/agent \\
   -H "Authorization: Bearer mf_your_key" \\
   -H "Content-Type: application/json" \\
   -d '{"message": "swap 0.001 WETH to USDC"}'`}</pre>
-            <p className="text-xs text-gray-600">
-              Or download the skill: <code className="bg-gray-800 px-1.5 py-0.5 rounded">curl -o moltfi.sh {typeof window !== 'undefined' ? window.location.origin : ''}/api/skill/script</code>
-            </p>
+            <p className="text-xs text-gray-500">Any plain English message works — check balance, swap tokens, deposit, check rates.</p>
           </div>
         </>
       ) : (
+        /* No agent — show how to connect */
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-          <div className="text-lg font-medium">Register an agent</div>
-          <pre className="bg-gray-800/50 rounded-lg p-4 text-xs text-gray-300 overflow-x-auto">{`curl -X POST ${typeof window !== 'undefined' ? window.location.origin : ''}/api/agent/register \\
-  -H "Content-Type: application/json" \\
-  -d '{"agentName": "my-agent", "wallet": "0x..."}'`}</pre>
+          <h3 className="font-medium">Connect your agent</h3>
+          <p className="text-sm text-gray-400">Give your AI agent this skill file. It will register itself and start trading within your guardrails.</p>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 bg-gray-800 rounded-lg px-4 py-2.5 text-sm text-indigo-400 font-mono overflow-x-auto">
+              curl -s {origin}/api/skill
+            </code>
+            <button onClick={copySkillCmd} className="bg-gray-800 hover:bg-gray-700 px-3 py-2.5 rounded-lg text-sm transition shrink-0">
+              {copied ? '✓' : 'Copy'}
+            </button>
+          </div>
+          <p className="text-xs text-gray-500">The skill file contains full instructions for any AI agent — OpenClaw, ChatGPT, Claude, or any agent that can make HTTP calls.</p>
         </div>
       )}
     </div>

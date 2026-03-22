@@ -71,7 +71,7 @@ export default function Home() {
 
         <div className="space-y-4 max-w-2xl mx-auto">
           {[
-            { step: '1', title: 'Register your agent', desc: 'Your agent reads one skill file and registers with your wallet address. A vault is created automatically with default guardrails.' },
+            { step: '1', title: 'Give your agent the skill file', desc: 'One command: curl -s /api/skill — your agent reads it, registers itself, and gets an API key. Vault created automatically.' },
             { step: '2', title: 'Set your limits', desc: 'On the dashboard, set max trade size and daily volume cap. These get written to a smart contract — the agent literally cannot exceed them.' },
             { step: '3', title: 'Your agent trades', desc: 'Your agent sends plain English requests. MoltFi routes them through the vault — the blockchain enforces your guardrails on every transaction.' },
             { step: '4', title: 'Verify everything', desc: 'Every trade has a Basescan link. Click it to see the on-chain proof that guardrails were checked before the swap executed.' },
