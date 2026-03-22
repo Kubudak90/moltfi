@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createWalletClient, createPublicClient, http, encodeFunctionData, parseEther } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import { baseSepolia } from 'viem/chains'
-
-const VAULT = '0x333896c4c1b58c5c9b56967301c008C073Bd2279' as const
+import { lookupVault } from '../lookup'
 
 const vaultAbi = [
   {
@@ -31,6 +30,11 @@ export async function POST(req: NextRequest) {
     const walletClient = createWalletClient({ account, chain: baseSepolia, transport: http() })
     const publicClient = createPublicClient({ chain: baseSepolia, transport: http() })
 
+    const vault = await lookupVault(account.address)
+    if (!vault) {
+      return NextResponse.json({ error: 'No vault found. Create a vault first.' }, { status: 404 })
+    }
+
     const amountRaw = parseEther(amount.toString())
 
     const data = encodeFunctionData({
@@ -39,7 +43,7 @@ export async function POST(req: NextRequest) {
       args: [amountRaw],
     })
 
-    const hash = await walletClient.sendTransaction({ to: VAULT, data } as any)
+    const hash = await walletClient.sendTransaction({ to: vault as `0x${string}`, data } as any)
     const receipt = await publicClient.waitForTransactionReceipt({ hash })
 
     return NextResponse.json({
@@ -47,6 +51,7 @@ export async function POST(req: NextRequest) {
       txHash: hash,
       status: receipt.status,
       amount: `${amount} ETH staked via Lido`,
+      vault,
       explorer: `https://sepolia.basescan.org/tx/${hash}`,
       note: 'ETH staked into Lido via vault. ETH → stETH → wstETH. Principal tracked — only yield above principal can be traded.',
     })

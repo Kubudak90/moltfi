@@ -37,11 +37,12 @@ export async function GET(req: NextRequest) {
       { name: 'balance', type: 'function', stateMutability: 'view', inputs: [{ name: 'token', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] },
     ]
 
-    const [owner, agent, wethBalance, usdcBalance] = await Promise.all([
+    const [owner, agent, wethBalance, usdcBalance, ethBalance] = await Promise.all([
       client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'owner' } as any),
       client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'agent' } as any),
       client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [WETH] } as any),
       client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [USDC] } as any),
+      client.getBalance({ address: vaultAddress as `0x${string}` }),
     ])
 
     // Get policy
@@ -63,6 +64,7 @@ export async function GET(req: NextRequest) {
       owner,
       agent,
       balances: {
+        ETH: formatEther(ethBalance as bigint),
         WETH: formatEther(wethBalance as bigint),
         USDC: (Number(usdcBalance) / 1000000).toString(),
       },
