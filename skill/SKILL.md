@@ -91,7 +91,7 @@ echo '{"baseUrl": "https://moltfi.app", "apiKey": "mf_YOUR_KEY"}' > config.json
 
 - **AgentPolicy** — on-chain spending limits (max per trade, daily cap). Human sets. Agent can't change.
 - **AgentGuardRouter** — wraps Uniswap V3. Checks policy before every swap.
-- **AgentVault** — holds funds. Only the agent can trade (through the router). Only the human can withdraw.
+- **AgentVault** — holds funds. MoltFi executes trades through the router. Only the human can withdraw.
 - **Venice AI** — private inference, zero data retention. All strategy reasoning is private. All trades are public blockchain transactions.
 
 ## Sponsor Tech

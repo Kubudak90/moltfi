@@ -7,7 +7,6 @@ const DB_PATH = join(process.cwd(), 'data', 'agents.json')
 
 interface AgentRegistration {
   apiKey: string
-  agentWallet: string
   humanWallet: string
   vault: string
   agentName: string
@@ -104,7 +103,6 @@ export async function POST(req: NextRequest) {
 
     const registration: AgentRegistration = {
       apiKey,
-      agentWallet: '',
       humanWallet: humanWallet.toLowerCase(),
       vault,
       agentName: agentName || 'Unknown Agent',
