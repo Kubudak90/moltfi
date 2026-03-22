@@ -35,12 +35,6 @@ export default function DashboardClient() {
   const [perf, setPerf] = useState<any>(null)
   const [activity, setActivity] = useState<any[]>([])
 
-  // Load cached strategy name from localStorage
-  const [cachedStrategy, setCachedStrategy] = useState<any>(() => {
-    if (typeof window === 'undefined') return null
-    try { return JSON.parse(localStorage.getItem('ag_active_strategy') || 'null') } catch { return null }
-  })
-
   useEffect(() => {
     if (vaults[0]) {
       fetch(`/api/vault/performance?vault=${vaults[0]}`)
@@ -330,8 +324,8 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                 <div className={`w-2.5 h-2.5 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
                 <span className={`font-semibold ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
                   {vaultData?.policy?.active
-                    ? (cachedStrategy?.name || 'Strategy Active')
-                    : 'No Active Strategy'}
+                    ? 'Trading Policy Active'
+                    : 'No Active Policy'}
                 </span>
               </div>
               <a href="/strategy" className="text-xs text-indigo-400 hover:underline">
@@ -341,11 +335,6 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
 
             {vaultData?.policy?.active ? (
               <div className="space-y-3">
-                {/* Strategy description if available */}
-                {cachedStrategy?.description && (
-                  <p className="text-sm text-gray-400">{cachedStrategy.description}</p>
-                )}
-
                 {/* What each asset is doing */}
                 <div className="space-y-2">
                   {parseFloat(vaultData?.balances?.WETH || '0') > 0 && (
@@ -402,7 +391,7 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                 )}
               </div>
             ) : (
-              <p className="text-sm text-gray-500">Your vault has funds but no active strategy. The agent can&apos;t trade until you approve a strategy on the <a href="/strategy" className="text-indigo-400 hover:underline">Strategy page</a>.</p>
+              <p className="text-sm text-gray-500">Your vault has funds but no trading policy. The agent can&apos;t trade until you approve one on the <a href="/strategy" className="text-indigo-400 hover:underline">Strategy page</a>.</p>
             )}
           </div>
 

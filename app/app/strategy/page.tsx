@@ -241,37 +241,13 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
-                <span className="font-semibold text-lg text-green-400">Active Strategy</span>
+                <span className="font-semibold text-lg text-green-400">Trading Policy Active</span>
               </div>
-              {cachedStrategy && (
-                <span className="text-sm text-indigo-400 font-medium">{cachedStrategy.expectedYield}</span>
-              )}
             </div>
 
-            {/* Strategy name & description if we have cached details */}
-            {cachedStrategy ? (
-              <div className="mb-5">
-                <div className="font-medium text-lg mb-1">{cachedStrategy.name}</div>
-                <p className="text-sm text-gray-400">{cachedStrategy.description}</p>
-                {cachedStrategy.steps && (
-                  <div className="bg-gray-800/40 rounded-lg p-4 mt-3">
-                    <div className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">What the agent does</div>
-                    {cachedStrategy.steps.map((step, j) => (
-                      <div key={j} className="flex items-start gap-2 text-sm mb-1.5">
-                        <span className="text-indigo-400 shrink-0">{j + 1}.</span>
-                        <span className="text-gray-300">{step}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* No cached details — policy is active but we don't know which strategy name.
-                 This happens on a new browser or cleared cache. Show on-chain data. */
-              <div className="mb-5">
-                <p className="text-sm text-gray-400">A trading policy is active on your vault. The on-chain guardrails below are what the agent is operating within.</p>
-              </div>
-            )}
+            <div className="mb-5">
+              <p className="text-sm text-gray-400">Your agent can trade within the guardrails below. Every trade is a blockchain transaction — verifiable on Basescan.</p>
+            </div>
 
             {/* On-chain guardrails — always shown, always real */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
