@@ -1,13 +1,9 @@
 'use client'
 
 import { useAgentContext } from '../components/AgentContext'
-import { useState } from 'react'
 
 export default function AgentPage() {
   const { agents, hasAgent, hasVault, vaults } = useAgentContext()
-  const [testMsg, setTestMsg] = useState('')
-  const [testResult, setTestResult] = useState<string | null>(null)
-  const [testing, setTesting] = useState(false)
 
   if (!hasVault) {
     return (
@@ -18,24 +14,6 @@ export default function AgentPage() {
   }
 
   const agent = hasAgent ? agents[0] : null
-
-  const sendTest = async () => {
-    if (!testMsg.trim()) return
-    setTesting(true)
-    setTestResult(null)
-    try {
-      const res = await fetch('/api/agent', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: testMsg }),
-      })
-      const data = await res.json()
-      setTestResult(data.reply || data.error || JSON.stringify(data))
-    } catch (e: any) {
-      setTestResult(e.message)
-    }
-    setTesting(false)
-  }
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
@@ -66,24 +44,6 @@ export default function AgentPage() {
                 <div className="text-gray-300 mt-0.5">API key (mf_...)</div>
               </div>
             </div>
-          </div>
-
-          {/* Test console */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
-            <h3 className="font-medium">Send a message</h3>
-            <div className="flex gap-2">
-              <input type="text" value={testMsg} onChange={e => setTestMsg(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && sendTest()}
-                placeholder="Try: what's my balance? — or: swap 0.001 WETH to USDC"
-                className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
-              <button onClick={sendTest} disabled={testing || !testMsg.trim()}
-                className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-sm px-4 py-2 rounded-lg transition shrink-0">
-                {testing ? 'Sending...' : 'Send'}
-              </button>
-            </div>
-            {testResult && (
-              <div className="bg-gray-800/50 rounded-lg p-4 text-sm text-gray-300 whitespace-pre-wrap">{testResult}</div>
-            )}
           </div>
 
           {/* Connection info */}
