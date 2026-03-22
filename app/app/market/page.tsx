@@ -51,6 +51,26 @@ export default function MarketPage() {
         </div>
       </div>
 
+      {/* Coming Soon */}
+      <div className="bg-gray-900 border border-gray-800/50 rounded-xl p-6 opacity-60">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-400">Coming Soon</h2>
+          <span className="text-xs px-2 py-0.5 rounded bg-gray-800 text-gray-500 border border-gray-700">Not yet integrated</span>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {[
+            { name: 'Aave', desc: 'Lending protocol — supply assets to earn interest', color: 'border-gray-700' },
+            { name: 'Compound', desc: 'Lending protocol — earn yield by supplying assets', color: 'border-gray-700' },
+          ].map(p => (
+            <div key={p.name} className={`border ${p.color} rounded-xl p-4`}>
+              <div className="font-medium text-gray-400 mb-1">{p.name}</div>
+              <div className="text-sm text-gray-600">{p.desc}</div>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-gray-600 mt-3">These protocols are on the roadmap but not currently connected. No data is being pulled from them.</p>
+      </div>
+
       {/* How market data is used */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <h3 className="font-semibold mb-3">How Your Agent Uses This Data</h3>
