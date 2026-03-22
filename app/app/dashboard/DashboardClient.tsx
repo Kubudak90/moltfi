@@ -267,44 +267,23 @@ export default function DashboardClient() {
                     </div>
                   </div>
 
-                  {/* Guardrails */}
+                  {/* Guardrails summary */}
                   {vaultData?.policy?.active ? (
-                    <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-4 space-y-3">
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div>
-                          <div className="text-xs text-gray-500">Max per trade</div>
-                          <div className="text-lg font-bold">{vaultData.policy.maxPerAction} ETH</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500">Daily limit</div>
-                          <div className="text-lg font-bold">{vaultData.policy.dailyLimit} ETH</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500">Used today</div>
-                          <div className="text-lg font-bold">{vaultData.policy.dailySpent} ETH</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500">Remaining</div>
-                          <div className="text-lg font-bold text-green-400">{vaultData.policy.remaining} ETH</div>
-                        </div>
+                    <a href="/guardrails" className="flex items-center justify-between bg-gray-800/30 rounded-lg p-3 hover:bg-gray-800/50 transition">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-2 h-2 rounded-full bg-green-400" />
+                        <span className="text-gray-400">Guardrails active — {vaultData.policy.maxPerAction} ETH/trade, {vaultData.policy.remaining} ETH remaining today</span>
                       </div>
-                      <div className="flex items-center justify-between pt-2 border-t border-gray-800/50 text-xs">
-                        <span className="text-gray-600">
-                          Enforced by <a href="https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc#readContract" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">AgentPolicy</a> — any trade exceeding limits reverts on-chain
-                        </span>
-                        <a href="/strategy" className="text-indigo-400 hover:underline shrink-0 ml-2">Change limits →</a>
-                      </div>
-                    </div>
+                      <span className="text-xs text-indigo-400">Manage →</span>
+                    </a>
                   ) : (
-                    <div className="bg-gray-800/30 border border-yellow-500/20 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-sm font-medium text-yellow-400">No guardrails set</div>
-                          <div className="text-xs text-gray-500 mt-1">The agent cannot trade until limits are configured.</div>
-                        </div>
-                        <a href="/strategy" className="text-xs text-indigo-400 hover:underline">Set limits →</a>
+                    <a href="/guardrails" className="flex items-center justify-between bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3 hover:bg-yellow-500/10 transition">
+                      <div className="flex items-center gap-3 text-sm">
+                        <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                        <span className="text-yellow-400">No guardrails set — agent cannot trade</span>
                       </div>
-                    </div>
+                      <span className="text-xs text-indigo-400">Set up →</span>
+                    </a>
                   )}
 
                   {/* Deposit */}
