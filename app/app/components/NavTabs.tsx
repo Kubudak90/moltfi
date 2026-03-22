@@ -15,10 +15,13 @@ const tabs = [
 export function NavTabs() {
   const pathname = usePathname()
 
+  // Don't show tabs on landing page
+  if (pathname === '/') return null
+
   return (
-    <div className="border-b border-gray-800 bg-[#09090b]/80 backdrop-blur-sm sticky top-14 z-40">
+    <div className="border-b border-gray-800 bg-[#09090b]/80 backdrop-blur-sm sticky top-14 z-40 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="flex gap-1 overflow-x-auto">
+        <div className="flex gap-1 overflow-x-auto scrollbar-hide">
           {tabs.map(tab => {
             const active = pathname === tab.href
             return (
