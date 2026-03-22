@@ -4,7 +4,11 @@ import { Providers } from './providers'
 import { ConnectWallet } from './components/ConnectWallet'
 import { NavTabs } from './components/NavTabs'
 
-export const metadata = { title: 'AgentGuard — AI Vault Manager', description: 'Manage your DeFi positions with an AI agent, protected by on-chain guardrails' }
+export const metadata = {
+  title: 'AgentGuard — AI Vault Manager',
+  description: 'Manage your DeFi positions with an AI agent, protected by on-chain guardrails',
+  icons: { icon: '/favicon.svg' },
+}
 
 import { PrivacyIndicator } from './components/PrivacyIndicator'
 
