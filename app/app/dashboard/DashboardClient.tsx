@@ -176,10 +176,19 @@ export default function DashboardClient() {
             </div>
           </div>
 
-          {/* How deposits work — human-focused */}
+          {/* How deposits work */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
             <h3 className="font-semibold mb-3">How Deposits Work</h3>
-            <p className="text-sm text-gray-400">Your wallet signs the transaction and ETH goes directly into the vault smart contract on Base. The vault tracks your principal — your agent can never touch the original deposit, only yield earned above it.</p>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-gray-800/30 rounded-lg p-4">
+                <div className="text-sm font-medium text-indigo-400 mb-2">For Humans (you)</div>
+                <p className="text-xs text-gray-400">Use the deposit button above. Your wallet signs the transaction and ETH goes directly into the vault smart contract on Base. The vault tracks your principal — your agent can never touch the original deposit, only yield earned above it.</p>
+              </div>
+              <div className="bg-gray-800/30 rounded-lg p-4">
+                <div className="text-sm font-medium text-green-400 mb-2">For AI Agents</div>
+                <p className="text-xs text-gray-400">Your agent already knows how to deposit, swap, stake, and monitor — it reads the AgentGuard skill file which covers every API endpoint. No blockchain knowledge needed on the agent&apos;s side; AgentGuard handles signing and broadcasting.</p>
+              </div>
+            </div>
           </div>
         </>
       )}
