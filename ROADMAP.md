@@ -1,6 +1,6 @@
-# AgentGuard — Master Roadmap
+# MoltFi — Master Roadmap
 
-**STATUS: BUILD COMPLETE. SUBMISSION TOMORROW MORNING.**
+**STATUS: Post-hackathon polish. Rebranded AgentGuard → MoltFi.**
 
 Deadline: **March 22, 2026 11:59 PM PST** (March 23 07:59 UTC)
 Current: March 21, 11:42 PM UTC → **~32 hours left**
@@ -902,3 +902,103 @@ The API never holds keys. It builds transactions. The agent signs them. This is 
 5. No code changes to contracts or frontend logic
 
 That's it. The architecture is chain-agnostic by design.
+
+---
+
+## 12. AUDIT — March 22, 2026
+
+### Brand
+- Renamed AgentGuard → MoltFi across all user-facing code (16 files)
+- `agentguard.app` references updated to `moltfi.app`
+- Contract names on-chain unchanged (already deployed)
+
+### 🔴 BUGS & FALSE CLAIMS (must fix)
+
+**1. Chat system prompt claims Aave & Uniswap LP — NOT available**
+- `app/api/chat/route.ts` SYSTEM_PROMPT references "Aave: USDC lending" and "Uniswap V3: Liquidity provision"
+- We only have Uniswap swaps + Lido staking. Advisor will propose impossible strategies.
+- **Fix:** Remove Aave, change Uniswap to swaps-only in system prompt.
+
+**2. Landing page lists ENS, Celo, ERC-8004 as integrated tech — they're not**
+- ENS: `/api/ens` exists but only does name→address lookup. Not used by anything.
+- Celo: rates API reads cUSD supply. Nothing in the app uses it.
+- ERC-8004: Listed as "On-chain agent identity" but no ERC-8004 code in MoltFi.
+- **Fix:** Remove from landing page tech grid, or add honest descriptions.
+
+**3. wstETH token has zero address `0x000...000` on guardrails page**
+- `app/guardrails/page.tsx` line 14: wstETH address is all zeros
+- Toggling it would approve the zero address on-chain
+- **Fix:** Either get real wstETH address on Base Sepolia or remove from UI.
+
+**4. `/api/register` is dead/legacy**
+- Returns empty response. Duplicate of `/api/agent/register`.
+- **Fix:** Delete `app/api/register/route.ts`.
+
+**5. `/api/vault/stake` fails — "not owner" error**
+- Tries to stake from Kyro's hardcoded wallet, not the vault owner's
+- **Fix:** Needs to be called by vault owner or rethink signing flow.
+
+**6. `/api/vault/swap` — nonce/gas issues**
+- "replacement transaction underpriced" error on test
+- May need nonce management or gas estimation fix
+- **Fix:** Investigate nonce handling, add retry logic.
+
+### 🟡 NEEDS WORK
+
+**7. No API auth on swap/deposit endpoints**
+- Anyone can call `/api/vault/deposit` or `/api/vault/swap` if they know the vault address
+- Server signs with Kyro's key — any caller triggers real transactions
+- On-chain policy limits damage but it's still sloppy
+- **Fix:** Add API key or signature-based auth for agent endpoints.
+
+**8. Private Mode was a flag, not enforced — NOW FIXED**
+- Chat + pipeline APIs now check vault private mode status
+- If Venice is down and private mode ON → 503 error instead of fallback
+- Response always includes `provider: "venice"`, `privateMode: bool`
+
+**9. Strategy page was localStorage-dependent — NOW FIXED**
+- Strategy page now uses `vaultData.policy.active` as source of truth
+- If policy active on-chain but no cached strategy → still shows active with on-chain guardrails
+- Vault page now shows strategy status bar
+
+**10. Overview section had unrealistic numbers — NOW FIXED**
+- Performance API was extrapolating 1 testnet trade into 514,453% APR
+- Now shows actual P&L %, only annualizes after 7+ days
+- ETH price fixed with Coinbase fallback (CoinGecko rate-limits)
+
+**11. "Change Strategy" nuked active state — NOW FIXED**
+- Now shows back button, doesn't clear active strategy
+
+### ✅ WORKING CORRECTLY (verified March 22)
+
+| Endpoint/Feature | Status | Notes |
+|---|---|---|
+| `/api/rates` | ✅ | ETH $2,117 (Coinbase fallback working), Lido 2.42%, gas 0.006 gwei |
+| `/api/policy` | ✅ | Reads live: active=true, maxPerAction=1 ETH |
+| `/api/vault/status` | ✅ | Real balances: 0.03 ETH, 0.004 WETH, 0.60 USDC |
+| `/api/vault/activity` | ✅ | 4 real on-chain events with tx hashes |
+| `/api/vault/performance` | ✅ | Fixed ETH price ($2,115), 1 trade, realistic return |
+| `/api/vault/private-mode` | ✅ | Toggle works, privateMode=true |
+| `/api/vault/yield` | ✅ | principal=0, yield=0 (correct for current state) |
+| `/api/chat` | ✅ | Venice AI working, private mode enforcement |
+| `/api/pipeline` | ✅ | Venice AI working, private mode enforcement |
+| `/api/skill` | ✅ | Serves MoltFi skill file |
+| `/api/agent/register` | ✅ | Kyro registered as agent |
+| `/api/vault/deposit` | ✅ | Works (deposited 0.001 ETH in test) |
+| Strategy page | ✅ | On-chain source of truth, back button, real guardrail values |
+| Activity page | ✅ | Real blockchain data, Basescan links |
+| Guardrails page | ✅ | Reads/writes on-chain, private mode toggle |
+| Overview section | ✅ | Condensed, realistic numbers |
+
+### 📋 TODO (Priority Order)
+
+1. [ ] Remove false claims from landing page (Aave, ENS, Celo, ERC-8004)
+2. [ ] Fix chat system prompt — only Lido staking + Uniswap swaps
+3. [ ] Fix wstETH zero address on guardrails page
+4. [ ] Delete dead `/api/register` endpoint
+5. [ ] Install Venice as OpenClaw model provider → test agent-to-agent flow
+6. [ ] Add basic auth to swap/deposit API endpoints
+7. [ ] Fix `/api/vault/stake` owner check
+8. [ ] Fix `/api/vault/swap` nonce management
+9. [ ] Add "switching strategy" confirmation (will revoke old + set new)
+10. [ ] Private Mode toggle from PrivacyIndicator (currently only on Guardrails page)
