@@ -128,38 +128,32 @@ export default function DashboardClient() {
       {hasVault && (
         <>
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            {/* Vault identity — prominent */}
+            {/* Vault header — compact, horizontal */}
             <div className="mb-6">
-              <h2 className="text-xl font-semibold mb-3">Your Vault</h2>
-              <div className="bg-gray-800/50 rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="text-xs text-gray-500 uppercase tracking-wider">Vault Contract</div>
+              <div className="flex items-center justify-between mb-2">
+                <h2 className="text-xl font-semibold">Your Vault</h2>
+                <span className="text-xs text-gray-600">Smart contract on Base</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">Contract</span>
                   <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-                    className="text-xs text-indigo-400 hover:underline">View on Basescan →</a>
+                    className="font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
                 </div>
-                <div className="font-mono text-sm text-white break-all">{vaults[0]}</div>
-
-                <div className="border-t border-gray-700 pt-3 flex items-center justify-between">
-                  <div>
-                    <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Owner</div>
-                    <div className="font-mono text-sm text-white break-all">{address}</div>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500">Owner</span>
+                  <a href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener"
+                    className="font-mono text-white hover:text-indigo-400">{address?.slice(0, 6)}...{address?.slice(-4)}</a>
                 </div>
-
                 {hasAgent && (
-                  <div className="border-t border-gray-700 pt-3 flex items-center justify-between">
-                    <div>
-                      <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Agent</div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-400" />
-                        <span className="text-sm text-white">{agents[0].agentName}</span>
-                        <span className="text-xs text-gray-500 font-mono">{agents[0].agentWallet}</span>
-                      </div>
-                    </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-green-400" />
+                    <span className="text-xs text-gray-500">Agent</span>
+                    <a href={`https://sepolia.basescan.org/address/${agents[0].agentWallet}`} target="_blank" rel="noopener"
+                      className="font-mono text-white hover:text-indigo-400">{agents[0].agentName}</a>
                   </div>
                 )}
               </div>
-              <p className="text-xs text-gray-600 mt-2">Your vault is a smart contract on Base that holds your funds. Only your wallet can withdraw or change guardrails — not even AgentGuard can touch it.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 mb-6">
