@@ -41,8 +41,6 @@ export default function MarketPage() {
           {[
             { name: 'Lido', desc: 'Liquid staking — deposit ETH, receive stETH that earns yield', yield: rates?.lido ? `${rates.lido.smaApr.toFixed(2)}% APR` : null, color: 'border-blue-500/40' },
             { name: 'Uniswap V3', desc: 'Decentralized exchange — swap tokens at market rates', yield: null, color: 'border-pink-500/40' },
-            { name: 'Aave', desc: 'Lending protocol — supply assets to earn interest', yield: null, color: 'border-purple-500/40' },
-            { name: 'Compound', desc: 'Lending protocol — earn yield by supplying assets', yield: null, color: 'border-green-500/40' },
           ].map(p => (
             <div key={p.name} className={`border ${p.color} rounded-xl p-4`}>
               <div className="font-medium mb-1">{p.name}</div>
