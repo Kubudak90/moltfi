@@ -28,7 +28,7 @@ export default function DashboardClient() {
   const { agents, vaults, vaultData, hasAgent, hasVault, ethPrice, rates, refreshVaults } = useAgentContext()
   const [depositAmount, setDepositAmount] = useState('0.01')
   const [withdrawToken, setWithdrawToken] = useState<'ETH'|'WETH'|'USDC'>('ETH')
-  const [withdrawAmount, setWithdrawAmount] = useState('')
+  const [withdrawAmount, setWithdrawAmount] = useState('0.01')
   const [txStatus, setTxStatus] = useState('')
   const [error, setError] = useState('')
   const [copied, setCopied] = useState(false)
