@@ -1,18 +1,30 @@
 {
-  "name": "agentguard",
-  "version": "1.0.0",
-  "description": "On-chain spending limits for autonomous AI agents — Uniswap v4 hook",
-  "type": "module",
+  "name": "moltfi-dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
-    "demo": "npx tsx src/demo/pipeline.ts",
-    "demo:guard": "npx tsx src/demo/guard-check.ts"
+    "dev": "next dev --hostname 100.71.117.120 --port 3002",
+    "build": "next build",
+    "start": "next start"
   },
   "dependencies": {
-    "tailwindcss": "^4.2.2",
-    "viem": "^2.23.0"
+    "@tanstack/react-query": "^5.94.5",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "next": "^16.2.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typescript": "^5.9.3",
+    "viem": "^2.47.6",
+    "wagmi": "^2.19.5"
   },
   "devDependencies": {
-    "tsx": "^4.19.0",
-    "typescript": "^5.7.0"
+    "@tailwindcss/postcss": "^4.2.2",
+    "@types/node": "25.5.0",
+    "postcss": "^8.5.8",
+    "tailwindcss": "^4.2.2"
   }
 }
