@@ -254,40 +254,65 @@ export default function DashboardClient() {
                     </div>
                   </div>
 
-                  {/* Guardrails */}
-                  <div className="bg-gray-800/30 rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
-                        <span className={`text-sm font-medium ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
-                          {vaultData?.policy?.active ? 'Guardrails Active' : 'No Guardrails Set'}
-                        </span>
+                  {/* On-Chain Guardrails — verifiable proof */}
+                  {vaultData?.policy?.active ? (
+                    <div className="bg-gray-800/30 border border-green-500/10 rounded-lg p-4 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-green-400">On-Chain Enforcement</span>
+                        <a href={`https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc#readContract`}
+                          target="_blank" rel="noopener"
+                          className="text-xs text-indigo-400 hover:underline">Verify on Basescan →</a>
+                      </div>
+
+                      {/* The actual limits — from chain, not from us */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-gray-900/50 rounded-lg p-3">
+                          <div className="text-xs text-gray-500 mb-1">Max per trade</div>
+                          <div className="text-lg font-bold text-gray-200">{vaultData.policy.maxPerAction} ETH</div>
+                          <div className="text-xs text-gray-600 mt-1">Exceeds this → TX reverts</div>
+                        </div>
+                        <div className="bg-gray-900/50 rounded-lg p-3">
+                          <div className="text-xs text-gray-500 mb-1">Daily limit</div>
+                          <div className="text-lg font-bold text-gray-200">{vaultData.policy.dailyLimit} ETH</div>
+                          <div className="text-xs text-gray-600 mt-1">{vaultData.policy.dailySpent} used · {vaultData.policy.remaining} left</div>
+                        </div>
+                      </div>
+
+                      {/* How it works — the enforcement chain */}
+                      <div className="bg-gray-900/50 rounded-lg p-3">
+                        <div className="text-xs text-gray-500 mb-2">Enforcement chain (every trade)</div>
+                        <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
+                          <span className="bg-gray-800 px-2 py-1 rounded">Trade request</span>
+                          <span className="text-gray-600">→</span>
+                          <a href={`https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6`}
+                            target="_blank" rel="noopener"
+                            className="bg-gray-800 px-2 py-1 rounded text-indigo-400 hover:underline">AgentGuardRouter</a>
+                          <span className="text-gray-600">→</span>
+                          <a href={`https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc`}
+                            target="_blank" rel="noopener"
+                            className="bg-gray-800 px-2 py-1 rounded text-indigo-400 hover:underline">AgentPolicy check</a>
+                          <span className="text-gray-600">→</span>
+                          <span className="bg-gray-800 px-2 py-1 rounded text-green-400">Uniswap V3</span>
+                        </div>
+                        <p className="text-xs text-gray-600 mt-2">If AgentPolicy check fails, the entire transaction reverts — no funds move. These are smart contracts, not software settings.</p>
+                      </div>
+
+                      {/* Contract addresses — anyone can verify */}
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-600">
+                        <span>Policy: <a href="https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc" target="_blank" rel="noopener" className="text-indigo-400/70 hover:underline font-mono">0x6364...06Fbc</a></span>
+                        <span>Router: <a href="https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6" target="_blank" rel="noopener" className="text-indigo-400/70 hover:underline font-mono">0x5Cc0...77E6</a></span>
+                        <span>Vault: <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener" className="text-indigo-400/70 hover:underline font-mono">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a></span>
                       </div>
                     </div>
-                    {vaultData?.policy?.active && (
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Max per trade</div>
-                          <div className="text-sm font-medium text-gray-200">{vaultData.policy.maxPerAction} ETH</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Daily limit</div>
-                          <div className="text-sm font-medium text-gray-200">{vaultData.policy.dailyLimit} ETH</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Used today</div>
-                          <div className="text-sm font-medium text-gray-200">{vaultData.policy.dailySpent} ETH</div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 mb-1">Remaining</div>
-                          <div className="text-sm font-medium text-gray-200">{vaultData.policy.remaining} ETH</div>
-                        </div>
+                  ) : (
+                    <div className="bg-gray-800/30 border border-yellow-500/10 rounded-lg p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                        <span className="text-sm font-medium text-yellow-400">No Guardrails Set</span>
                       </div>
-                    )}
-                    {!vaultData?.policy?.active && (
-                      <p className="text-xs text-gray-500">No trading policy set. The agent cannot trade until guardrails are configured.</p>
-                    )}
-                  </div>
+                      <p className="text-xs text-gray-500">No trading policy on-chain. The agent cannot trade until guardrails are configured.</p>
+                    </div>
+                  )}
 
                   {/* Deposit */}
                   <div className="grid md:grid-cols-2 gap-4 pt-2 border-t border-gray-800/50">
