@@ -33,7 +33,7 @@ export function ConnectWallet() {
 
   if (!mounted) {
     return (
-      <button className="bg-jpm hover:bg-jpm text-sm px-4 py-1.5 rounded-lg transition font-medium">
+      <button className="bg-indigo-600 hover:bg-indigo-600 text-sm px-4 py-1.5 rounded-lg transition font-medium">
         Connect Wallet
       </button>
     )
@@ -44,9 +44,9 @@ export function ConnectWallet() {
       <div className="relative" ref={menuRef}>
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex items-center gap-2 bg-navy-700 hover:bg-navy-600 text-sm px-3 py-1.5 rounded-lg border border-navy-600 transition"
+          className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-sm px-3 py-1.5 rounded-lg border border-gray-800 transition"
         >
-          <div className="w-5 h-5 rounded-full bg-jpm flex items-center justify-center text-[10px] font-bold">
+          <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold">
             {address.slice(2, 4).toUpperCase()}
           </div>
           <span className="font-mono text-xs">{address.slice(0, 6)}...{address.slice(-4)}</span>
@@ -56,23 +56,23 @@ export function ConnectWallet() {
         </button>
 
         {menuOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-navy-800 border border-navy-600 rounded-lg shadow-xl py-1 z-50">
+          <div className="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-lg shadow-xl py-1 z-50">
             <Link href="/dashboard"
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-navy-700 hover:text-white transition">
+              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition">
               Dashboard
             </Link>
             <Link href="/activity"
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-navy-700 hover:text-white transition">
+              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition">
               Activity
             </Link>
             <Link href="/strategy"
-              className="block px-4 py-2 text-sm text-gray-300 hover:bg-navy-700 hover:text-white transition">
+              className="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition">
               Strategy
             </Link>
-            <div className="border-t border-navy-600 my-1" />
+            <div className="border-t border-gray-800 my-1" />
             <button
               onClick={() => { disconnect(); setMenuOpen(false) }}
-              className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-navy-700 transition">
+              className="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-800 transition">
               Disconnect
             </button>
           </div>
@@ -84,7 +84,7 @@ export function ConnectWallet() {
   return (
     <button
       onClick={() => connect({ connector: injected() })}
-      className="bg-jpm hover:bg-jpm text-sm px-4 py-1.5 rounded-lg transition font-medium"
+      className="bg-indigo-600 hover:bg-indigo-600 text-sm px-4 py-1.5 rounded-lg transition font-medium"
     >
       Connect Wallet
     </button>

@@ -15,11 +15,11 @@ type Activity = {
 }
 
 const TYPE_STYLE: Record<string, { icon: string; color: string; bg: string; border: string }> = {
-  deposit: { icon: '↓', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-  swap: { icon: '↔', color: 'text-uni', bg: 'bg-jpm/10', border: 'border-jpm/20' },
+  deposit: { icon: '↓', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' },
+  swap: { icon: '↔', color: 'text-indigo-400', bg: 'bg-indigo-600/10', border: 'border-indigo-500/20' },
   stake: { icon: '⬆', color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-  withdraw: { icon: '↑', color: 'text-gold', bg: 'bg-gold/10', border: 'border-gold/20' },
-  yield: { icon: '◉', color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+  withdraw: { icon: '↑', color: 'text-yellow-400', bg: 'bg-yellow-400/10', border: 'border-yellow-500/20' },
+  yield: { icon: '◉', color: 'text-green-400', bg: 'bg-green-500/10', border: 'border-green-500/20' },
 }
 
 function formatTime(ts: number | null): string {
@@ -62,14 +62,14 @@ export default function ActivityPage() {
         <div className="text-right">
           <div className="text-xs text-gray-500">{activities.length} transaction{activities.length !== 1 ? 's' : ''}</div>
           <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-            className="text-xs text-uni hover:underline">Raw blockchain data →</a>
+            className="text-xs text-indigo-400 hover:underline">Raw blockchain data →</a>
         </div>
       </div>
 
       {loading && <div className="text-center py-12 text-gray-500">Reading from blockchain...</div>}
 
       {!loading && activities.length === 0 && (
-        <div className="bg-navy-800 border border-navy-600 rounded-xl p-12 text-center">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-12 text-center">
           <div className="text-4xl mb-3">📭</div>
           <div className="text-gray-400 font-medium mb-1">No activity yet</div>
           <p className="text-xs text-gray-600">When your agent makes trades, stakes, or deposits, every action shows up here with a plain-English explanation of what happened and whether guardrails were followed.</p>
@@ -83,10 +83,10 @@ export default function ActivityPage() {
             const isExpanded = expanded === tx.txHash
             return (
               <div key={tx.txHash}
-                className={`bg-navy-800 border ${style.border} rounded-xl overflow-hidden transition-all`}>
+                className={`bg-gray-900 border ${style.border} rounded-xl overflow-hidden transition-all`}>
                 {/* Main row — always visible */}
                 <button onClick={() => setExpanded(isExpanded ? null : tx.txHash)}
-                  className="w-full flex items-center gap-4 p-5 text-left hover:bg-navy-700/30 transition">
+                  className="w-full flex items-center gap-4 p-5 text-left hover:bg-gray-800/30 transition">
                   <div className={`w-10 h-10 rounded-full ${style.bg} flex items-center justify-center shrink-0`}>
                     <span className={`text-lg ${style.color}`}>{style.icon}</span>
                   </div>
@@ -102,7 +102,7 @@ export default function ActivityPage() {
 
                 {/* Expanded detail */}
                 {isExpanded && (
-                  <div className="px-5 pb-5 space-y-3 border-t border-navy-600">
+                  <div className="px-5 pb-5 space-y-3 border-t border-gray-800">
                     <div className="pt-4">
                       <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">What happened</div>
                       <p className="text-sm text-gray-300">{tx.detail}</p>
@@ -116,17 +116,17 @@ export default function ActivityPage() {
                     {tx.proof && (
                       <div>
                         <a href={`https://sepolia.basescan.org/tx/${tx.txHash}`} target="_blank" rel="noopener"
-                          className="text-xs text-uni uppercase tracking-wider mb-2 inline-flex items-center gap-1 hover:underline">
+                          className="text-xs text-indigo-400 uppercase tracking-wider mb-2 inline-flex items-center gap-1 hover:underline">
                           On-chain proof
                           <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                         </a>
-                        <div className="bg-navy-700/50 rounded-lg divide-y divide-gray-700/50">
+                        <div className="bg-gray-800/50 rounded-lg divide-y divide-gray-700/50">
                           {Object.entries(tx.proof).map(([key, val]) => (
                             <div key={key} className="flex items-center justify-between px-3 py-2 text-xs">
                               <span className="text-gray-500">{key}</span>
                               <span className={`font-mono ${
-                                val.includes('✓') || val.includes('passed') ? 'text-emerald-400' :
-                                (val as string).startsWith('0x') ? 'text-uni' : 'text-gray-300'
+                                val.includes('✓') || val.includes('passed') ? 'text-green-400' :
+                                (val as string).startsWith('0x') ? 'text-indigo-400' : 'text-gray-300'
                               }`}>
                                 {(val as string).startsWith('0x') ? (
                                   <a href={`https://sepolia.basescan.org/address/${val}`} target="_blank" rel="noopener" className="hover:underline">
@@ -146,7 +146,7 @@ export default function ActivityPage() {
                         <span className="text-xs font-mono text-gray-400">{tx.txHash.slice(0, 20)}...{tx.txHash.slice(-8)}</span>
                       </div>
                       <a href={`https://sepolia.basescan.org/tx/${tx.txHash}`} target="_blank" rel="noopener"
-                        className="text-xs bg-navy-700 hover:bg-navy-600 text-uni px-3 py-1.5 rounded-lg transition">
+                        className="text-xs bg-gray-800 hover:bg-gray-700 text-indigo-400 px-3 py-1.5 rounded-lg transition">
                         Verify on Basescan →
                       </a>
                     </div>
@@ -159,21 +159,21 @@ export default function ActivityPage() {
       )}
 
       {/* What this page is */}
-      <div className="bg-navy-800 border border-navy-600 rounded-xl p-6">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <h3 className="font-semibold mb-3">Your Audit Trail</h3>
         <p className="text-sm text-gray-400 mb-4">
           Every row above is a real blockchain transaction. This isn&apos;t a log file your agent writes — it&apos;s data pulled directly from Base. Your agent can&apos;t edit or hide anything here.
         </p>
         <div className="grid sm:grid-cols-3 gap-4 text-xs">
-          <div className="bg-navy-700/30 rounded-lg p-3">
+          <div className="bg-gray-800/30 rounded-lg p-3">
             <div className="font-medium text-gray-300 mb-1">Plain English</div>
             <div className="text-gray-500">Every action is explained — what happened, why, and whether it followed your rules.</div>
           </div>
-          <div className="bg-navy-700/30 rounded-lg p-3">
+          <div className="bg-gray-800/30 rounded-lg p-3">
             <div className="font-medium text-gray-300 mb-1">Guardrail Checks</div>
             <div className="text-gray-500">Each transaction shows whether trade limits, token allowlists, and principal protection were respected.</div>
           </div>
-          <div className="bg-navy-700/30 rounded-lg p-3">
+          <div className="bg-gray-800/30 rounded-lg p-3">
             <div className="font-medium text-gray-300 mb-1">Independently Verifiable</div>
             <div className="text-gray-500">Click &ldquo;Verify on Basescan&rdquo; to see the raw transaction on the blockchain. No trust required.</div>
           </div>

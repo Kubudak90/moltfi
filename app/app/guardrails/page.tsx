@@ -23,9 +23,9 @@ const FACTORY_ABI = [
 function StatusBadge({ active, label }: { active: boolean; label: string }) {
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-      active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-navy-700 text-gray-500 border border-navy-600'
+      active ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-gray-800 text-gray-500 border border-gray-800'
     }`}>
-      <div className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-emerald-400' : 'bg-gray-600'}`} />
+      <div className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-green-400' : 'bg-gray-600'}`} />
       {label}
     </span>
   )
@@ -185,7 +185,7 @@ export default function GuardrailsPage() {
   const dailySpent = parseFloat(policy?.dailySpent || '0')
   const dailyLimitNum = parseFloat(origDaily || '0')
   const usagePercent = dailyLimitNum > 0 ? Math.min((dailySpent / dailyLimitNum) * 100, 100) : 0
-  const usageColor = usagePercent > 80 ? 'bg-red-500' : usagePercent > 50 ? 'bg-gold' : 'bg-emerald-500'
+  const usageColor = usagePercent > 80 ? 'bg-red-500' : usagePercent > 50 ? 'bg-yellow-400' : 'bg-green-500'
 
   return (
     <div className={`max-w-4xl mx-auto px-6 py-8 space-y-6 ${hasChanges ? 'pb-28' : ''}`}>
@@ -196,14 +196,14 @@ export default function GuardrailsPage() {
           <p className="text-sm text-gray-500">Controls enforced on your agent — on-chain and off-chain</p>
         </div>
         <a href={`https://sepolia.basescan.org/address/${POLICY_ADDR}`} target="_blank" rel="noopener"
-          className="text-sm text-uni hover:underline">View Contract →</a>
+          className="text-sm text-indigo-400 hover:underline">View Contract →</a>
       </div>
 
       {/* ========== PRIVATE MODE ========== */}
-      <div className={`rounded-xl p-6 border transition ${privateMode ? 'bg-jpm/5 border-uni/30' : 'bg-navy-800 border-navy-600'}`}>
+      <div className={`rounded-xl p-6 border transition ${privateMode ? 'bg-indigo-600/5 border-indigo-500/30' : 'bg-gray-900 border-gray-800'}`}>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <svg className={`w-6 h-6 ${privateMode ? 'text-gold' : 'text-gray-600'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg className={`w-6 h-6 ${privateMode ? 'text-yellow-400' : 'text-gray-600'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
             <div>
@@ -214,23 +214,23 @@ export default function GuardrailsPage() {
           <button
             onClick={togglePrivateMode}
             disabled={toggling || !pmLoaded}
-            className={`relative w-14 h-7 rounded-full transition-colors ${privateMode ? 'bg-jpm' : 'bg-gray-700'} ${toggling ? 'opacity-50' : 'cursor-pointer'}`}
+            className={`relative w-14 h-7 rounded-full transition-colors ${privateMode ? 'bg-indigo-600' : 'bg-gray-700'} ${toggling ? 'opacity-50' : 'cursor-pointer'}`}
           >
             <div className={`absolute top-0.5 w-6 h-6 bg-white rounded-full shadow transition-transform ${privateMode ? 'translate-x-7' : 'translate-x-0.5'}`} />
           </button>
         </div>
         {privateMode ? (
           <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2 text-gold-light">
-              <span className="text-emerald-400">✓</span>
+            <div className="flex items-center gap-2 text-yellow-300">
+              <span className="text-green-400">✓</span>
               <span>Strategy generation routed through Venice AI only</span>
             </div>
-            <div className="flex items-center gap-2 text-gold-light">
-              <span className="text-emerald-400">✓</span>
+            <div className="flex items-center gap-2 text-yellow-300">
+              <span className="text-green-400">✓</span>
               <span>Zero data retention — your financial data is never stored by any AI provider</span>
             </div>
-            <div className="flex items-center gap-2 text-gold-light">
-              <span className="text-emerald-400">✓</span>
+            <div className="flex items-center gap-2 text-yellow-300">
+              <span className="text-green-400">✓</span>
               <span>Non-Venice inference requests will be rejected</span>
             </div>
           </div>
@@ -242,7 +242,7 @@ export default function GuardrailsPage() {
       </div>
 
       {/* ========== TRADE LIMITS (EDITABLE) ========== */}
-      <div className="bg-navy-800 border border-navy-600 rounded-xl p-6">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold">Trade Limits</h3>
@@ -261,8 +261,8 @@ export default function GuardrailsPage() {
                 min="0"
                 value={maxPerTrade}
                 onChange={(e) => setMaxPerTrade(e.target.value)}
-                className={`w-full bg-navy-700 border rounded-lg px-4 py-3 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-jpm ${
-                  maxPerTrade !== origMax ? 'border-jpm text-white' : 'border-navy-600 text-gray-300'
+                className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  maxPerTrade !== origMax ? 'border-indigo-500 text-white' : 'border-gray-800 text-gray-300'
                 }`}
                 placeholder="0.0"
               />
@@ -279,8 +279,8 @@ export default function GuardrailsPage() {
                 min="0"
                 value={dailyLimit}
                 onChange={(e) => setDailyLimit(e.target.value)}
-                className={`w-full bg-navy-700 border rounded-lg px-4 py-3 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-jpm ${
-                  dailyLimit !== origDaily ? 'border-jpm text-white' : 'border-navy-600 text-gray-300'
+                className={`w-full bg-gray-800 border rounded-lg px-4 py-3 text-lg font-bold focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                  dailyLimit !== origDaily ? 'border-indigo-500 text-white' : 'border-gray-800 text-gray-300'
                 }`}
                 placeholder="0.0"
               />
@@ -292,12 +292,12 @@ export default function GuardrailsPage() {
 
         {/* Usage bar — only show if limits are active on-chain */}
         {hasLimits && (
-          <div className="bg-navy-700/50 rounded-lg p-4">
+          <div className="bg-gray-800/50 rounded-lg p-4">
             <div className="flex justify-between text-sm mb-2">
               <span className="text-gray-400">Today&apos;s Usage</span>
               <span className="font-mono text-gray-300">{dailySpent.toFixed(4)} / {dailyLimitNum.toFixed(1)} ETH</span>
             </div>
-            <div className="h-3 bg-navy-700 rounded-full overflow-hidden">
+            <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
               <div className={`h-full ${usageColor} rounded-full transition-all`} style={{ width: `${usagePercent}%` }} />
             </div>
             <div className="flex justify-between text-xs text-gray-600 mt-1.5">
@@ -309,7 +309,7 @@ export default function GuardrailsPage() {
       </div>
 
       {/* ========== TOKEN ALLOWLIST (TOGGLEABLE) ========== */}
-      <div className="bg-navy-800 border border-navy-600 rounded-xl p-6">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold">Approved Tokens</h3>
@@ -327,19 +327,19 @@ export default function GuardrailsPage() {
                 onClick={() => toggleToken(symbol)}
                 className={`w-full flex items-center justify-between px-4 py-3 rounded-lg border transition text-left ${
                   enabled
-                    ? changed ? 'bg-jpm/10 border-jpm text-white' : 'bg-navy-700 border-navy-600 text-gray-200'
-                    : changed ? 'bg-red-500/5 border-red-500/30 text-gray-500' : 'bg-navy-700/50 border-navy-600/50 text-gray-600'
+                    ? changed ? 'bg-indigo-600/10 border-indigo-500 text-white' : 'bg-gray-800 border-gray-800 text-gray-200'
+                    : changed ? 'bg-red-500/5 border-red-500/30 text-gray-500' : 'bg-gray-800/50 border-gray-800/50 text-gray-600'
                 }`}
               >
                 <div className="flex items-center gap-3">
-                  <div className={`w-2 h-2 rounded-full transition ${enabled ? 'bg-emerald-400' : 'bg-gray-600'}`} />
+                  <div className={`w-2 h-2 rounded-full transition ${enabled ? 'bg-green-400' : 'bg-gray-600'}`} />
                   <div>
                     <span className="font-medium">{symbol}</span>
                     <p className="text-xs text-gray-500 mt-0.5">{info.description}</p>
                   </div>
                 </div>
                 <div className={`text-xs px-2 py-0.5 rounded ${
-                  enabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-gray-700 text-gray-500'
+                  enabled ? 'bg-green-500/10 text-green-400' : 'bg-gray-700 text-gray-500'
                 }`}>
                   {enabled ? 'Enabled' : 'Disabled'}
                 </div>
@@ -356,7 +356,7 @@ export default function GuardrailsPage() {
         <p className="text-xs text-gray-600">Built into the smart contracts. Cannot be disabled.</p>
       </div>
 
-      <div className="bg-navy-800 border border-navy-600 rounded-xl p-6 space-y-4">
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
         {[
           { icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', title: 'Principal Protection', desc: 'Your original deposit is locked. The agent can only trade yield above your principal.' },
           { icon: 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z', title: 'No Self-Modification', desc: 'The agent cannot change its own guardrails. Only your wallet can.' },
@@ -364,8 +364,8 @@ export default function GuardrailsPage() {
           { icon: 'M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2', title: 'Owner-Only Withdrawals', desc: 'Only your wallet can withdraw funds. The agent can trade but never move funds out.' },
         ].map(({ icon, title, desc }) => (
           <div key={title} className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
-              <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+              <svg className="w-4 h-4 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d={icon} />
               </svg>
             </div>
@@ -378,7 +378,7 @@ export default function GuardrailsPage() {
       </div>
 
       {/* On-chain vs Off-chain */}
-      <div className="bg-navy-800 border border-jpm/20 rounded-xl p-6">
+      <div className="bg-gray-900 border border-indigo-500/20 rounded-xl p-6">
         <h3 className="font-semibold mb-3">Why On-Chain Guardrails Matter</h3>
         <div className="grid md:grid-cols-2 gap-4 text-sm text-gray-400">
           <div>
@@ -391,12 +391,12 @@ export default function GuardrailsPage() {
             </ul>
           </div>
           <div>
-            <div className="font-medium text-uni mb-2">On-chain (MoltFi)</div>
+            <div className="font-medium text-indigo-400 mb-2">On-chain (MoltFi)</div>
             <ul className="space-y-1.5 text-xs">
-              <li className="flex items-start gap-2"><span className="text-emerald-400 shrink-0">✓</span> Limits enforced by smart contract on Base</li>
-              <li className="flex items-start gap-2"><span className="text-emerald-400 shrink-0">✓</span> Agent can&apos;t bypass — code is immutable on-chain</li>
-              <li className="flex items-start gap-2"><span className="text-emerald-400 shrink-0">✓</span> Anyone can verify by reading the contract</li>
-              <li className="flex items-start gap-2"><span className="text-emerald-400 shrink-0">✓</span> Only the human wallet can change limits</li>
+              <li className="flex items-start gap-2"><span className="text-green-400 shrink-0">✓</span> Limits enforced by smart contract on Base</li>
+              <li className="flex items-start gap-2"><span className="text-green-400 shrink-0">✓</span> Agent can&apos;t bypass — code is immutable on-chain</li>
+              <li className="flex items-start gap-2"><span className="text-green-400 shrink-0">✓</span> Anyone can verify by reading the contract</li>
+              <li className="flex items-start gap-2"><span className="text-green-400 shrink-0">✓</span> Only the human wallet can change limits</li>
             </ul>
           </div>
         </div>
@@ -404,7 +404,7 @@ export default function GuardrailsPage() {
 
       {/* ========== DEPLOY CHANGES BAR (sticky bottom) ========== */}
       {hasChanges && (
-        <div className="fixed bottom-0 left-0 right-0 bg-navy-950/95 backdrop-blur border-t border-jpm/30 p-4 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-gray-950/95 backdrop-blur border-t border-indigo-500/30 p-4 z-50">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div>
               <div className="text-sm font-medium text-white">
@@ -433,8 +433,8 @@ export default function GuardrailsPage() {
                 disabled={deploying}
                 className={`px-6 py-2 text-sm font-semibold rounded-lg transition ${
                   deploying
-                    ? 'bg-jpm/50 text-jpm-light cursor-wait'
-                    : 'bg-jpm hover:bg-jpm text-white'
+                    ? 'bg-indigo-600/50 text-indigo-200 cursor-wait'
+                    : 'bg-indigo-600 hover:bg-indigo-600 text-white'
                 }`}
               >
                 {deploying ? 'Deploying...' : 'Deploy Changes'}
