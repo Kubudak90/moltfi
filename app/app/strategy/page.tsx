@@ -241,15 +241,50 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="font-semibold text-lg text-emerald-400">Trading Policy Active</span>
+                <span className="font-semibold text-lg text-emerald-400">
+                  {cachedStrategy ? cachedStrategy.name : 'Trading Policy Active'}
+                </span>
+              </div>
+              {cachedStrategy?.expectedYield && (
+                <span className="text-sm font-medium text-gold">{cachedStrategy.expectedYield}</span>
+              )}
+            </div>
+
+            {/* Strategy description — what the agent is actually doing */}
+            {cachedStrategy ? (
+              <div className="mb-5">
+                <p className="text-sm text-gray-300 mb-3">{cachedStrategy.description}</p>
+                {cachedStrategy.steps && cachedStrategy.steps.length > 0 && (
+                  <div className="bg-navy-700/40 rounded-lg p-4">
+                    <div className="text-xs text-gray-500 uppercase tracking-wider font-medium mb-2">What the agent does</div>
+                    {cachedStrategy.steps.map((step, j) => (
+                      <div key={j} className="flex items-start gap-2 text-sm mb-1.5">
+                        <span className="text-uni shrink-0">{j + 1}.</span>
+                        <span className="text-gray-400">{step}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="mb-5">
+                <p className="text-sm text-gray-400">A trading policy is active on your vault. Strategy details are stored in your browser for privacy — if you cleared your cache, generate a new strategy or continue with the current guardrails.</p>
+              </div>
+            )}
+
+            {/* Privacy distinction */}
+            <div className="flex items-center gap-4 mb-5 text-xs">
+              <div className="flex items-center gap-1.5 text-gold">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                AI analysis is private (Venice, zero retention)
+              </div>
+              <div className="flex items-center gap-1.5 text-gray-500">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.172 13.828a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                Trades are public blockchain transactions
               </div>
             </div>
 
-            <div className="mb-5">
-              <p className="text-sm text-gray-400">Your agent requests trades through the MoltFi API. We execute them within the guardrails below — enforced by the blockchain, not by us. Every trade is verifiable on Basescan.</p>
-            </div>
-
-            {/* On-chain guardrails — always shown, always real */}
+            {/* On-chain guardrails */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
               <div className="bg-navy-700/50 rounded-lg p-3">
                 <div className="text-xs text-gray-500 mb-1">Max per trade</div>
@@ -529,7 +564,7 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
       {/* How it works — compact */}
       <div className="bg-navy-800 border border-navy-600 rounded-xl p-4">
         <p className="text-xs text-gray-500">
-          Venice AI proposes strategies privately (zero retention). When you approve, the limits are written to the <a href={`https://sepolia.basescan.org/address/${POLICY_CONTRACT}`} target="_blank" rel="noopener" className="text-uni hover:underline">policy contract</a> on-chain. Your agent requests trades via the API — MoltFi executes them through the vault. If any trade exceeds the guardrails, the blockchain reverts it automatically.
+          <strong className="text-gray-400">Private analysis, public trades.</strong> Venice AI generates strategies privately (zero data retention) — nobody sees your analysis, not even us. When you approve, the guardrails are written to the <a href={`https://sepolia.basescan.org/address/${POLICY_CONTRACT}`} target="_blank" rel="noopener" className="text-uni hover:underline">policy contract</a> on-chain. Your agent requests trades via the API — MoltFi executes them through the vault. Trades are blockchain transactions — public and verifiable by design.
         </p>
       </div>
     </div>
