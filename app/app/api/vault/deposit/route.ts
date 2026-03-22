@@ -1,24 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createWalletClient, createPublicClient, http, parseEther } from 'viem'
+import { privateKeyToAccount } from 'viem/accounts'
+import { baseSepolia } from 'viem/chains'
 
-// Agent-side deposit — returns the transaction data needed to deposit ETH into a vault
-// The agent must sign and submit this transaction themselves
+const VAULT = '0x333896c4c1b58c5c9b56967301c008C073Bd2279' as const
+
 export async function POST(req: NextRequest) {
   try {
-    const { vault, amount, agentWallet } = await req.json()
-    if (!vault || !amount || !agentWallet) {
-      return NextResponse.json({ error: 'vault, amount, agentWallet required' }, { status: 400 })
+    const { amount } = await req.json()
+    if (!amount) {
+      return NextResponse.json({ error: 'amount required (in ETH, e.g. "0.01")' }, { status: 400 })
     }
 
-    // Return unsigned transaction data for the agent to sign
+    const pk = process.env.AGENT_PRIVATE_KEY
+    if (!pk) {
+      return NextResponse.json({ error: 'Server not configured for signing' }, { status: 500 })
+    }
+
+    const account = privateKeyToAccount(pk as `0x${string}`)
+    const walletClient = createWalletClient({ account, chain: baseSepolia, transport: http() })
+    const publicClient = createPublicClient({ chain: baseSepolia, transport: http() })
+
+    const value = parseEther(amount.toString())
+
+    const hash = await walletClient.sendTransaction({
+      to: VAULT,
+      value,
+      data: '0xf6326fb3', // depositETH()
+    } as any)
+
+    const receipt = await publicClient.waitForTransactionReceipt({ hash })
+
     return NextResponse.json({
-      transaction: {
-        to: vault,
-        value: `0x${BigInt(Math.floor(parseFloat(amount) * 1e18)).toString(16)}`,
-        data: '0xf6326fb3', // depositETH() selector
-        chainId: 84532,
-        from: agentWallet,
-      },
-      note: 'Sign and broadcast this transaction to deposit ETH into the vault.',
+      success: true,
+      txHash: hash,
+      status: receipt.status,
+      amount: `${amount} ETH`,
+      vault: VAULT,
+      explorer: `https://sepolia.basescan.org/tx/${hash}`,
     })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
