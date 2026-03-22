@@ -107,7 +107,16 @@ export default function GuardrailsPage() {
   }
 
   const deployChanges = async () => {
-    if (!walletClient || !vaults[0]) return
+    if (!vaults[0]) return
+    if (wrongNetwork) {
+      try {
+        await switchChain({ chainId: baseSepolia.id })
+        await new Promise(r => setTimeout(r, 500))
+      } catch {
+        return
+      }
+    }
+    if (!walletClient) return
     setDeploying(true)
     setDeployStatus('Preparing transactions...')
 
@@ -421,17 +430,15 @@ export default function GuardrailsPage() {
                 Discard
               </button>
               <button
-                onClick={wrongNetwork ? () => switchChain({ chainId: baseSepolia.id }) : deployChanges}
-                disabled={deploying || (!walletClient && !wrongNetwork)}
+                onClick={deployChanges}
+                disabled={deploying}
                 className={`px-6 py-2 text-sm font-semibold rounded-lg transition ${
-                  wrongNetwork
-                    ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30'
-                    : deploying
+                  deploying
                     ? 'bg-indigo-500/50 text-indigo-200 cursor-wait'
                     : 'bg-indigo-600 hover:bg-indigo-500 text-white'
                 }`}
               >
-                {wrongNetwork ? 'Switch to Base Sepolia' : deploying ? 'Deploying...' : 'Deploy Changes'}
+                {deploying ? 'Deploying...' : 'Deploy Changes'}
               </button>
             </div>
           </div>

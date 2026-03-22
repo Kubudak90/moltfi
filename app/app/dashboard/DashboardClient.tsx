@@ -38,6 +38,8 @@ export default function DashboardClient() {
     if (wrongNetwork) {
       try {
         await switchChain({ chainId: baseSepolia.id })
+        // Give wallet a moment to switch
+        await new Promise(r => setTimeout(r, 500))
         return true
       } catch {
         setError('Please switch to Base Sepolia in your wallet.')
@@ -146,13 +148,9 @@ export default function DashboardClient() {
             </div>
             <div className="ml-auto text-xs text-green-400">● Connected</div>
           </div>
-          <button onClick={wrongNetwork ? () => switchChain({ chainId: baseSepolia.id }) : createVault}
-            className={`w-full py-3 rounded-lg font-medium transition text-lg mb-2 ${
-              wrongNetwork
-                ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-            }`}>
-            {wrongNetwork ? 'Switch to Base Sepolia' : 'Create Vault'}
+          <button onClick={createVault}
+            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-lg font-medium transition text-lg mb-2">
+            Create Vault
           </button>
           <div className="flex items-start gap-2 bg-gray-800/30 rounded-lg p-3">
             <svg className="w-4 h-4 text-gray-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -221,13 +219,9 @@ export default function DashboardClient() {
                     className="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-14" />
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500">ETH</span>
                 </div>
-                <button onClick={wrongNetwork ? () => switchChain({ chainId: baseSepolia.id }) : depositETH}
-                  className={`px-6 py-2.5 rounded-lg text-sm font-medium transition ${
-                    wrongNetwork
-                      ? 'bg-red-500/20 text-red-300 hover:bg-red-500/30'
-                      : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-                  }`}>
-                  {wrongNetwork ? 'Switch Network' : 'Deposit'}
+                <button onClick={depositETH}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition">
+                  Deposit
                 </button>
               </div>
               <p className="text-xs text-gray-600 mt-2">Your wallet will ask to confirm. Deposited ETH becomes the vault&apos;s principal — your agent can only trade yield above this amount.</p>
