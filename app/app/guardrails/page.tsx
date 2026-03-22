@@ -223,20 +223,21 @@ export default function GuardrailsPage() {
           <div className="space-y-2 text-sm">
             <div className="flex items-center gap-2 text-yellow-300">
               <span className="text-green-400">✓</span>
-              <span>Strategy generation routed through Venice AI only</span>
+              <span>All AI analysis routed through Venice AI only</span>
             </div>
             <div className="flex items-center gap-2 text-yellow-300">
               <span className="text-green-400">✓</span>
-              <span>Zero data retention — your financial data is never stored by any AI provider</span>
+              <span>Strategy reasoning is never stored — Venice has zero data retention</span>
             </div>
             <div className="flex items-center gap-2 text-yellow-300">
               <span className="text-green-400">✓</span>
-              <span>Non-Venice inference requests will be rejected</span>
+              <span>Non-Venice AI requests return an error instead of falling back</span>
             </div>
+            <p className="text-xs text-gray-600 mt-2">Note: vault balances and trades are on a public blockchain — privacy applies to AI analysis, not on-chain data.</p>
           </div>
         ) : (
           <p className="text-sm text-gray-500">
-            Your agent can use any AI provider. Enable to enforce Venice-only inference — your financial data stays private.
+            AI analysis may use any available provider. Enable to restrict all inference to Venice AI (zero data retention).
           </p>
         )}
       </div>
