@@ -220,17 +220,14 @@ export default function DashboardClient() {
                   <div className="flex items-center gap-4 text-xs">
                     <div className="flex items-center gap-1.5">
                       <div className="w-2 h-2 rounded-full bg-indigo-400" />
-                      <span className="text-gray-500">Owner</span>
+                      <span className="text-gray-500">Your wallet</span>
                       <a href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener"
                         className="font-mono text-indigo-400 hover:underline">{address?.slice(0, 6)}...{address?.slice(-4)}</a>
                     </div>
-                    {hasAgent && (
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-green-400" />
-                        <span className="text-gray-500">Agent</span>
-                        <span className="text-gray-300">{agents[0].agentName}</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                      <span className="text-gray-500">Managed by MoltFi</span>
+                    </div>
                   </div>
 
                   {/* Balance hero */}
