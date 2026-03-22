@@ -212,16 +212,8 @@ export default function DashboardClient() {
                   {/* Header with vault links */}
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold">Your Vault</h2>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
-                      <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-                        className="font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
-                      {hasAgent && (
-                        <span className="flex items-center gap-1">
-                          <div className="w-2 h-2 rounded-full bg-green-400" />
-                          {agents[0].agentName}
-                        </span>
-                      )}
-                    </div>
+                    <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
+                      className="text-xs font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
                   </div>
 
                   {/* Balance hero */}
