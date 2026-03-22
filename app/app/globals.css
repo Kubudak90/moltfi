@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+/* MoltFi base — deep navy */
+body {
+  background-color: #060E1A;
+  color: #E2E8F0;
+}
+
 /* Hide scrollbar but keep scroll functionality */
 .scrollbar-hide {
   -ms-overflow-style: none;

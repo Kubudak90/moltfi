@@ -18,7 +18,7 @@ export function NavTabs() {
   if (pathname === '/') return null
 
   return (
-    <div className="border-b border-gray-800 bg-[#09090b]/80 backdrop-blur-sm sticky top-14 z-40 overflow-hidden">
+    <div className="border-b border-navy-600 bg-navy-950/80 backdrop-blur-sm sticky top-14 z-40 overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex gap-1 overflow-x-auto scrollbar-hide">
           {tabs.map(tab => {
@@ -27,12 +27,12 @@ export function NavTabs() {
               <Link key={tab.href} href={tab.href}
                 className={`px-4 py-3 text-sm font-medium transition border-b-2 -mb-px whitespace-nowrap ${
                   active
-                    ? 'border-indigo-500 text-white'
+                    ? 'border-jpm text-white'
                     : 'border-transparent text-gray-500 hover:text-gray-300'
                 }`}>
                 {tab.label}
                 {tab.badge && (
-                  <span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+                  <span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded-full bg-jpm/20 text-uni border border-jpm/30">
                     {tab.badge}
                   </span>
                 )}

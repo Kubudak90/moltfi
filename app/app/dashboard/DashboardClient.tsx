@@ -111,7 +111,7 @@ export default function DashboardClient() {
   if (!address) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-24 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-2xl font-bold mx-auto mb-6">AG</div>
+        <div className="w-16 h-16 rounded-2xl bg-jpm flex items-center justify-center text-2xl font-bold mx-auto mb-6">AG</div>
         <h1 className="text-3xl font-bold mb-3">Connect Your Wallet</h1>
         <p className="text-gray-400">Connect your wallet to get started.</p>
       </div>
@@ -138,7 +138,7 @@ export default function DashboardClient() {
         </div>
       )}
       {txStatus && (
-        <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-4 text-sm text-indigo-300">
+        <div className="bg-jpm/10 border border-jpm/20 rounded-lg p-4 text-sm text-uni-light">
           {txConfirmed ? '✓ Transaction confirmed!' : txStatus}
         </div>
       )}
@@ -183,13 +183,13 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
         }
 
         return (
-          <div className="bg-gray-900 border border-yellow-500/30 rounded-xl p-8">
+          <div className="bg-navy-800 border border-gold/30 rounded-xl p-8">
             <h2 className="text-xl font-bold mb-2 text-center">Connect Your Agent</h2>
             <p className="text-gray-400 mb-6 text-center text-sm">Copy these instructions and paste them into your AI agent&apos;s chat.</p>
-            <div className="bg-gray-800/50 rounded-lg p-4 relative group">
+            <div className="bg-navy-700/50 rounded-lg p-4 relative group">
               <button onClick={() => doCopy(skillSnippet)}
-                className="absolute top-3 right-3 text-gray-500 hover:text-indigo-400 transition p-1.5 rounded-lg hover:bg-gray-700/50">
-                {copied ? <span className="text-green-400 text-xs font-medium px-1">Copied!</span> : (
+                className="absolute top-3 right-3 text-gray-500 hover:text-uni transition p-1.5 rounded-lg hover:bg-navy-600/50">
+                {copied ? <span className="text-emerald-400 text-xs font-medium px-1">Copied!</span> : (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                 )}
               </button>
@@ -202,22 +202,22 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
 
       {/* Agent connected, no vault */}
       {hasAgent && !hasVault && (
-        <div className="bg-gray-900 border border-indigo-500/30 rounded-xl p-8">
-          <div className="flex items-center gap-3 mb-6 p-3 bg-gray-800/50 rounded-lg">
-            <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold">
+        <div className="bg-navy-800 border border-jpm/30 rounded-xl p-8">
+          <div className="flex items-center gap-3 mb-6 p-3 bg-navy-700/50 rounded-lg">
+            <div className="w-8 h-8 rounded-full bg-jpm flex items-center justify-center text-xs font-bold">
               {agents[0].agentName.slice(0, 2).toUpperCase()}
             </div>
             <div>
               <div className="font-medium text-sm">{agents[0].agentName}</div>
               <div className="text-xs text-gray-500 font-mono">{agents[0].agentWallet.slice(0, 10)}...{agents[0].agentWallet.slice(-8)}</div>
             </div>
-            <div className="ml-auto text-xs text-green-400">● Connected</div>
+            <div className="ml-auto text-xs text-emerald-400">● Connected</div>
           </div>
           <button onClick={createVault}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white py-3 rounded-lg font-medium transition text-lg mb-2">
+            className="w-full bg-jpm hover:bg-jpm text-white py-3 rounded-lg font-medium transition text-lg mb-2">
             Create Vault
           </button>
-          <div className="flex items-start gap-2 bg-gray-800/30 rounded-lg p-3">
+          <div className="flex items-start gap-2 bg-navy-700/30 rounded-lg p-3">
             <svg className="w-4 h-4 text-gray-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -232,7 +232,7 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
       {hasVault && (
         <>
           {/* Overview */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <div className="bg-navy-800 border border-navy-600 rounded-xl p-6">
             <h3 className="font-semibold mb-4">Overview</h3>
 
             {(() => {
@@ -250,21 +250,21 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                 <div className="space-y-4">
                   {/* Top row: ETH price, Lido rate, your return */}
                   <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-gray-800/50 rounded-lg p-3">
+                    <div className="bg-navy-700/50 rounded-lg p-3">
                       <div className="text-xs text-gray-500 mb-1">ETH</div>
                       <div className="text-lg font-bold">{ethPrice ? `$${ethPrice.toLocaleString()}` : '—'}</div>
                       {rates?.prices?.eth24hChange != null && (
-                        <div className={`text-xs ${rates.prices.eth24hChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                        <div className={`text-xs ${rates.prices.eth24hChange >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                           {rates.prices.eth24hChange >= 0 ? '+' : ''}{rates.prices.eth24hChange.toFixed(2)}%
                         </div>
                       )}
                     </div>
-                    <div className="bg-gray-800/50 rounded-lg p-3">
+                    <div className="bg-navy-700/50 rounded-lg p-3">
                       <div className="text-xs text-gray-500 mb-1">Lido APR</div>
                       <div className="text-lg font-bold">{rates?.lido ? `${rates.lido.smaApr.toFixed(2)}%` : '—'}</div>
                       <div className="text-xs text-gray-600">market rate</div>
                     </div>
-                    <div className="bg-gray-800/50 rounded-lg p-3">
+                    <div className="bg-navy-700/50 rounded-lg p-3">
                       <div className="text-xs text-gray-500 mb-1">Your Return</div>
                       {tradeCount === 0 ? (
                         <>
@@ -273,7 +273,7 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                         </>
                       ) : returnPct !== null ? (
                         <>
-                          <div className={`text-lg font-bold ${returnPct >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          <div className={`text-lg font-bold ${returnPct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                             {returnPct >= 0 ? '+' : ''}{returnPct.toFixed(2)}%
                           </div>
                           <div className="text-xs text-gray-600">
@@ -293,12 +293,12 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 text-sm">
                       <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                        <div className="w-2 h-2 rounded-full bg-jpm" />
                         <span className="text-gray-400">{totalEth.toFixed(4)} ETH</span>
                       </div>
                       {usdc > 0 && (
                         <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          <div className="w-2 h-2 rounded-full bg-emerald-500" />
                           <span className="text-gray-400">{usdc.toFixed(2)} USDC</span>
                         </div>
                       )}
@@ -318,17 +318,17 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
           </div>
 
           {/* What your money is doing */}
-          <div className={`bg-gray-900 border rounded-xl p-5 ${vaultData?.policy?.active ? 'border-green-500/20' : 'border-yellow-500/20'}`}>
+          <div className={`bg-navy-800 border rounded-xl p-5 ${vaultData?.policy?.active ? 'border-emerald-500/20' : 'border-gold/20'}`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className={`w-2.5 h-2.5 rounded-full ${vaultData?.policy?.active ? 'bg-green-400 animate-pulse' : 'bg-yellow-400'}`} />
-                <span className={`font-semibold ${vaultData?.policy?.active ? 'text-green-400' : 'text-yellow-400'}`}>
+                <div className={`w-2.5 h-2.5 rounded-full ${vaultData?.policy?.active ? 'bg-emerald-400 animate-pulse' : 'bg-gold'}`} />
+                <span className={`font-semibold ${vaultData?.policy?.active ? 'text-emerald-400' : 'text-gold'}`}>
                   {vaultData?.policy?.active
                     ? 'Trading Policy Active'
                     : 'No Active Policy'}
                 </span>
               </div>
-              <a href="/strategy" className="text-xs text-indigo-400 hover:underline">
+              <a href="/strategy" className="text-xs text-uni hover:underline">
                 {vaultData?.policy?.active ? 'Manage →' : 'Set up strategy →'}
               </a>
             </div>
@@ -338,27 +338,27 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                 {/* What each asset is doing */}
                 <div className="space-y-2">
                   {parseFloat(vaultData?.balances?.WETH || '0') > 0 && (
-                    <div className="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-2">
+                    <div className="flex items-center justify-between bg-navy-700/40 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                        <div className="w-2 h-2 rounded-full bg-jpm" />
                         <span className="text-sm text-gray-300">{vaultData.balances.WETH} WETH</span>
                       </div>
                       <span className="text-xs text-gray-500">Available to trade</span>
                     </div>
                   )}
                   {parseFloat(vaultData?.balances?.ETH || '0') > 0 && (
-                    <div className="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-2">
+                    <div className="flex items-center justify-between bg-navy-700/40 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-indigo-500" />
+                        <div className="w-2 h-2 rounded-full bg-jpm" />
                         <span className="text-sm text-gray-300">{vaultData.balances.ETH} ETH</span>
                       </div>
                       <span className="text-xs text-gray-500">Vault balance</span>
                     </div>
                   )}
                   {parseFloat(vaultData?.balances?.USDC || '0') > 0 && (
-                    <div className="flex items-center justify-between bg-gray-800/40 rounded-lg px-3 py-2">
+                    <div className="flex items-center justify-between bg-navy-700/40 rounded-lg px-3 py-2">
                       <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-green-500" />
+                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
                         <span className="text-sm text-gray-300">{vaultData.balances.USDC} USDC</span>
                       </div>
                       <span className="text-xs text-gray-500">From swap</span>
@@ -367,7 +367,7 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                 </div>
 
                 {/* Guardrails summary */}
-                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 pt-2 border-t border-gray-800/50">
+                <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-gray-500 pt-2 border-t border-navy-600/50">
                   <span>Max per trade: <strong className="text-gray-400">{vaultData.policy.maxPerAction} ETH</strong></span>
                   <span>Daily limit: <strong className="text-gray-400">{vaultData.policy.dailyLimit} ETH</strong></span>
                   <span>Used today: <strong className="text-gray-400">{vaultData.policy.dailySpent} ETH</strong></span>
@@ -375,28 +375,28 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
 
                 {/* Last activity */}
                 {activity.length > 0 && (
-                  <div className="pt-2 border-t border-gray-800/50">
+                  <div className="pt-2 border-t border-navy-600/50">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs text-gray-500">Recent activity</span>
-                      <a href="/activity" className="text-xs text-indigo-400 hover:underline">View all →</a>
+                      <a href="/activity" className="text-xs text-uni hover:underline">View all →</a>
                     </div>
                     {activity.map((a, i) => (
                       <div key={i} className="flex items-center justify-between text-xs py-1">
                         <span className="text-gray-400">{a.summary}</span>
                         <a href={`https://sepolia.basescan.org/tx/${a.txHash}`} target="_blank" rel="noopener"
-                          className="text-indigo-400 hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
+                          className="text-uni hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
             ) : (
-              <p className="text-sm text-gray-500">Your vault has funds but no trading policy. The agent can&apos;t trade until you approve one on the <a href="/strategy" className="text-indigo-400 hover:underline">Strategy page</a>.</p>
+              <p className="text-sm text-gray-500">Your vault has funds but no trading policy. The agent can&apos;t trade until you approve one on the <a href="/strategy" className="text-uni hover:underline">Strategy page</a>.</p>
             )}
           </div>
 
           {/* Your Vault — below market data */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <div className="bg-navy-800 border border-navy-600 rounded-xl p-6">
             <div className="mb-6">
               <div className="flex items-center justify-between mb-2">
                 <h2 className="text-xl font-semibold">Your Vault</h2>
@@ -406,25 +406,25 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">Contract</span>
                   <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-                    className="font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
+                    className="font-mono text-uni hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-gray-500">Owner</span>
                   <a href={`https://sepolia.basescan.org/address/${address}`} target="_blank" rel="noopener"
-                    className="font-mono text-white hover:text-indigo-400">{address?.slice(0, 6)}...{address?.slice(-4)}</a>
+                    className="font-mono text-white hover:text-uni">{address?.slice(0, 6)}...{address?.slice(-4)}</a>
                 </div>
                 {hasAgent && (
                   <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-green-400" />
+                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
                     <span className="text-xs text-gray-500">Agent</span>
                     <a href={`https://sepolia.basescan.org/address/${agents[0].agentWallet}`} target="_blank" rel="noopener"
-                      className="font-mono text-white hover:text-indigo-400">{agents[0].agentName}</a>
+                      className="font-mono text-white hover:text-uni">{agents[0].agentName}</a>
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="bg-gray-800/50 rounded-lg p-5 mb-6">
+            <div className="bg-navy-700/50 rounded-lg p-5 mb-6">
               <div className="text-xs text-gray-500 mb-1">WETH Balance</div>
               <div className="text-2xl font-bold">{vaultData?.balances?.WETH || '0'}</div>
               {(ethPrice || perf?.portfolio?.ethPrice) && vaultData?.balances?.WETH && (
@@ -443,11 +443,11 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                   <div className="relative flex-1">
                     <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
                       step="0.001" min="0" placeholder="0.01"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-12" />
+                      className="w-full bg-navy-700 border border-navy-600 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-jpm pr-12" />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">ETH</span>
                   </div>
                   <button onClick={depositETH}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition">
+                    className="bg-jpm hover:bg-jpm text-white px-5 py-2.5 rounded-lg text-sm font-medium transition">
                     Deposit
                   </button>
                 </div>
@@ -459,7 +459,7 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
                   <div className="relative flex-1">
                     <input type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
                       step="0.001" min="0" placeholder="0.01"
-                      className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-16" />
+                      className="w-full bg-navy-700 border border-navy-600 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-jpm pr-16" />
                     <select value={withdrawToken} onChange={e => setWithdrawToken(e.target.value as any)}
                       className="absolute right-1 top-1/2 -translate-y-1/2 bg-gray-700 border-none rounded text-xs text-gray-300 py-1 px-1.5 focus:outline-none">
                       <option value="ETH">ETH</option>
@@ -478,17 +478,17 @@ Full reference: https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md`
           </div>
 
           {/* How deposits work */}
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+          <div className="bg-navy-800 border border-navy-600 rounded-xl p-6">
             <h3 className="font-semibold mb-3">How Deposits Work</h3>
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="bg-gray-800/30 rounded-lg p-4">
-                <div className="text-sm font-medium text-indigo-400 mb-2">For Humans (you)</div>
+              <div className="bg-navy-700/30 rounded-lg p-4">
+                <div className="text-sm font-medium text-uni mb-2">For Humans (you)</div>
                 <p className="text-xs text-gray-400">Use the deposit button above. Your wallet signs the transaction and ETH goes directly into the vault smart contract on Base. The vault tracks your principal — your agent can never touch the original deposit, only yield earned above it.</p>
               </div>
-              <div className="bg-gray-800/30 rounded-lg p-4">
-                <div className="text-sm font-medium text-green-400 mb-2">For AI Agents</div>
-                <pre className="text-xs font-mono text-gray-300 bg-gray-900/80 rounded p-2 overflow-x-auto mb-2">POST /api/vault/deposit{'\n'}{JSON.stringify({ amount: "0.01" })}</pre>
-                <p className="text-xs text-gray-500">MoltFi handles signing and broadcasting. See the <a href="https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md#3-deposit-eth" className="text-indigo-400 hover:underline">full skill reference</a> for all endpoints.</p>
+              <div className="bg-navy-700/30 rounded-lg p-4">
+                <div className="text-sm font-medium text-emerald-400 mb-2">For AI Agents</div>
+                <pre className="text-xs font-mono text-gray-300 bg-navy-800/80 rounded p-2 overflow-x-auto mb-2">POST /api/vault/deposit{'\n'}{JSON.stringify({ amount: "0.01" })}</pre>
+                <p className="text-xs text-gray-500">MoltFi handles signing and broadcasting. See the <a href="https://github.com/ortegarod/moltfi/blob/main/skill/SKILL.md#3-deposit-eth" className="text-uni hover:underline">full skill reference</a> for all endpoints.</p>
               </div>
             </div>
           </div>
