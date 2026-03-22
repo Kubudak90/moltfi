@@ -85,6 +85,13 @@ Return a strategy block:
     })
 
     if (!response.ok) {
+      if (isPrivateMode(vault)) {
+        return NextResponse.json({
+          error: 'Venice AI is unavailable and Private Mode is enabled. No fallback providers allowed — your data stays private.',
+          privateMode: true,
+          provider: 'venice',
+        }, { status: 503 })
+      }
       return NextResponse.json({ error: `Venice error: ${response.status}` }, { status: 502 })
     }
 

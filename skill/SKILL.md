@@ -161,6 +161,27 @@ Your human sets these on the dashboard. They're enforced by smart contracts — 
 
 ---
 
-## Privacy
+## Privacy & Private Mode
 
-All strategy analysis runs through Venice AI with zero data retention. Your human's financial data is never stored by any AI provider. When Private Mode is enabled on the dashboard, all inference is forced through Venice — no exceptions.
+All strategy analysis runs through Venice AI with zero data retention.
+
+**When Private Mode is enabled** (your human toggles this on the dashboard):
+- All AI inference is forced through Venice — no fallback providers
+- If Venice is unavailable, API calls fail rather than falling back to a non-private provider
+- Always pass the `vault` address in your API calls so the server can check private mode status
+- The API response includes `privateMode: true` and `provider: "venice"` so you can confirm
+
+**Important:** When calling `/api/chat` or `/api/pipeline`, include the vault address:
+```bash
+curl -X POST {BASE_URL}/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vault": "VAULT_ADDRESS",
+    "messages": [{ "role": "user", "content": "Should I rebalance?" }]
+  }'
+```
+
+Check private mode status:
+```bash
+curl {BASE_URL}/api/vault/private-mode?vault=VAULT_ADDRESS
+```
