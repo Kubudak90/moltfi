@@ -98,16 +98,64 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Bring Your Own Agent */}
+      <section className="max-w-4xl mx-auto px-6 pb-20">
+        <h2 className="text-2xl font-bold mb-3 text-center">Bring Your Own Agent</h2>
+        <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
+          AgentGuard works with any AI agent on any platform. Your agent reads one skill file and instantly knows how to manage DeFi vaults, execute trades, and respect guardrails.
+        </p>
+
+        <div className="bg-gray-900 border border-indigo-500/30 rounded-xl p-8 mb-8">
+          <div className="grid md:grid-cols-2 gap-8 items-center">
+            <div>
+              <div className="text-xs text-indigo-400 uppercase tracking-wider mb-3 font-medium">One skill file. Any agent.</div>
+              <h3 className="text-xl font-bold mb-3">Your agent curls one URL and it just works.</h3>
+              <p className="text-sm text-gray-400 mb-4">
+                The same pattern that powers the agent economy — a single skill file teaches your agent everything: how to register, check balances, execute swaps, follow guardrails, and report back to you.
+              </p>
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2 text-gray-300">
+                  <span className="text-green-400">✓</span> OpenClaw agents
+                </div>
+                <div className="flex items-center gap-2 text-gray-300">
+                  <span className="text-green-400">✓</span> Any agent with HTTP access
+                </div>
+                <div className="flex items-center gap-2 text-gray-300">
+                  <span className="text-green-400">✓</span> No SDK, no library, no dependency
+                </div>
+                <div className="flex items-center gap-2 text-gray-300">
+                  <span className="text-green-400">✓</span> Works in 60 seconds
+                </div>
+              </div>
+            </div>
+            <div>
+              <div className="bg-gray-800/80 rounded-lg p-4 font-mono text-xs leading-relaxed">
+                <div className="text-gray-500 mb-2"># Your agent does this once:</div>
+                <div className="text-green-400">curl https://agentguard.app/api/skill</div>
+                <div className="text-gray-500 mt-3 mb-2"># Now it knows how to:</div>
+                <div className="text-gray-300">POST /api/agent/register     <span className="text-gray-600"># connect</span></div>
+                <div className="text-gray-300">GET  /api/vault/status       <span className="text-gray-600"># check vault</span></div>
+                <div className="text-gray-300">POST /api/vault/swap         <span className="text-gray-600"># trade</span></div>
+                <div className="text-gray-300">POST /api/strategy/generate  <span className="text-gray-600"># plan</span></div>
+                <div className="text-gray-300">GET  /api/vault/performance  <span className="text-gray-600"># report</span></div>
+                <div className="text-gray-500 mt-3"># Every trade goes through on-chain</div>
+                <div className="text-gray-500"># guardrails. Can&apos;t exceed limits.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-8 text-center">How It Works</h2>
         <div className="space-y-4 max-w-2xl mx-auto">
           {[
-            { step: '1', title: 'Your agent connects', desc: 'Your AI agent registers itself on AgentGuard. It knows its own wallet — no copy-pasting addresses.' },
-            { step: '2', title: 'You set the rules', desc: 'On the dashboard, you choose which DeFi protocols your agent can use and set your spending limits. These get written to a smart contract on Base.' },
-            { step: '3', title: 'Your agent proposes strategies', desc: 'Using Venice\'s private inference, your agent analyzes current yields and conditions across your enabled protocols. It presents you with strategy options — in plain language, not DeFi jargon.' },
-            { step: '4', title: 'You pick, it executes', desc: 'Choose a strategy. Your agent executes within your guardrails — every trade goes through the AgentGuard smart contract before reaching Uniswap or any protocol. If it exceeds your limits, the transaction reverts.' },
-            { step: '5', title: 'You monitor everything', desc: 'Watch your agent work on the dashboard. Every action logged with reasoning. Ask it questions anytime through the chat. Change your strategy or limits whenever you want.' },
+            { step: '1', title: 'Connect your wallet', desc: 'Open the dashboard and connect your wallet. That\'s your identity — no accounts, no signups.' },
+            { step: '2', title: 'Your agent reads the skill file', desc: 'Point your AI agent to the skill URL. It learns every endpoint — register, trade, stake, monitor. One curl. No SDK.' },
+            { step: '3', title: 'Agent registers & gets a vault', desc: 'Your agent registers itself with your wallet address. You create a vault — a smart contract that holds your funds with on-chain spending limits.' },
+            { step: '4', title: 'AI proposes strategies privately', desc: 'Venice AI analyzes your vault, market conditions, and yields — with zero data retention. Your portfolio data never gets stored anywhere.' },
+            { step: '5', title: 'You approve, agent executes', desc: 'Pick a strategy. Guardrails get written to a smart contract on Base. Your agent trades within those limits — if it tries to exceed them, the blockchain reverts the transaction.' },
           ].map(item => (
             <div key={item.step} className="flex gap-4 bg-gray-900 border border-gray-800 rounded-xl p-5">
               <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>
