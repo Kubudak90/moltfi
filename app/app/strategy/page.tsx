@@ -180,38 +180,67 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
 
       {/* Active strategy */}
       {active && (
-        <div className="p-6 bg-green-500/5 border border-green-500/30 rounded-xl">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
-              <span className="font-semibold text-green-400">Agent Running</span>
+        <div className="space-y-4">
+          {/* Success confirmation */}
+          <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-4 flex items-start gap-3">
+            <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+              <svg className="w-5 h-5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
             </div>
-            <span className="text-xs text-green-300/70">{active.expectedYield}</span>
+            <div>
+              <div className="text-sm font-medium text-green-300 mb-1">Strategy deployed — guardrails are on-chain</div>
+              <p className="text-xs text-gray-500">Your funds are safe in your vault. The agent can only trade within the limits below — enforced by the blockchain, not by us. If it tries to exceed them, the transaction automatically fails.</p>
+            </div>
           </div>
-          <div className="font-medium text-lg mb-1">{active.name}</div>
-          <p className="text-sm text-gray-400 mb-4">{active.description}</p>
-          <div className="bg-gray-800/40 rounded-lg p-4 mb-4">
-            <div className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">What the agent is doing</div>
-            {active.steps?.map((step, j) => (
-              <div key={j} className="flex items-start gap-2 text-sm mb-1.5">
-                <span className="text-green-400 shrink-0">→</span>
-                <span className="text-gray-300">{step}</span>
+
+          {/* Active strategy card */}
+          <div className="p-6 border border-gray-800 bg-gray-900 rounded-xl">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+                <span className="font-semibold text-green-400">Agent Running</span>
               </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-4">
-            <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Max trade: </span><span className="text-gray-300">{active.guardrails.maxTradeSize}</span></div>
-            <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Daily limit: </span><span className="text-gray-300">{active.guardrails.dailyLimit}</span></div>
-            <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Slippage: </span><span className="text-gray-300">{active.guardrails.maxSlippage}</span></div>
-            <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Protocols: </span><span className="text-gray-300">{active.guardrails.protocols.join(', ')}</span></div>
-          </div>
-          <div className="flex gap-3">
-            <button onClick={() => { setActive(null); setStrategies([]); setSelected(null); localStorage.removeItem('ag_active_strategy'); localStorage.removeItem('ag_strategies'); localStorage.removeItem('ag_strategies_ts') }}
-              className="text-sm text-gray-500 hover:text-gray-300">Change Strategy</button>
-            <button onClick={pause}
-              className="ml-auto bg-red-600/20 hover:bg-red-600/40 text-red-400 px-4 py-2 rounded-lg border border-red-500/30 transition text-sm font-medium">
-              Pause Agent
-            </button>
+              <span className="text-sm text-indigo-400 font-medium">{active.expectedYield}</span>
+            </div>
+            <div className="font-medium text-lg mb-1">{active.name}</div>
+            <p className="text-sm text-gray-400 mb-4">{active.description}</p>
+
+            <div className="bg-gray-800/40 rounded-lg p-4 mb-4">
+              <div className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">What the agent is doing</div>
+              {active.steps?.map((step, j) => (
+                <div key={j} className="flex items-start gap-2 text-sm mb-1.5">
+                  <span className="text-green-400 shrink-0">→</span>
+                  <span className="text-gray-300">{step}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="text-xs text-gray-500 mb-2 uppercase tracking-wider font-medium">On-chain guardrails</div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs mb-6">
+              <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Max trade: </span><span className="text-gray-300">{active.guardrails.maxTradeSize}</span></div>
+              <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Daily limit: </span><span className="text-gray-300">{active.guardrails.dailyLimit}</span></div>
+              <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Slippage: </span><span className="text-gray-300">{active.guardrails.maxSlippage}</span></div>
+              <div className="bg-gray-800/50 rounded-lg p-2"><span className="text-gray-500">Protocols: </span><span className="text-gray-300">{active.guardrails.protocols.join(', ')}</span></div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-4 border-t border-gray-800">
+              <button onClick={() => { setActive(null); setStrategies([]); setSelected(null); localStorage.removeItem('ag_active_strategy'); localStorage.removeItem('ag_strategies'); localStorage.removeItem('ag_strategies_ts') }}
+                className="text-sm text-gray-500 hover:text-gray-300 transition">Change Strategy</button>
+              <div className="ml-auto relative group">
+                <button onClick={pause}
+                  className="bg-red-600/20 hover:bg-red-600/40 text-red-400 px-4 py-2 rounded-lg border border-red-500/30 transition text-sm font-medium flex items-center gap-2">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Pause Agent
+                </button>
+                <div className="absolute bottom-full right-0 mb-2 w-64 bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs text-gray-300 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 shadow-xl">
+                  Revokes the agent&apos;s trading permissions on-chain. It won&apos;t be able to make any trades until you approve a new strategy. Your funds stay in the vault — nothing moves.
+                  <div className="absolute top-full right-4 -mt-px w-2 h-2 bg-gray-800 border-r border-b border-gray-700 rotate-45" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
