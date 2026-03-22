@@ -52,26 +52,11 @@ export default function StrategyPage() {
   const policyDailySpent = vaultData?.policy?.dailySpent
   const policyRemaining = vaultData?.policy?.remaining
 
-  // Cached strategy details — localStorage first, then fetch from server
+  // Cached strategy details — browser only (privacy: we don't store strategies server-side)
   const [cachedStrategy, setCachedStrategy] = useState<Strategy | null>(() => {
     if (typeof window === 'undefined') return null
     try { return JSON.parse(localStorage.getItem('ag_active_strategy') || 'null') } catch { return null }
   })
-
-  // Load strategy from server if not in localStorage
-  useEffect(() => {
-    if (!cachedStrategy && vaults[0]) {
-      fetch(`/api/vault/strategy?vault=${vaults[0]}`)
-        .then(r => r.json())
-        .then(d => {
-          if (d.strategy) {
-            setCachedStrategy(d.strategy)
-            localStorage.setItem('ag_active_strategy', JSON.stringify(d.strategy))
-          }
-        })
-        .catch(() => {})
-    }
-  }, [cachedStrategy, vaults])
   const [strategies, setStrategies] = useState<Strategy[]>(() => {
     if (typeof window === 'undefined') return []
     try { return JSON.parse(localStorage.getItem('ag_strategies') || '[]') } catch { return [] }
@@ -207,14 +192,6 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
     setCachedStrategy(s)
     setShowGenerate(false)
     localStorage.setItem('ag_active_strategy', JSON.stringify(s))
-    // Persist to server so it survives browser clears
-    if (vaults[0]) {
-      fetch('/api/vault/strategy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vault: vaults[0], strategy: s }),
-      }).catch(() => {})
-    }
   }
 
   const pause = () => {
@@ -228,14 +205,6 @@ Strategy 1: Safe. Strategy 2: Balanced. Strategy 3: Aggressive.` }] })
     localStorage.removeItem('ag_active_strategy')
     localStorage.removeItem('ag_deploy_tx')
     localStorage.removeItem('ag_deployed_at')
-    // Clear from server
-    if (vaults[0]) {
-      fetch('/api/vault/strategy', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ vault: vaults[0], strategy: null }),
-      }).catch(() => {})
-    }
   }
 
   if (!address) return <div className="max-w-4xl mx-auto px-6 py-16 text-center text-gray-500">Connect your wallet to view strategies.</div>
