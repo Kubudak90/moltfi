@@ -388,7 +388,7 @@ Full reference: https://github.com/ortegarod/agentguard/blob/main/skill/SKILL.md
                   </div>
 
                   {/* Performance vs Benchmarks */}
-                  {perf && (
+                  {perf?.performance && (
                     <div>
                       <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Performance vs Market</div>
                       <div className="grid grid-cols-3 gap-3">
