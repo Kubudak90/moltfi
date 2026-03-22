@@ -188,19 +188,6 @@ export default function GuardrailsPage() {
           className="text-sm text-indigo-400 hover:underline">View Contract →</a>
       </div>
 
-      {/* Status Overview */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
-        <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Active Guardrails</div>
-        <div className="flex flex-wrap gap-2">
-          <StatusBadge active={hasLimits} label={hasLimits ? 'Trade Limits On-Chain' : 'No Trade Limits Set'} />
-          <StatusBadge active={privateMode} label={privateMode ? 'Private Mode (Venice)' : 'Private Mode Off'} />
-          <StatusBadge active={hasLimits} label={hasLimits ? 'Token Allowlist Active' : 'No Token Allowlist'} />
-        </div>
-        {!hasLimits && !privateMode && (
-          <p className="text-sm text-yellow-500/80 mt-3">⚠ No guardrails are active. Set trade limits below or enable Private Mode.</p>
-        )}
-      </div>
-
       {/* ========== PRIVATE MODE ========== */}
       <div className={`rounded-xl p-6 border transition ${privateMode ? 'bg-purple-500/5 border-purple-500/30' : 'bg-gray-900 border-gray-800'}`}>
         <div className="flex items-center justify-between mb-4">
