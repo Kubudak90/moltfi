@@ -211,7 +211,7 @@ export default function Home() {
       {/* Tech */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-8 text-center">Built With</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="flex flex-wrap justify-center gap-4">
           {[
             { name: 'Uniswap V3', desc: 'Real swap execution via AgentGuardRouter', color: 'border-pink-500/30' },
             { name: 'Venice AI', desc: 'Zero-retention inference — trade intent stays private', color: 'border-indigo-500/30' },
@@ -219,7 +219,7 @@ export default function Home() {
             { name: 'Base', desc: 'All contracts deployed on Base', color: 'border-blue-400/30' },
             { name: 'OpenClaw', desc: 'Agent runtime & skill harness', color: 'border-orange-500/30' },
           ].map(item => (
-            <div key={item.name} className={`bg-gray-900 border ${item.color} rounded-xl p-4`}>
+            <div key={item.name} className={`bg-gray-900 border ${item.color} rounded-xl p-4 w-44`}>
               <div className="font-medium text-sm">{item.name}</div>
               <div className="text-xs text-gray-500 mt-1">{item.desc}</div>
             </div>
