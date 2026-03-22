@@ -46,9 +46,9 @@ export async function GET(req: NextRequest) {
   try {
     const activities: ActivityItem[] = []
 
-    // Get the vault creation block (approximate — go back ~100k blocks)
+    // RPC limits getLogs to 10k block range — use recent history
     const currentBlock = await client.getBlockNumber()
-    const fromBlock = currentBlock > 500000n ? currentBlock - 500000n : 0n
+    const fromBlock = currentBlock > 9000n ? currentBlock - 9000n : 0n
 
     // Fetch vault events + router swap events in parallel
     const vaultEvents = await Promise.all(
