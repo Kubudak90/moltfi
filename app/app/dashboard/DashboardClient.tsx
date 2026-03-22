@@ -19,7 +19,7 @@ const factoryAbi = [
 const vaultAbi = [
   { name: 'depositETH', type: 'function', stateMutability: 'payable', inputs: [], outputs: [] },
   { name: 'withdrawETH', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'amount', type: 'uint256' }], outputs: [] },
-  { name: 'withdrawToken', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'token', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [] },
+  { name: 'withdraw', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'token', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [] },
 ] as const
 
 export default function DashboardClient() {
@@ -92,7 +92,7 @@ export default function DashboardClient() {
       const token = withdrawToken === 'WETH' ? WETH : USDC
       const decimals = withdrawToken === 'USDC' ? 6 : 18
       const amount = BigInt(Math.floor(parseFloat(withdrawAmount) * (10 ** decimals)))
-      writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdrawToken',
+      writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdraw',
         args: [token, amount], chain: baseSepolia })
     }
   }
