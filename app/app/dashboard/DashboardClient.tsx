@@ -186,22 +186,11 @@ export default function DashboardClient() {
             </div>
             <div>
               <div className="font-medium text-sm">{agents[0].agentName}</div>
-              <div className="text-xs text-gray-500 font-mono">{agents[0].agentWallet.slice(0, 10)}...{agents[0].agentWallet.slice(-8)}</div>
+              <div className="text-xs text-gray-500">Registered</div>
             </div>
             <div className="ml-auto text-xs text-green-400">● Connected</div>
           </div>
-          <button onClick={createVault}
-            className="w-full bg-indigo-600 hover:bg-indigo-600 text-white py-3 rounded-lg font-medium transition text-lg mb-2">
-            Create Vault
-          </button>
-          <div className="flex items-start gap-2 bg-gray-800/30 rounded-lg p-3">
-            <svg className="w-4 h-4 text-gray-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-xs text-gray-400">
-              Deploys a smart contract on Base. Your wallet will ask to confirm — network fee ~$0.03.
-            </p>
-          </div>
+          <p className="text-gray-400 text-sm text-center mb-4">Vault creation is in progress. If it didn&apos;t complete, ask your agent to say &quot;create a vault&quot;.</p>
         </div>
       )}
 
