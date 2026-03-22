@@ -288,6 +288,15 @@ export async function POST(req: NextRequest) {
     const followupData = await followup.json()
     const finalReply = followupData.choices?.[0]?.message?.content || toolResult
 
+    // Save Venice's summary for the activity log
+    try {
+      const parsed = JSON.parse(toolResult)
+      if (parsed.txHash && finalReply) {
+        const { saveActivitySummary } = await import('@/lib/activity-log')
+        saveActivitySummary(parsed.txHash, finalReply)
+      }
+    } catch {}
+
     return NextResponse.json({
       reply: finalReply,
       model: followupData.model || data.model,

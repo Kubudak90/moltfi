@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, parseAbiItem, formatEther, formatUnits } from 'viem'
 import { baseSepolia } from 'viem/chains'
+import { getActivitySummary } from '@/lib/activity-log'
 
 const client = createPublicClient({ chain: baseSepolia, transport: http() })
 const ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as const
@@ -33,6 +34,7 @@ type ActivityItem = {
   type: string
   summary: string
   detail: string
+  aiGenerated?: boolean
   txHash: string
   blockNumber: number
   timestamp: number | null
@@ -97,11 +99,14 @@ export async function GET(req: NextRequest) {
       const args = log.args as any
       const token = args.token || ''
       const amount = args.amount || BigInt(0)
+      const depositTx = log.transactionHash || ''
+      const depositAi = getActivitySummary(depositTx)
       activities.push({
         type: 'deposit',
         summary: `Deposited ${formatAmount(amount, token)}`,
-        detail: `Funds added to vault. This increases the vault balance and is tracked as principal.`,
-        txHash: log.transactionHash || '',
+        detail: depositAi || `Funds added to vault.`,
+        aiGenerated: !!depositAi,
+        txHash: depositTx,
         blockNumber: Number(log.blockNumber),
         timestamp: null,
         guardrailCheck: 'No guardrail needed — deposits are always allowed.',
@@ -134,11 +139,15 @@ export async function GET(req: NextRequest) {
       const maxPerAction = policy ? formatEther(policy[0]) : 'unknown'
       const dailyLimit = policy ? formatEther(policy[1]) : 'unknown'
 
+      const txHash = log.transactionHash || ''
+      const aiSummary = getActivitySummary(txHash)
+
       activities.push({
         type: 'swap',
         summary: `Swapped ${fmtIn} ${tokenIn} → ${fmtOut} ${tokenOut}`,
-        detail: `Trade routed through MoltFiRouter → Uniswap V3. The smart contract checked the agent's policy before allowing the swap. If the trade exceeded any limit, the transaction would have reverted and no funds would have moved.`,
-        txHash: log.transactionHash || '',
+        detail: aiSummary || `Swap routed through AgentGuardRouter → policy check → Uniswap V3.`,
+        aiGenerated: !!aiSummary,
+        txHash,
         blockNumber: Number(log.blockNumber),
         timestamp: null,
         guardrailCheck: `Trade size: ${fmtIn} ${tokenIn} · Max allowed per trade: ${maxPerAction} ETH · Daily spent: ${dailySpent} / ${dailyLimit} ETH`,
