@@ -69,7 +69,7 @@ export async function GET(req: NextRequest) {
 
     // RPC limits getLogs to 10k block range — use recent history
     const currentBlock = await client.getBlockNumber()
-    const fromBlock = currentBlock > 9000n ? currentBlock - 9000n : 0n
+    const fromBlock = currentBlock > BigInt(9000) ? currentBlock - BigInt(9000) : BigInt(0)
 
     // Fetch vault events + router swap events in parallel
     const vaultEvents = await Promise.all(
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
     for (const log of deposits) {
       const args = log.args as any
       const token = args.token || ''
-      const amount = args.amount || 0n
+      const amount = args.amount || BigInt(0)
       activities.push({
         type: 'deposit',
         summary: `Deposited ${formatAmount(amount, token)}`,
@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
       const args = log.args as any
       activities.push({
         type: 'withdraw',
-        summary: `Withdrew ${formatAmount(args.amount || 0n, args.token || '')}`,
+        summary: `Withdrew ${formatAmount(args.amount || BigInt(0), args.token || '')}`,
         detail: `Funds removed from vault by the owner.`,
         txHash: log.transactionHash || '',
         blockNumber: Number(log.blockNumber),
@@ -127,8 +127,8 @@ export async function GET(req: NextRequest) {
       const args = log.args as any
       const tokenIn = tokenName(args.tokenIn || '')
       const tokenOut = tokenName(args.tokenOut || '')
-      const amountIn = args.amountIn || 0n
-      const amountOut = args.amountOut || 0n
+      const amountIn = args.amountIn || BigInt(0)
+      const amountOut = args.amountOut || BigInt(0)
       const fmtIn = tokenIn === 'USDC' ? formatUnits(amountIn, 6) : formatEther(amountIn)
       const fmtOut = tokenOut === 'USDC' ? formatUnits(amountOut, 6) : formatEther(amountOut)
       const maxPerAction = policy ? formatEther(policy[0]) : 'unknown'
@@ -159,7 +159,7 @@ export async function GET(req: NextRequest) {
       const args = log.args as any
       activities.push({
         type: 'stake',
-        summary: `Staked ${formatEther(args.ethAmount || 0n)} ETH → received stETH`,
+        summary: `Staked ${formatEther(args.ethAmount || BigInt(0))} ETH → received stETH`,
         detail: `ETH staked through Lido. Now earning ~3% APR. Principal is tracked.`,
         txHash: log.transactionHash || '',
         blockNumber: Number(log.blockNumber),
@@ -173,7 +173,7 @@ export async function GET(req: NextRequest) {
       const args = log.args as any
       activities.push({
         type: 'yield',
-        summary: `Collected ${formatEther(args.yieldAmount || 0n)} ETH yield`,
+        summary: `Collected ${formatEther(args.yieldAmount || BigInt(0))} ETH yield`,
         detail: `Yield above principal was withdrawn for trading.`,
         txHash: log.transactionHash || '',
         blockNumber: Number(log.blockNumber),

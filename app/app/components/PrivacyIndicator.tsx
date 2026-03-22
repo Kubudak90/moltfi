@@ -60,25 +60,25 @@ export function PrivacyIndicator() {
             {privateMode ? (
               <>
                 <p className="text-gray-300 mb-2">
-                  When your agent asks for strategy advice, only Venice AI can answer. Venice doesn&apos;t save your conversations or use them for training — when the response is sent, the data is gone.
+                  Both sides locked to Venice AI. MoltFi runs Venice server-side. External agents must pass a Venice verification handshake before they can interact.
                 </p>
                 <p className="text-gray-300 mb-2">
-                  If Venice goes down, the request fails rather than quietly switching to another provider.
+                  No Venice access = no conversation. If Venice goes down, requests fail rather than falling back to another provider.
                 </p>
                 <p className="text-gray-500">
-                  Your trades are still on a public blockchain — private mode protects the AI thinking behind them, not the trades themselves.
+                  Trades are still on a public blockchain — private mode protects the AI reasoning, not the transactions.
                 </p>
               </>
             ) : (
               <p className="text-gray-300">
-                Your agent can use any AI provider for strategy advice. Turn on Private Mode in <a href="/guardrails" className="text-indigo-400 hover:underline">Guardrails</a> to lock it to Venice AI only.
+                Your agent can use any AI provider for strategy advice. Turn on Private Mode in <a href="/guardrails" className="text-indigo-400 hover:underline">Guardrails</a> to require Venice AI on both sides.
               </p>
             )}
           </div>
 
           <div className="mt-4 pt-3 border-t border-gray-800">
-            <a href="https://venice.ai" target="_blank" rel="noopener" className="text-xs text-gray-600 hover:text-gray-400">
-              AI provider: Venice AI →
+            <a href="https://docs.openclaw.ai/providers/venice" target="_blank" rel="noopener" className="text-xs text-gray-600 hover:text-gray-400">
+              Set up Venice on your agent →
             </a>
           </div>
         </div>

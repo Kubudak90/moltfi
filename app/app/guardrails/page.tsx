@@ -222,15 +222,18 @@ export default function GuardrailsPage() {
         {privateMode ? (
           <div className="space-y-2 text-sm">
             <p className="text-gray-300">
-              MoltFi&apos;s DeFi advisor runs on Venice AI — your strategy analysis is never saved or used for training.
+              Both sides must run Venice AI. MoltFi&apos;s inference already uses Venice. Your agent must also prove Venice access before it can talk to MoltFi.
             </p>
             <p className="text-gray-400">
-              For end-to-end privacy, configure your own agent to use Venice as its model provider too. <a href="https://venice.ai" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">Get started →</a>
+              When your agent calls MoltFi&apos;s API, it goes through a challenge-response handshake — if it can&apos;t complete a Venice inference, the request is rejected.
+            </p>
+            <p className="text-gray-500">
+              <a href="https://docs.openclaw.ai/providers/venice" target="_blank" rel="noopener" className="text-indigo-400 hover:underline">Set up Venice on your agent →</a>
             </p>
           </div>
         ) : (
           <p className="text-sm text-gray-500">
-            MoltFi&apos;s DeFi advisor uses Venice AI by default. Enable Private Mode to block fallback to other providers if Venice is unavailable.
+            MoltFi&apos;s DeFi advisor uses Venice AI by default. Enable Private Mode to require that external agents also prove Venice access before interacting.
           </p>
         )}
       </div>

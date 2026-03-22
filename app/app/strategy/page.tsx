@@ -130,7 +130,7 @@ export default function StrategyPage() {
       const ep = rates?.prices?.eth ? `$${rates.prices.eth.toLocaleString()}` : 'unknown'
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-MoltFi-Source': 'dashboard' },
         signal: controller.signal,
         body: JSON.stringify({ messages: [{ role: 'user',
           content: `You are an autonomous AI DeFi agent for MoltFi on Base. The user has a vault with ${balance} WETH and ${usdcBalance} USDC. Current data: ETH price ${ep}, Lido stETH APR ${lidoApr}.

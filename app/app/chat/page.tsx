@@ -76,7 +76,7 @@ If they ask how the agent-to-agent flow works: their personal AI agent (on OpenC
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-MoltFi-Source': 'dashboard' },
         body: JSON.stringify({
           messages: [
             { role: 'system', content: systemContext },
