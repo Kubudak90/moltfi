@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi'
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi'
 import { parseEther } from 'viem'
 import { baseSepolia } from 'viem/chains'
 import { useAgentContext } from '../components/AgentContext'
@@ -21,8 +21,7 @@ const vaultAbi = [
 ] as const
 
 export default function DashboardClient() {
-  const { address } = useAccount()
-  const chainId = useChainId()
+  const { address, chainId } = useAccount()
   const { switchChain } = useSwitchChain()
   const { agents, vaults, vaultData, hasAgent, hasVault, ethPrice, refreshVaults } = useAgentContext()
   const [depositAmount, setDepositAmount] = useState('0.01')

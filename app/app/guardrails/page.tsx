@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import { useAccount, useWalletClient, useChainId, useSwitchChain } from 'wagmi'
+import { useAccount, useWalletClient, useSwitchChain } from 'wagmi'
 import { parseEther, encodeFunctionData } from 'viem'
 import { baseSepolia } from 'viem/chains'
 import { useAgentContext } from '../components/AgentContext'
@@ -33,8 +33,7 @@ function StatusBadge({ active, label }: { active: boolean; label: string }) {
 }
 
 export default function GuardrailsPage() {
-  const { address } = useAccount()
-  const chainId = useChainId()
+  const { address, chainId } = useAccount()
   const { switchChain } = useSwitchChain()
   const { data: walletClient } = useWalletClient()
   const { vaults, vaultData, hasVault, refreshVaults } = useAgentContext()
