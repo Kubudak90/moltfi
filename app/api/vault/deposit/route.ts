@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     const value = parseEther(amount.toString())
 
     const { transferHash, receipt } = await queueTransaction(async () => {
-      const baseNonce = await publicClient.getTransactionCount({
+      const wrapNonce = await publicClient.getTransactionCount({
         address: account.address,
         blockTag: 'pending',
       })
@@ -49,16 +49,21 @@ export async function POST(req: NextRequest) {
       const wrapHash = await walletClient.sendTransaction({
         to: WETH,
         value,
-        nonce: baseNonce,
+        nonce: wrapNonce,
         data: encodeFunctionData({ abi: wethAbi, functionName: 'deposit' }),
       })
       await publicClient.waitForTransactionReceipt({ hash: wrapHash })
 
-      // Transfer WETH to vault using the next nonce explicitly
+      const transferNonce = await publicClient.getTransactionCount({
+        address: account.address,
+        blockTag: 'pending',
+      })
+
+      // Transfer WETH to vault after re-reading nonce from chain
       // @ts-expect-error viem v2 strict types
       const tHash = await walletClient.sendTransaction({
         to: WETH,
-        nonce: baseNonce + 1,
+        nonce: transferNonce,
         data: encodeFunctionData({
           abi: wethAbi,
           functionName: 'transfer',
