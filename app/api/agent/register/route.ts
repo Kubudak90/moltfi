@@ -1,6 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { createPublicClient, http } from 'viem'
+import { baseSepolia } from 'viem/chains'
 import { loadAgents, saveAgents, generateApiKey, getAgentWallet } from '../../../../lib/agents'
 import type { AgentRegistration } from '../../../../lib/agents'
+
+const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
+const factoryAbi = [{
+  name: 'getVaults', type: 'function', stateMutability: 'view',
+  inputs: [{ name: 'user', type: 'address' }],
+  outputs: [{ name: '', type: 'address[]' }],
+}] as const
+
+async function findSignerVault(): Promise<string | null> {
+  try {
+    const agentWallet = getAgentWallet()
+    if (!agentWallet) return null
+    const client = createPublicClient({ chain: baseSepolia, transport: http() })
+    // @ts-expect-error viem strict types
+    const vaults = await client.readContract({
+      address: VAULT_FACTORY, abi: factoryAbi,
+      functionName: 'getVaults', args: [agentWallet as `0x${string}`],
+    })
+    return vaults.length > 0 ? (vaults[vaults.length - 1] as string) : null
+  } catch { return null }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,6 +45,11 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       if (agentName) existing.agentName = agentName
+      // If no vault linked, try to find one on-chain
+      if (!existing.vault) {
+        const onChainVault = await findSignerVault()
+        if (onChainVault) existing.vault = onChainVault
+      }
       saveAgents(agents)
 
       return NextResponse.json({
@@ -36,23 +64,30 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // New registration — generate API key, then create vault
+    // New registration — generate API key
     const apiKey = generateApiKey()
 
-    // Create or find vault on-chain
+    // Find existing signer vault on-chain, or create one
     let vault = ''
-    try {
-      const origin = req.nextUrl.origin
-      const createRes = await fetch(`${origin}/api/vault/create`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ maxPerTrade: '0.5', dailyLimit: '1' }),
-      })
-      const createData = await createRes.json()
-      if (createData.vault) {
-        vault = createData.vault
-      }
-    } catch {}
+    const existingVault = await findSignerVault()
+    if (existingVault) {
+      vault = existingVault
+    } else {
+      try {
+        const proto = req.headers.get('x-forwarded-proto') || 'https'
+        const host = req.headers.get('host') || req.nextUrl.host
+        const origin = `${proto}://${host}`
+        const createRes = await fetch(`${origin}/api/vault/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ maxPerTrade: '0.5', dailyLimit: '1' }),
+        })
+        const createData = await createRes.json()
+        if (createData.vault) {
+          vault = createData.vault
+        }
+      } catch {}
+    }
 
     const registration: AgentRegistration = {
       apiKey,
