@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi'
 import { parseEther } from 'viem'
-import { baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 import { useAgentContext } from '../components/AgentContext'
 
 const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
@@ -48,17 +48,17 @@ export default function DashboardClient() {
   const { writeContract, data: txHash } = useWriteContract()
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash })
 
-  const wrongNetwork = chainId !== baseSepolia.id
+  const wrongNetwork = chainId !== base.id && chainId !== baseSepolia.id
 
   const ensureNetwork = async (): Promise<boolean> => {
     if (wrongNetwork) {
       try {
-        await switchChain({ chainId: baseSepolia.id })
+        await switchChain({ chainId: base.id })
         // Give wallet a moment to switch
         await new Promise(r => setTimeout(r, 500))
         return true
       } catch {
-        setError('Please switch to Base Sepolia in your wallet.')
+        setError('Please switch to Base in your wallet.')
         return false
       }
     }
@@ -76,7 +76,7 @@ export default function DashboardClient() {
     if (!(await ensureNetwork())) return
     setTxStatus('Creating vault...')
     writeContract({ account: address, address: VAULT_FACTORY, abi: factoryAbi, functionName: 'createVault',
-      args: [agentAddr as `0x${string}`, parseEther('1'), parseEther('5'), [WETH, USDC]], chain: baseSepolia })
+      args: [agentAddr as `0x${string}`, parseEther('1'), parseEther('5'), [WETH, USDC]], chain: chainId === baseSepolia.id ? baseSepolia : base })
   }
 
   const depositETH = async () => {
@@ -84,7 +84,7 @@ export default function DashboardClient() {
     if (!(await ensureNetwork())) return
     setTxStatus('Depositing ETH...')
     writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'depositETH',
-      value: parseEther(depositAmount), chain: baseSepolia })
+      value: parseEther(depositAmount), chain: chainId === baseSepolia.id ? baseSepolia : base })
   }
 
   const withdraw = async () => {
@@ -97,13 +97,13 @@ export default function DashboardClient() {
       setTxStatus(`Withdrawing ${amt} ${withdrawToken}...`)
       if (withdrawToken === 'ETH') {
         writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdrawETH',
-          args: [parseEther(amt)], chain: baseSepolia })
+          args: [parseEther(amt)], chain: chainId === baseSepolia.id ? baseSepolia : base })
       } else {
         const token = withdrawToken === 'WETH' ? WETH : USDC
         const decimals = withdrawToken === 'USDC' ? 6 : 18
         const amount = BigInt(Math.floor(parseFloat(amt) * (10 ** decimals)))
         writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdraw',
-          args: [token, amount], chain: baseSepolia })
+          args: [token, amount], chain: chainId === baseSepolia.id ? baseSepolia : base })
       }
     } catch (e: any) {
       setError(`Withdraw failed: ${e.message}`)
@@ -123,7 +123,7 @@ export default function DashboardClient() {
         abi: vaultAbi,
         functionName: 'setAgent',
         args: [serverAgentWallet as `0x${string}`],
-        chain: baseSepolia,
+        chain: chainId === baseSepolia.id ? baseSepolia : base,
       })
     } catch (e: any) {
       setError(`Agent update failed: ${e.message}`)
@@ -147,11 +147,11 @@ export default function DashboardClient() {
         <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-5 flex items-center justify-between">
           <div>
             <div className="font-semibold text-red-300">Wrong Network</div>
-            <p className="text-sm text-red-400/80 mt-1">You&apos;re connected to the wrong network. MoltFi runs on <strong>Base Sepolia (testnet)</strong>. No real money is involved.</p>
+            <p className="text-sm text-red-400/80 mt-1">You&apos;re connected to the wrong network. MoltFi runs on <strong>Base</strong>. Switch your wallet to Base mainnet or Base Sepolia.</p>
           </div>
-          <button onClick={() => switchChain({ chainId: baseSepolia.id })}
+          <button onClick={() => switchChain({ chainId: base.id })}
             className="bg-red-500/20 hover:bg-red-500/30 text-red-300 px-4 py-2 rounded-lg text-sm font-medium transition shrink-0">
-            Switch to Base Sepolia
+            Switch to Base
           </button>
         </div>
       )}
@@ -216,7 +216,7 @@ export default function DashboardClient() {
           )}
           <h2 className="text-xl font-bold">Create Your Vault</h2>
           <p className="text-gray-400 text-sm max-w-md mx-auto">
-            Deploy a smart contract vault on Base Sepolia. Your wallet owns it. The agent can only trade within your guardrails.
+            Deploy a smart contract vault on Base. Your wallet owns it. The agent can only trade within your guardrails.
           </p>
           <button onClick={createVault} disabled={!serverAgentWallet && !hasAgent}
             className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white px-8 py-3 rounded-lg text-sm font-medium transition">
@@ -278,7 +278,7 @@ export default function DashboardClient() {
                   {/* Header with vault links */}
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold">Your Vault</h2>
-                    <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
+                    <a href={`${chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org"}/address/${vaults[0]}`} target="_blank" rel="noopener"
                       className="text-xs font-mono text-blue-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
                   </div>
 
@@ -370,7 +370,7 @@ export default function DashboardClient() {
                       {activity.map((a, i) => (
                         <div key={i} className="flex items-center justify-between text-xs py-1.5">
                           <span className="text-gray-400">{a.summary}</span>
-                          <a href={`https://sepolia.basescan.org/tx/${a.txHash}`} target="_blank" rel="noopener"
+                          <a href={`${chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org"}/tx/${a.txHash}`} target="_blank" rel="noopener"
                             className="text-blue-400 hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
                         </div>
                       ))}

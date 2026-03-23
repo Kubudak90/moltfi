@@ -23,7 +23,7 @@ function Nav() {
         <Link href="/" className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-xs font-bold">MF</div>
           <span className="font-bold text-lg">MoltFi</span>
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-yellow-400/15 text-yellow-400 border border-yellow-500/25">Base Sepolia</span>
+          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-400/15 text-blue-400 border border-blue-500/25">Base</span>
         </Link>
         <div className="flex items-center gap-3">
           <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition px-3 py-1.5 rounded-lg hover:bg-gray-800/50">

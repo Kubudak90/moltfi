@@ -4,7 +4,7 @@ import { useAgentContext } from '../components/AgentContext'
 import { useState, useEffect, useCallback } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from 'wagmi'
 import { parseEther } from 'viem'
-import { baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 
 const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
 const AGENT_POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
@@ -62,7 +62,7 @@ export default function GuardrailsPage() {
 
   const policy = vaultData?.policy
   const vault = vaults[0] as `0x${string}`
-  const wrongNetwork = chainId !== baseSepolia.id
+  const wrongNetwork = chainId !== base.id && chainId !== baseSepolia.id
   const saving = isPending || txWaiting
 
   // Determine if there are pending changes
@@ -111,7 +111,7 @@ export default function GuardrailsPage() {
   const saveChanges = async () => {
     if (!vault) return
     if (wrongNetwork) {
-      try { await switchChain({ chainId: baseSepolia.id }) } catch { return }
+      try { await switchChain({ chainId: base.id }) } catch { return }
     }
 
     // Build transaction queue
@@ -143,7 +143,7 @@ export default function GuardrailsPage() {
       abi: factoryAbi,
       functionName: queue[0].fn as any,
       args: queue[0].args as any,
-      chain: baseSepolia,
+      chain: chainId === baseSepolia.id ? baseSepolia : base,
     })
   }
 
@@ -166,7 +166,7 @@ export default function GuardrailsPage() {
             abi: factoryAbi,
             functionName: next.fn as any,
             args: next.args as any,
-            chain: baseSepolia,
+            chain: chainId === baseSepolia.id ? baseSepolia : base,
           })
         }, 500)
       } else {
@@ -183,7 +183,7 @@ export default function GuardrailsPage() {
   const freezePolicy = async () => {
     if (!vault) return
     if (wrongNetwork) {
-      try { await switchChain({ chainId: baseSepolia.id }) } catch { return }
+      try { await switchChain({ chainId: base.id }) } catch { return }
     }
     setTxProgress('Freezing all trading')
     writeContract({
@@ -192,7 +192,7 @@ export default function GuardrailsPage() {
       abi: factoryAbi,
       functionName: 'revokePolicy',
       args: [vault],
-      chain: baseSepolia,
+      chain: chainId === baseSepolia.id ? baseSepolia : base,
     })
     setFreezeConfirm(false)
   }
@@ -212,7 +212,7 @@ export default function GuardrailsPage() {
           <h1 className="text-2xl font-bold">Guardrails</h1>
           <p className="text-sm text-gray-500 mt-1">Scoped access rules for your agent&apos;s API key — enforced on-chain.</p>
         </div>
-        <a href={`https://sepolia.basescan.org/address/${AGENT_POLICY}#readContract`}
+        <a href={`${chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org"}/address/${AGENT_POLICY}#readContract`}
           target="_blank" rel="noopener"
           className="text-xs text-blue-400 hover:underline">View contract →</a>
       </div>
@@ -220,7 +220,7 @@ export default function GuardrailsPage() {
       {txConfirmed && txQueue.length === 0 && (
         <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4 text-sm text-green-400">
           ✓ Guardrails updated on-chain —{' '}
-          <a href={`https://sepolia.basescan.org/tx/${txHash}`} target="_blank" rel="noopener" className="underline">
+          <a href={`${chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org"}/tx/${txHash}`} target="_blank" rel="noopener" className="underline">
             view transaction
           </a>
         </div>
@@ -369,7 +369,7 @@ export default function GuardrailsPage() {
               ].map(c => (
                 <div key={c.addr} className="flex items-center justify-between">
                   <span className="text-gray-500">{c.label}</span>
-                  <a href={`https://sepolia.basescan.org/address/${c.addr}`} target="_blank" rel="noopener"
+                  <a href={`${chainId === 84532 ? "https://sepolia.basescan.org" : "https://basescan.org"}/address/${c.addr}`} target="_blank" rel="noopener"
                     className="font-mono text-blue-400 hover:underline">{c.addr.slice(0, 6)}...{c.addr.slice(-4)}</a>
                 </div>
               ))}
