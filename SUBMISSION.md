@@ -8,19 +8,21 @@
 MoltFi
 
 ## tagline
-Scoped API access for AI agent trading — with on-chain guardrails.
+DeFi vaults with on-chain guardrails for AI agents.
 
 ## description
-Give your AI agent a scoped API key to trade crypto — with on-chain guardrails it physically cannot bypass. You set the limits. Smart contracts enforce them. You stay in control.
+Your AI agent can trade crypto on Base — within limits enforced at the blockchain level, not inside the agent's code. You create a vault that you own, set your trading policies (max per trade, daily cap, token allowlist), and give your agent an API key to trade on your vault. Every trade is checked by a smart contract before execution. Over your limits? The transaction reverts automatically. Every swap has a Basescan link you can verify.
 
-You connect your wallet, create a vault, deposit funds, and set spending limits (max per trade, daily cap, token allowlist). These limits get written to a smart contract on Base. Your agent registers and gets an API key — scoped access that lets it trade within your guardrails. Every trade goes through the smart contract before execution. Within limits → executes on Uniswap V3. Over limits → transaction reverts automatically. Every trade has a Basescan link.
+Your agent doesn't need to understand Solidity, ABI encoding, or gas management. It reads a skill file (`/api/skill`), registers once, and sends plain English trade requests — "swap 0.01 WETH to USDC." MoltFi's processing layer, powered by Venice AI (zero data retention), interprets the intent, maps it to the right contract call, handles nonce management and gas, and routes it through the smart contract for policy enforcement before executing on Uniswap V3. Your agent stays focused on strategy. MoltFi handles the infrastructure.
 
-Venice AI handles trade processing with zero data retention — agent reasoning stays private while trades are publicly verifiable on-chain. Live Lido stETH APR data informs strategy decisions, with staking infrastructure ready for mainnet deployment.
+Live Lido stETH APR data is available on the dashboard and via API for yield-aware strategy decisions. Staking infrastructure (ETH → stETH → wstETH through the vault) is built and ready for mainnet — Lido doesn't deploy to testnets.
+
+Your wallet owns the vault. You configure the policies. You withdraw anytime.
 
 ## problemStatement
-AI agents are trading crypto, but there's no good way to give an agent scoped trading access with limits that it physically cannot circumvent. Software-level guardrails live in the agent's own code — the exact wrong place to enforce them. A prompt injection, a bug, or a bad model update can bypass them.
+When you give an AI agent access to trade with your money, the spending limits typically live inside the agent's own code or framework. The problem is that agents drift — especially with long context windows, prompt injections, or model updates, they can forget or override their own rules. There's no way to guarantee the agent won't exceed your limits when the limits are enforced by the same system that's making the decisions.
 
-MoltFi solves this with scoped API keys and on-chain enforcement. The agent gets an API key that lets it trade within your limits. Smart contracts check every trade before execution. The agent operates freely within the guardrails. When it tries to exceed them, the transaction reverts. The human stays in control.
+MoltFi moves enforcement to the blockchain. You own a vault and set trading policies — how much per trade, how much per day, which tokens. Your agent gets an API key to trade on your vault, but every trade goes through a smart contract that checks your policies before any funds move. The agent can trade freely within your rules. When it tries to exceed them, the transaction reverts on-chain. No amount of context drift or prompt injection can bypass a smart contract.
 
 ## repoURL
 https://github.com/ortegarod/moltfi
@@ -118,7 +120,7 @@ https://moltfi-production.up.railway.app
   "skills": ["github", "coding-agent"],
   "tools": ["viem", "wagmi", "Uniswap V3 SwapRouter02", "Uniswap Trading API", "Venice API (zai-org-glm-4.7)", "Foundry", "CoinGecko API", "Lido APR API", "Base Sepolia RPC", "shadcn/ui"],
   "intention": "continuing",
-  "intentionNotes": "MoltFi addresses a real gap — agents need guardrails that live on-chain, not in code. We plan to deploy to Base mainnet, add more guardrail types, and integrate with more DEXs."
+  "intentionNotes": "MoltFi addresses a real gap — agents need guardrails enforced at the blockchain level. We plan to deploy to Base mainnet, add live Lido staking (ready in code but Lido doesn't deploy to testnets), and integrate with protocols like Aave, Compound, and additional DEXs like Uniswap V4."
 }
 ```
 

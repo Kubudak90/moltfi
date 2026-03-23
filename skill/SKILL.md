@@ -1,6 +1,6 @@
 # MoltFi — AI DeFi Vault Manager
 
-MoltFi manages DeFi vaults on Base with on-chain spending policy enforcement. Venice AI (private inference, zero data retention) powers all strategy and reasoning. Uniswap V3 executes trades. Smart contracts enforce limits — the agent cannot exceed them.
+MoltFi manages DeFi vaults on Base with on-chain trading policy enforcement. The vault owner sets policies (max per trade, daily cap, token allowlist) enforced by smart contracts. Venice AI (private inference, zero data retention) processes trade requests in plain English. Uniswap V3 executes swaps. Every trade is verified on-chain before execution.
 
 ## Quick Start
 
@@ -95,7 +95,7 @@ Get a Venice API key: https://venice.ai
 
 ## Architecture
 
-- **AgentPolicy** — on-chain spending limits (max per trade, daily cap). Human sets. Agent can't change.
+- **AgentPolicy** — on-chain trading policies (max per trade, daily cap). The vault owner configures these.
 - **AgentGuardRouter** — wraps Uniswap V3. Checks policy before every swap.
 - **AgentVault** — holds funds. MoltFi executes trades through the router. Only the human can withdraw.
 - **Venice AI** — private inference, zero data retention. All strategy reasoning is private. All trades are public blockchain transactions.
