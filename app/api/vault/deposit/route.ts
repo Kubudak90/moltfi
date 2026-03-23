@@ -3,14 +3,11 @@ import { createWalletClient, createPublicClient, http, parseEther, encodeFunctio
 import { queueTransaction } from '../../../../lib/tx-queue'
 import { privateKeyToAccount } from 'viem/accounts'
 import { baseSepolia } from 'viem/chains'
-
-const RPC_URL = 'https://sepolia.base.org'
 import { lookupVault } from '../lookup'
 
-const WETH = '0x4200000000000000000000000000000000000006' as const
-const wethAbi = [
-  { name: 'deposit', type: 'function', stateMutability: 'payable', inputs: [], outputs: [] },
-  { name: 'transfer', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'to', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [{ name: '', type: 'bool' }] },
+const RPC_URL = 'https://sepolia.base.org'
+const vaultAbi = [
+  { name: 'depositETH', type: 'function', stateMutability: 'payable', inputs: [], outputs: [] },
 ] as const
 
 export async function POST(req: NextRequest) {
@@ -38,49 +35,31 @@ export async function POST(req: NextRequest) {
 
     const value = parseEther(amount.toString())
 
-    const { transferHash, receipt } = await queueTransaction(async () => {
-      const wrapNonce = await publicClient.getTransactionCount({
+    const { hash, receipt } = await queueTransaction(async () => {
+      const nonce = await publicClient.getTransactionCount({
         address: account.address,
         blockTag: 'pending',
       })
 
-      // Wrap ETH → WETH
+      // Single-tx native vault deposit: vault.depositETH()
       // @ts-expect-error viem v2 strict types
-      const wrapHash = await walletClient.sendTransaction({
-        to: WETH,
+      const h = await walletClient.sendTransaction({
+        to: vault as `0x${string}`,
         value,
-        nonce: wrapNonce,
-        data: encodeFunctionData({ abi: wethAbi, functionName: 'deposit' }),
+        nonce,
+        data: encodeFunctionData({ abi: vaultAbi, functionName: 'depositETH' }),
       })
-      await publicClient.waitForTransactionReceipt({ hash: wrapHash })
-
-      const transferNonce = await publicClient.getTransactionCount({
-        address: account.address,
-        blockTag: 'pending',
-      })
-
-      // Transfer WETH to vault after re-reading nonce from chain
-      // @ts-expect-error viem v2 strict types
-      const tHash = await walletClient.sendTransaction({
-        to: WETH,
-        nonce: transferNonce,
-        data: encodeFunctionData({
-          abi: wethAbi,
-          functionName: 'transfer',
-          args: [vault as `0x${string}`, value],
-        }),
-      })
-      const r = await publicClient.waitForTransactionReceipt({ hash: tHash })
-      return { transferHash: tHash, receipt: r }
+      const r = await publicClient.waitForTransactionReceipt({ hash: h })
+      return { hash: h, receipt: r }
     })
 
     return NextResponse.json({
       success: true,
-      txHash: transferHash,
+      txHash: hash,
       status: receipt.status,
       amount: `${amount} ETH`,
       vault,
-      explorer: `https://sepolia.basescan.org/tx/${transferHash}`,
+      explorer: `https://sepolia.basescan.org/tx/${hash}`,
     })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
