@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { injected } from 'wagmi/connectors'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 export function ConnectWallet() {
   const { address, isConnected } = useAccount()
@@ -14,6 +14,16 @@ export function ConnectWallet() {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const pathname = usePathname()
+  const router = useRouter()
+  const wasConnected = useRef(isConnected)
+
+  // Redirect to dashboard when wallet connects on landing page
+  useEffect(() => {
+    if (isConnected && !wasConnected.current && pathname === '/') {
+      router.push('/dashboard')
+    }
+    wasConnected.current = isConnected
+  }, [isConnected, pathname, router])
 
   useEffect(() => setMounted(true), [])
 
