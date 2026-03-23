@@ -48,7 +48,14 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     if (!address) return
     fetch(`/api/vault/status?human=${address}`).then(r => r.json()).then(d => {
       setVaults(d.vaults || [])
-      if (d.vaults?.length > 0) fetch(`/api/vault/status?vault=${d.vaults[0]}`).then(r => r.json()).then(setVaultData).catch(() => {})
+      if (d.vaults?.length > 0) {
+        fetch(`/api/vault/status?vault=${d.vaults[0]}`).then(r => r.json()).then(vd => {
+          // Also fetch policy to get approvedTokens
+          fetch(`/api/policy?vault=${d.vaults[0]}`).then(r => r.json()).then(pd => {
+            setVaultData({ ...vd, approvedTokens: pd.approvedTokens || {} })
+          }).catch(() => setVaultData(vd))
+        }).catch(() => {})
+      }
     }).catch(() => {})
   }
 
