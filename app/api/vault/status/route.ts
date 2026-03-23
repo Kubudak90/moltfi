@@ -51,36 +51,32 @@ export async function GET(req: NextRequest) {
       { name: 'balance', type: 'function', stateMutability: 'view', inputs: [{ name: 'token', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] },
     ]
 
-    const balanceCalls: Promise<any>[] = [
-      client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'owner' } as any),
-      client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'agent' } as any),
-      client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [WETH] } as any),
-      client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [usdcAddr] } as any),
-      client.getBalance({ address: vaultAddress as `0x${string}` }),
-    ]
-    // Read wstETH balance on mainnet
-    if (isMainnet) {
-      balanceCalls.push(
-        client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [WSTETH] } as any)
-      )
+    // Helper to safely read contract with fallback
+    const safeRead = async (args: any, fallback: any = BigInt(0)) => {
+      try { return await client.readContract(args) } catch { return fallback }
     }
-    const results = await Promise.all(balanceCalls)
-    const [owner, agent, wethBalance, usdcBalance, ethBalance] = results
-    const wstethBalance = isMainnet ? results[5] : BigInt(0)
 
-    // Get policy
+    // Sequential reads to avoid rate limiting on free RPC
+    const owner = await safeRead({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'owner' }, '0x0')
+    const agent = await safeRead({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'agent' }, '0x0')
+    const wethBalance = await safeRead({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [WETH] })
+    const usdcBalance = await safeRead({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [usdcAddr] })
+    let ethBalance = BigInt(0)
+    try { ethBalance = await client.getBalance({ address: vaultAddress as `0x${string}` }) } catch {}
+    const wstethBalance = isMainnet
+      ? await safeRead({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [WSTETH] })
+      : BigInt(0)
+
+    // Get policy (best-effort)
     const policyAbi = [
       { name: 'policies', type: 'function', stateMutability: 'view', inputs: [{ name: '', type: 'address' }, { name: '', type: 'address' }], outputs: [{ name: 'maxPerAction', type: 'uint256' }, { name: 'dailyLimit', type: 'uint256' }, { name: 'active', type: 'bool' }] },
       { name: 'getDailySpent', type: 'function', stateMutability: 'view', inputs: [{ name: 'agent', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] },
       { name: 'getRemainingAllowance', type: 'function', stateMutability: 'view', inputs: [{ name: 'agent', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] },
     ]
 
-    // Policy is set with factory as agentOwner, so we need factory address as the human
-    const [policy, dailySpent, remaining] = await Promise.all([
-      client.readContract({ address: policyAddr as `0x${string}`, abi: policyAbi, functionName: 'policies', args: [factoryAddr, vaultAddress] } as any),
-      client.readContract({ address: policyAddr as `0x${string}`, abi: policyAbi, functionName: 'getDailySpent', args: [vaultAddress] } as any),
-      client.readContract({ address: policyAddr as `0x${string}`, abi: policyAbi, functionName: 'getRemainingAllowance', args: [vaultAddress] } as any),
-    ])
+    const policy = await safeRead({ address: policyAddr as `0x${string}`, abi: policyAbi, functionName: 'policies', args: [factoryAddr, vaultAddress] }, [BigInt(0), BigInt(0), false])
+    const dailySpent = await safeRead({ address: policyAddr as `0x${string}`, abi: policyAbi, functionName: 'getDailySpent', args: [vaultAddress] })
+    const remaining = await safeRead({ address: policyAddr as `0x${string}`, abi: policyAbi, functionName: 'getRemainingAllowance', args: [vaultAddress] })
 
     return NextResponse.json({
       vault: vaultAddress,
