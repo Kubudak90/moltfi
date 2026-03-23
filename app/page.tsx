@@ -1,6 +1,31 @@
 'use client'
 
-import Link from 'next/link'
+import { useState } from 'react'
+
+function CopyBlock({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false)
+  const doCopy = () => {
+    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
+      .catch(() => {
+        const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
+        setCopied(true); setTimeout(() => setCopied(false), 2000)
+      })
+  }
+  return (
+    <div className="relative group">
+      <pre className="bg-gray-800 rounded-lg p-3 pr-10 text-xs font-mono text-gray-300 whitespace-pre-wrap break-all">{text}</pre>
+      <button onClick={doCopy}
+        className="absolute top-2 right-2 p-1.5 rounded-lg text-gray-500 hover:text-indigo-400 hover:bg-gray-700/50 transition">
+        {copied ? (
+          <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+        ) : (
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+        )}
+      </button>
+    </div>
+  )
+}
 
 export default function Home() {
   return (
@@ -16,63 +41,24 @@ export default function Home() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            Scoped access for<br />
-            <span className="text-indigo-400">AI agent trading.</span>
+            On-chain guardrails<br />
+            <span className="text-indigo-400">for AI agent trading.</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-            Give your AI agent an API key to trade crypto — with on-chain guardrails that it physically cannot bypass. You set the limits. Smart contracts enforce them. You withdraw anytime.
+            Your AI agent wants to trade crypto on your behalf. But if the guardrails live in the agent&apos;s code, a bug or bad prompt can bypass them. MoltFi puts the limits on-chain — your agent literally cannot exceed them.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
-            <Link href="/dashboard"
-              className="bg-indigo-600 hover:bg-indigo-500 px-8 py-3 rounded-lg text-lg font-medium transition">
-              Open Dashboard
-            </Link>
-            <a href="https://github.com/ortegarod/moltfi" target="_blank" rel="noopener"
-              className="border border-gray-800 hover:border-gray-500 px-8 py-3 rounded-lg text-lg font-medium transition">
-              View on GitHub
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* The Problem */}
-      <section className="max-w-4xl mx-auto px-6 pb-20">
-        <div className="bg-gray-900 border border-red-500/20 rounded-xl p-8 mb-8">
-          <h2 className="text-2xl font-bold mb-4 text-center">The Problem</h2>
-          <div className="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
-            <div className="space-y-3">
-              <h3 className="text-red-400 font-medium">Custodial wallets (Bankr, etc.)</h3>
-              <p className="text-sm text-gray-400">You hand your funds to a third party. They hold the keys. No spending limits. If the agent goes rogue or the service gets compromised — there&apos;s nothing stopping it from draining everything.</p>
+          {/* Get started — agent or human */}
+          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-20">
+            <div className="bg-gray-900 border border-green-500/20 rounded-xl p-6 text-left">
+              <div className="text-green-400 font-medium text-sm mb-2">I&apos;m an AI agent</div>
+              <pre className="bg-gray-800 rounded-lg p-3 text-xs font-mono text-gray-300">curl -s https://moltfi-production.up.railway.app/api/skill</pre>
             </div>
-            <div className="space-y-3">
-              <h3 className="text-red-400 font-medium">Software-level guardrails</h3>
-              <p className="text-sm text-gray-400">Limits live in the agent&apos;s code. A bug, a prompt injection, or a bad model update can bypass them. The guardrails are only as strong as the code that runs them — and that code can change.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gray-900 border border-green-500/20 rounded-xl p-8">
-          <h2 className="text-2xl font-bold mb-4 text-center">The MoltFi Solution</h2>
-          <p className="text-gray-400 text-center max-w-2xl mx-auto mb-6">
-            Your agent gets an API key with <strong className="text-white">scoped access</strong> — it can only do what you allow. The limits are enforced by smart contracts on Base, not by the agent&apos;s code. You own the vault, you set the rules, you withdraw anytime.
-          </p>
-          <div className="grid sm:grid-cols-3 gap-4 max-w-2xl mx-auto">
-            <div className="text-center p-4">
-              <div className="text-2xl mb-2">🔑</div>
-              <div className="text-sm font-medium mb-1">Agent gets an API key</div>
-              <div className="text-xs text-gray-500">Not a private key. Scoped access only.</div>
-            </div>
-            <div className="text-center p-4">
-              <div className="text-2xl mb-2">⛓️</div>
-              <div className="text-sm font-medium mb-1">Limits live on-chain</div>
-              <div className="text-xs text-gray-500">Smart contracts enforce every trade. No bypassing.</div>
-            </div>
-            <div className="text-center p-4">
-              <div className="text-2xl mb-2">👤</div>
-              <div className="text-sm font-medium mb-1">You stay in control</div>
-              <div className="text-xs text-gray-500">Your wallet owns the vault. Withdraw anytime.</div>
+            <div className="bg-gray-900 border border-indigo-500/20 rounded-xl p-6 text-left">
+              <div className="text-indigo-400 font-medium text-sm mb-2">I&apos;m a human</div>
+              <p className="text-xs text-gray-400 mb-3">Copy this and paste it into your AI agent&apos;s chat:</p>
+              <CopyBlock text="Read this skill file and follow the instructions to manage my DeFi vault: curl -s https://moltfi-production.up.railway.app/api/skill" />
             </div>
           </div>
         </div>
@@ -90,17 +76,17 @@ export default function Home() {
           <div className="flex items-center justify-between max-w-3xl mx-auto text-center">
             <div className="flex-1">
               <div className="text-sm font-medium text-indigo-400 mb-1">Your Agent</div>
-              <div className="text-xs text-gray-500">API key + trade request</div>
+              <div className="text-xs text-gray-500">&quot;Swap 0.1 WETH to USDC&quot;</div>
             </div>
             <div className="text-gray-600 px-2">→</div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-yellow-400 mb-1">MoltFi API</div>
-              <div className="text-xs text-gray-500">Scoped access layer</div>
+              <div className="text-sm font-medium text-yellow-400 mb-1">MoltFi Vault</div>
+              <div className="text-xs text-gray-500">Interprets request</div>
             </div>
             <div className="text-gray-600 px-2">→</div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-green-400 mb-1">Smart Contract</div>
-              <div className="text-xs text-gray-500">Enforces your limits</div>
+              <div className="text-sm font-medium text-green-400 mb-1">AgentPolicy</div>
+              <div className="text-xs text-gray-500">Checks limits on-chain</div>
             </div>
             <div className="text-gray-600 px-2">→</div>
             <div className="flex-1">
@@ -112,10 +98,10 @@ export default function Home() {
 
         <div className="space-y-4 max-w-2xl mx-auto">
           {[
-            { step: '1', title: 'You connect your wallet and create a vault', desc: 'You deposit funds and set spending limits — max trade size, daily volume cap, which tokens are allowed. These limits get written to a smart contract on Base.' },
-            { step: '2', title: 'Your agent gets a scoped API key', desc: 'Your agent registers and gets an API key. This key lets it trade within your vault — but only within your limits. No private keys, no direct blockchain access.' },
-            { step: '3', title: 'Your agent trades with plain English', desc: '"Swap 0.01 WETH to USDC." MoltFi processes the request, then the smart contract checks it against your limits before any funds move.' },
-            { step: '4', title: 'Smart contracts enforce every limit', desc: 'Within limits → trade executes on Uniswap V3. Over limits → transaction reverts automatically. Every trade has a Basescan link. The agent physically cannot exceed your guardrails.' },
+            { step: '1', title: 'You connect your wallet and create a vault', desc: 'You set spending limits — max trade size, daily volume cap, which tokens are allowed. These limits get written to a smart contract on Base.' },
+            { step: '2', title: 'Your agent registers and gets access', desc: 'Your agent reads a skill file, registers with MoltFi, and gets an API key. It can now trade within your vault — but only within your limits.' },
+            { step: '3', title: 'Your agent sends trade requests in plain English', desc: '"Swap 0.01 WETH to USDC." MoltFi interprets the request, then the smart contract checks it against your limits before any funds move.' },
+            { step: '4', title: 'Every trade is verified on-chain', desc: 'If the trade is within your limits, it executes on Uniswap V3. If it exceeds them, the transaction reverts automatically. Every trade has a Basescan link you can verify.' },
           ].map(item => (
             <div key={item.step} className="flex gap-4 bg-gray-900 border border-gray-800 rounded-xl p-5">
               <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>
@@ -128,44 +114,35 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Scoped Access — What the API key can and can't do */}
+      {/* What's enforced */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
-        <h2 className="text-2xl font-bold mb-3 text-center">Scoped Access</h2>
+        <h2 className="text-2xl font-bold mb-3 text-center">What the Smart Contract Enforces</h2>
         <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
-          The API key is the guardrail. Here&apos;s exactly what your agent can and can&apos;t do.
+          These aren&apos;t software settings. They&apos;re on-chain rules that revert the transaction if violated.
         </p>
         <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
-          <div className="bg-gray-900 border border-green-500/20 rounded-xl p-5">
-            <h3 className="text-green-400 font-medium text-sm mb-3">Agent CAN</h3>
-            <ul className="space-y-2 text-sm text-gray-300">
-              <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span> Trade within your per-trade limit</li>
-              <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span> Trade within your daily spending cap</li>
-              <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span> Swap only your approved tokens</li>
-              <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span> Check vault balance and status</li>
-              <li className="flex items-start gap-2"><span className="text-green-400 mt-0.5">✓</span> Request strategy suggestions (Venice AI)</li>
-            </ul>
-          </div>
-          <div className="bg-gray-900 border border-red-500/20 rounded-xl p-5">
-            <h3 className="text-red-400 font-medium text-sm mb-3">Agent CANNOT</h3>
-            <ul className="space-y-2 text-sm text-gray-300">
-              <li className="flex items-start gap-2"><span className="text-red-400 mt-0.5">✗</span> Withdraw funds (owner-only)</li>
-              <li className="flex items-start gap-2"><span className="text-red-400 mt-0.5">✗</span> Change the guardrail limits</li>
-              <li className="flex items-start gap-2"><span className="text-red-400 mt-0.5">✗</span> Trade unapproved tokens</li>
-              <li className="flex items-start gap-2"><span className="text-red-400 mt-0.5">✗</span> Exceed per-trade or daily limits</li>
-              <li className="flex items-start gap-2"><span className="text-red-400 mt-0.5">✗</span> Access private keys</li>
-            </ul>
-          </div>
+          {[
+            { title: 'Max per trade', desc: 'Every swap is checked against your per-trade limit. Exceeds it → reverts.' },
+            { title: 'Daily spending cap', desc: 'Cumulative daily volume tracked on-chain. Resets every 24 hours.' },
+            { title: 'Token allowlist', desc: 'Only tokens you approved can be traded. Everything else is blocked.' },
+            { title: 'Instant revocation', desc: 'Freeze all agent trading with one transaction. Takes effect immediately.' },
+          ].map(item => (
+            <div key={item.title} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-2 h-2 rounded-full bg-green-400" />
+                <h3 className="font-medium text-sm">{item.title}</h3>
+              </div>
+              <p className="text-xs text-gray-400">{item.desc}</p>
+            </div>
+          ))}
         </div>
-        <p className="text-xs text-gray-600 text-center mt-4 max-w-lg mx-auto">
-          Why on-chain? Because you shouldn&apos;t have to trust someone&apos;s server to enforce your limits. The smart contract doesn&apos;t care who calls it — if the trade exceeds your limits, it reverts. Period.
-        </p>
       </section>
 
       {/* Agent Integration */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
         <h2 className="text-2xl font-bold mb-3 text-center">Works With Any Agent</h2>
         <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
-          If your agent can make HTTP calls, it can use MoltFi. No SDK, no blockchain knowledge required.
+          If your agent can make HTTP calls, it can use MoltFi. No SDK, no blockchain dependency.
         </p>
 
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
@@ -229,6 +206,7 @@ export default function Home() {
         <div className="flex flex-wrap justify-center gap-4">
           {[
             { name: 'Uniswap V3', desc: 'Swap execution via AgentGuardRouter', color: 'border-pink-500/30' },
+            { name: 'Lido', desc: 'Live stETH APR data & staking integration', color: 'border-cyan-500/30' },
             { name: 'Venice AI', desc: 'Zero-retention inference for trade processing', color: 'border-indigo-500/30' },
             { name: 'Base', desc: 'All contracts on Base Sepolia', color: 'border-blue-400/30' },
             { name: 'OpenClaw', desc: 'Agent runtime & skill harness', color: 'border-orange-500/30' },

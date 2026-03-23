@@ -91,6 +91,7 @@ https://moltfi-production.up.railway.app
 | Sponsor | Integration | Real? |
 |---------|------------|-------|
 | **Uniswap V3** | AgentGuardRouter wraps SwapRouter02. Real swaps verified on Basescan. | ✅ |
+| **Lido** | Live stETH APR data from Lido API displayed on dashboard. Staking endpoint (`/api/vault/stake`) routes ETH → stETH → wstETH through the vault. Full mainnet staking ready — Lido doesn't deploy to testnets. | ✅ |
 | **Venice AI** | All trade processing via Venice API. Zero data retention. | ✅ |
 | **Base** | All contracts on Base Sepolia. | ✅ |
 | **OpenClaw** | Built by an OpenClaw agent (Kyro). Skill file for OpenClaw agents. | ✅ |

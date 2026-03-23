@@ -85,6 +85,7 @@ Open the dashboard to:
 ## Built with
 
 - **[Uniswap V3](https://uniswap.org)** — Swap execution via AgentGuardRouter
+- **[Lido](https://lido.fi)** — Live stETH APR data displayed on dashboard; staking endpoint (`/api/vault/stake`) routes ETH → stETH → wstETH through the vault. Full mainnet staking ready — Lido doesn't deploy to testnets
 - **[Venice AI](https://venice.ai)** — Zero-retention inference for trade processing
 - **[Base](https://base.org)** — All contracts deployed on Base Sepolia
 - **[OpenClaw](https://openclaw.ai)** — Agent runtime & skill harness
