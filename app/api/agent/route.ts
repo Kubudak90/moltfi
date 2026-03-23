@@ -23,8 +23,8 @@ const TOOLS = [
     type: 'function' as const,
     function: {
       name: 'check_vault',
-      description: 'Check vault balances (ETH, WETH, USDC), on-chain policy status, and daily spending limits. Use when user asks about their vault, balance, holdings, portfolio, or policy.',
-      parameters: { type: 'object', properties: {}, required: [] },
+      description: 'Check vault balances (ETH, WETH, USDC, wstETH), on-chain policy status, and daily spending limits. Use when user asks about their vault, balance, holdings, portfolio, or policy. Pass chain="mainnet" for Base mainnet or omit for testnet.',
+      parameters: { type: 'object', properties: { chain: { type: 'string', enum: ['mainnet', 'sepolia'], description: 'Chain to check. Use "mainnet" for Base mainnet, "sepolia" for testnet. Default: sepolia.' } }, required: [] },
     },
   },
   {
@@ -46,6 +46,7 @@ const TOOLS = [
           tokenIn: { type: 'string', enum: ['WETH', 'USDC', 'wstETH'], description: 'Token to sell' },
           tokenOut: { type: 'string', enum: ['WETH', 'USDC', 'wstETH'], description: 'Token to buy' },
           amount: { type: 'string', description: 'Amount of tokenIn to swap (e.g. "0.001")' },
+          chain: { type: 'string', enum: ['mainnet', 'sepolia'], description: 'Chain. Use "mainnet" for Base mainnet. Default: sepolia.' },
         },
         required: ['tokenIn', 'tokenOut', 'amount'],
       },
@@ -110,17 +111,34 @@ You don't decide what to trade — the agent does. You enforce the rules and exe
 Rules:
 - Always use tools to get real data. Never guess balances or prices.
 - For swaps: execute what the agent asks using the swap tool. The guardrails protect the vault. ALWAYS call the swap tool — never refuse a swap request for tokens that are in the supported list.
+- When the user mentions "mainnet" or doesn't specify a network, ALWAYS pass chain="mainnet" to tools. Only use chain="sepolia" if they explicitly say testnet or sepolia.
 - Be concise — 1-3 sentences plus the relevant data.
 - If a tool fails, explain clearly what went wrong.
 - Include Basescan links for any transaction.`
 
 // ─── Tool execution ───
-async function executeTool(name: string, args: any, origin: string, vault: string, apiKey: string): Promise<string> {
+async function executeTool(name: string, args: any, origin: string, vault: string, apiKey: string, humanWallet?: string): Promise<string> {
   try {
     switch (name) {
       case 'check_vault': {
-        const res = await fetch(`${origin}/api/vault/status?vault=${vault}`)
-        return await res.text()
+        // Check both chains and return combined status
+        const results: string[] = []
+        // Mainnet - find vault, then get status
+        if (humanWallet) {
+          try {
+            const lookupRes = await fetch(`${origin}/api/vault/status?human=${encodeURIComponent(humanWallet)}&chain=mainnet`)
+            const lookupData = await lookupRes.json().catch(() => null)
+            const mainnetVault = lookupData?.vaults?.[0] || lookupData?.vault
+            if (mainnetVault) {
+              const mRes = await fetch(`${origin}/api/vault/status?vault=${mainnetVault}&chain=mainnet`)
+              results.push(`BASE MAINNET: ${await mRes.text()}`)
+            }
+          } catch {}
+        }
+        // Sepolia
+        const sRes = await fetch(`${origin}/api/vault/status?vault=${vault}`)
+        results.push(`BASE SEPOLIA: ${await sRes.text()}`)
+        return results.join('\n\n')
       }
       case 'get_rates': {
         const res = await fetch(`${origin}/api/rates`)
@@ -130,7 +148,7 @@ async function executeTool(name: string, args: any, origin: string, vault: strin
         const res = await fetch(`${origin}/api/vault/swap`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenIn: args.tokenIn, tokenOut: args.tokenOut, amount: args.amount, chain: 'mainnet' }),
+          body: JSON.stringify({ tokenIn: args.tokenIn, tokenOut: args.tokenOut, amount: args.amount, chain: args.chain || 'sepolia' }),
         })
         return await res.text()
       }
@@ -296,7 +314,7 @@ export async function POST(req: NextRequest) {
       toolArgs = JSON.parse(toolCall.function.arguments || '{}')
     } catch {}
 
-    const toolResult = await executeTool(toolName, toolArgs, origin, vault, apiKey)
+    const toolResult = await executeTool(toolName, toolArgs, origin, vault, apiKey, registration.humanWallet)
 
     // Step 3: Send result back to Venice for summary
     const followupMessages = [
