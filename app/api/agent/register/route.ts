@@ -22,7 +22,7 @@ async function findVaultForOwner(owner: string): Promise<string | null> {
       address: VAULT_FACTORY, abi: factoryAbi,
       functionName: 'getVaults', args: [owner as `0x${string}`],
     })
-    return vaults.length > 0 ? (vaults[vaults.length - 1] as string) : null
+    return vaults.length > 0 ? (vaults[0] as string) : null
   } catch (e) {
     console.error('[register] findVaultForOwner error:', e)
     return null
