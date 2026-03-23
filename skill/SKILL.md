@@ -29,12 +29,13 @@ Send plain English. MoltFi interprets your request, checks it against on-chain p
 
 ### What you can say
 
-- `"check my vault"` — balances, policy, agent address
+- `"check my vault"` — balances, policy, daily limit remaining
 - `"what are the current rates?"` — ETH price, Lido APR, gas
 - `"swap 0.001 WETH to USDC"` — executes swap (policy checked on-chain)
-- `"deposit 0.01 ETH"` — deposit into vault
-- `"what strategy should I use?"` — AI strategy recommendation
+- `"deposit 0.01 ETH"` — deposit ETH into the vault
+- `"show recent activity"` — recent swaps and transaction history
 - `"create a vault"` — if registration didn't auto-create one
+- `"what strategy should I use?"` — MoltFi does not choose strategy or give financial advice; it only executes within your guardrails
 
 ### Response format
 

@@ -11,18 +11,20 @@ MoltFi
 DeFi vaults with on-chain guardrails for AI agents.
 
 ## description
-Your AI agent can trade crypto on Base — within limits enforced at the blockchain level, not inside the agent's code. You create a vault that you own, set your trading policies (max per trade, daily cap, token allowlist), and give your agent an API key to trade on your vault. Every trade is checked by a smart contract before execution. Over your limits? The transaction reverts automatically. Every swap has a Basescan link you can verify.
+MoltFi gives AI agents scoped, on-chain access to DeFi on Base. A human creates a vault, sets guardrails like max trade size, daily limit, and approved tokens, then gives their agent an API key. The agent can send plain-English requests like "swap 0.001 WETH to USDC," but every action is enforced by smart contracts before execution. If a request exceeds policy, the transaction reverts on-chain.
 
-Your agent doesn't need to understand Solidity, ABI encoding, or gas management. It reads a skill file (`/api/skill`), registers once, and sends plain English trade requests — "swap 0.01 WETH to USDC." MoltFi's processing layer, powered by Venice AI (zero data retention), interprets the intent, maps it to the right contract call, handles nonce management and gas, and routes it through the smart contract for policy enforcement before executing on Uniswap V3. Your agent stays focused on strategy. MoltFi handles the infrastructure.
+The agent does not need to understand Solidity, calldata, or gas management. It reads a skill file (`/api/skill`), registers once, and sends natural-language requests. MoltFi uses Venice AI (zero data retention) to interpret the request, then executes through Uniswap V3 only if the on-chain guardrails allow it. Every successful action returns a real Base Sepolia transaction you can verify on Basescan.
 
-Live Lido stETH APR data is available on the dashboard and via API for yield-aware strategy decisions. Staking infrastructure (ETH → stETH → wstETH through the vault) is built and ready for mainnet — Lido doesn't deploy to testnets.
+The live tested flow is: register agent → check vault → deposit ETH → swap WETH to USDC → verify transaction on-chain.
 
-Your wallet owns the vault. You configure the policies. You withdraw anytime.
+Lido integration is also included through live stETH APR data and a staking path prepared for mainnet (Lido does not deploy to testnets).
+
+Your wallet owns the vault. You set the rules. The agent only operates inside them.
 
 ## problemStatement
-When you give an AI agent access to trade with your money, the spending limits typically live inside the agent's own code or framework. The problem is that agents drift — especially with long context windows, prompt injections, or model updates, they can forget or override their own rules. There's no way to guarantee the agent won't exceed your limits when the limits are enforced by the same system that's making the decisions.
+AI agents cannot reliably enforce their own risk limits. With long context windows, prompt injection, tool misuse, or model drift, they can forget or override the very rules meant to constrain them. If the spending limits live inside the same model that decides what to do, those limits are not trustworthy.
 
-MoltFi moves enforcement to the blockchain. You own a vault and set trading policies — how much per trade, how much per day, which tokens. Your agent gets an API key to trade on your vault, but every trade goes through a smart contract that checks your policies before any funds move. The agent can trade freely within your rules. When it tries to exceed them, the transaction reverts on-chain. No amount of context drift or prompt injection can bypass a smart contract.
+MoltFi moves enforcement to smart contracts. A human-owned vault defines how much the agent can trade, how much it can spend per day, and which assets it may touch. The agent can operate freely within those rules, but the moment it exceeds them, the transaction fails on-chain. Prompt injection can confuse a model; it cannot bypass a smart contract.
 
 ## repoURL
 https://github.com/ortegarod/moltfi
@@ -35,11 +37,12 @@ https://moltfi-production.up.railway.app
 ## What works (verified March 22, 2026)
 
 ### End-to-end flow
-1. ✅ You create a vault with spending limits → written to AgentPolicy contract
-2. ✅ Your agent registers → gets API key
-3. ✅ Your agent sends "swap 0.001 WETH to USDC" → smart contract checks limits → Uniswap V3 executes
-4. ✅ Every swap is a real Base Sepolia transaction verifiable on Basescan
-5. ✅ If agent exceeds limits → transaction reverts. No funds move.
+1. ✅ Agent reads `/api/skill` and registers → gets API key + vault
+2. ✅ Agent checks vault balances and live market rates
+3. ✅ Agent deposits ETH into the vault
+4. ✅ Agent sends `swap 0.0001 WETH to USDC` → smart contract checks limits → Uniswap V3 executes
+5. ✅ Every deposit and swap is a real Base Sepolia transaction verifiable on Basescan
+6. ✅ If the agent exceeds policy → transaction reverts and no funds move
 
 ### Smart contracts (deployed, verified on Basescan)
 | Contract | Address |
