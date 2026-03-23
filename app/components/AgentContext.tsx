@@ -56,7 +56,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
           fetch(`/api/vault/status?vault=${d.vaults[0]}${chainSuffix}`)
             .then(r => r.ok ? r.json() : Promise.reject('API error'))
             .then(vd => {
-              fetch(`/api/policy?vault=${d.vaults[0]}`).then(r => r.ok ? r.json() : ({})).then(pd => {
+              fetch(`/api/policy?vault=${d.vaults[0]}${chainSuffix}`).then(r => r.ok ? r.json() : ({})).then(pd => {
                 setVaultData({ ...vd, approvedTokens: pd.approvedTokens || {} })
               }).catch(() => setVaultData(vd))
             }).catch(() => {})

@@ -41,12 +41,13 @@ export default function DashboardClient() {
 
   useEffect(() => {
     if (vaults[0]) {
-      fetch(`/api/vault/performance?vault=${vaults[0]}`)
-        .then(r => r.json()).then(setPerf).catch(() => {})
-      fetch(`/api/vault/activity?vault=${vaults[0]}`)
-        .then(r => r.json()).then(d => setActivity((d.activities || []).slice(0, 3))).catch(() => {})
+      const cs = chainId === 8453 ? '&chain=mainnet' : ''
+      fetch(`/api/vault/performance?vault=${vaults[0]}${cs}`)
+        .then(r => r.ok ? r.json() : null).then(d => d && setPerf(d)).catch(() => {})
+      fetch(`/api/vault/activity?vault=${vaults[0]}${cs}`)
+        .then(r => r.ok ? r.json() : null).then(d => d && setActivity((d.activities || []).slice(0, 3))).catch(() => {})
     }
-  }, [vaults])
+  }, [vaults, chainId])
 
   const { writeContract, data: txHash } = useWriteContract()
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash })

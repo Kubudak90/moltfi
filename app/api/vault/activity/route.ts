@@ -1,14 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, parseAbiItem, formatEther, formatUnits } from 'viem'
-import { baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 import { getActivitySummary } from '@/lib/activity-log'
 
-const client = createPublicClient({ chain: baseSepolia, transport: http() })
-const ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as const
+const sepoliaClient = createPublicClient({ chain: baseSepolia, transport: http('https://sepolia.base.org') })
+const mainnetClient = createPublicClient({ chain: base, transport: http('https://mainnet.base.org') })
+
+// Sepolia contracts
+const SEPOLIA_ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as const
+const SEPOLIA_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
+const SEPOLIA_POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
+
+// Mainnet contracts
+const MAINNET_ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as const
+const MAINNET_FACTORY = '0x5AFC9Ff3230eE0E4bE9e110F7672584Ab593A4F6' as const
+const MAINNET_POLICY = '0x9f5C622170F11C35d3343fE444731E3F732De38a' as const
 
 const TOKEN_NAMES: Record<string, string> = {
   '0x4200000000000000000000000000000000000006': 'WETH',
   '0x036cbd53842c5426634e7929541ec2318f3dcf7e': 'USDC',
+  '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913': 'USDC',
+  '0xc1cba3fcea344f92d9239c08c0568f6f2f0ee452': 'wstETH',
 }
 
 const EVENTS = [
@@ -44,14 +56,18 @@ type ActivityItem = {
 
 export async function GET(req: NextRequest) {
   const vault = req.nextUrl.searchParams.get('vault')
+  const chainParam = req.nextUrl.searchParams.get('chain')
+  const isMainnet = chainParam === 'mainnet'
   if (!vault) return NextResponse.json({ error: 'vault param required' }, { status: 400 })
+
+  const client = isMainnet ? mainnetClient : sepoliaClient
+  const ROUTER = isMainnet ? MAINNET_ROUTER : SEPOLIA_ROUTER
+  const VAULT_FACTORY = isMainnet ? MAINNET_FACTORY : SEPOLIA_FACTORY
+  const POLICY = isMainnet ? MAINNET_POLICY : SEPOLIA_POLICY
 
   try {
     const activities: ActivityItem[] = []
 
-    // Read current policy for proof data
-    const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
-    const POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
     const policyAbi = [
       { name: 'policies', type: 'function', stateMutability: 'view', inputs: [{ name: '', type: 'address' }, { name: '', type: 'address' }], outputs: [{ name: 'maxPerAction', type: 'uint256' }, { name: 'dailyLimit', type: 'uint256' }, { name: 'active', type: 'bool' }] },
       { name: 'getDailySpent', type: 'function', stateMutability: 'view', inputs: [{ name: 'agent', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] },
@@ -61,19 +77,15 @@ export async function GET(req: NextRequest) {
     let policy: any = null
     let dailySpent = '0'
     try {
-      const [pol, spent] = await Promise.all([
-        client.readContract({ address: POLICY, abi: policyAbi, functionName: 'policies', args: [VAULT_FACTORY, vault as `0x${string}`] } as any),
-        client.readContract({ address: POLICY, abi: policyAbi, functionName: 'getDailySpent', args: [vault as `0x${string}`] } as any),
-      ])
+      const pol = await client.readContract({ address: POLICY as `0x${string}`, abi: policyAbi, functionName: 'policies', args: [VAULT_FACTORY as `0x${string}`, vault as `0x${string}`] } as any)
+      const spent = await client.readContract({ address: POLICY as `0x${string}`, abi: policyAbi, functionName: 'getDailySpent', args: [vault as `0x${string}`] } as any)
       policy = pol
       dailySpent = formatEther(spent as bigint)
     } catch {}
 
-    // RPC limits getLogs to 10k block range — use recent history
     const currentBlock = await client.getBlockNumber()
     const fromBlock = currentBlock > BigInt(9000) ? currentBlock - BigInt(9000) : BigInt(0)
 
-    // Fetch vault events + router swap events in parallel
     const vaultEvents = await Promise.all(
       EVENTS.map(event =>
         client.getLogs({
@@ -86,15 +98,13 @@ export async function GET(req: NextRequest) {
     )
     const [deposits, withdrawals, , stakes, yields, agentUpdates] = vaultEvents
 
-    // SwapExecuted comes from the router, filtered by agent (vault) as indexed param
     const swaps = await client.getLogs({
-      address: ROUTER,
-      event: EVENTS[2], // SwapExecuted
+      address: ROUTER as `0x${string}`,
+      event: EVENTS[2],
       fromBlock,
       toBlock: 'latest',
     }).catch(() => [])
 
-    // Process deposits
     for (const log of deposits) {
       const args = log.args as any
       const token = args.token || ''
@@ -113,7 +123,6 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Process withdrawals
     for (const log of withdrawals) {
       const args = log.args as any
       activities.push({
@@ -127,7 +136,6 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Process swaps
     for (const log of swaps) {
       const args = log.args as any
       const tokenIn = tokenName(args.tokenIn || '')
@@ -163,7 +171,6 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Process stakes
     for (const log of stakes) {
       const args = log.args as any
       activities.push({
@@ -177,7 +184,6 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Process yield withdrawals
     for (const log of yields) {
       const args = log.args as any
       activities.push({
@@ -191,22 +197,18 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // Fetch timestamps for all activities (batch block lookups)
     const uniqueBlocks = [...new Set(activities.map(a => a.blockNumber))]
     const blockTimestamps: Record<number, number> = {}
-    await Promise.all(
-      uniqueBlocks.map(async (bn) => {
-        try {
-          const block = await client.getBlock({ blockNumber: BigInt(bn) })
-          blockTimestamps[bn] = Number(block.timestamp)
-        } catch {}
-      })
-    )
+    for (const bn of uniqueBlocks) {
+      try {
+        const block = await client.getBlock({ blockNumber: BigInt(bn) })
+        blockTimestamps[bn] = Number(block.timestamp)
+      } catch {}
+    }
     for (const a of activities) {
       a.timestamp = blockTimestamps[a.blockNumber] || null
     }
 
-    // Sort by block number descending (newest first)
     activities.sort((a, b) => b.blockNumber - a.blockNumber)
 
     return NextResponse.json({ vault, activities, count: activities.length })

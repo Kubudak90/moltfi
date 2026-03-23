@@ -1,15 +1,21 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, formatEther, parseAbi } from 'viem'
-import { baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 
-const client = createPublicClient({ chain: baseSepolia, transport: http('https://sepolia.base.org') })
+const sepoliaClient = createPublicClient({ chain: baseSepolia, transport: http('https://sepolia.base.org') })
+const mainnetClient = createPublicClient({ chain: base, transport: http('https://mainnet.base.org') })
 
-const CONTRACT = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as `0x${string}`
-const ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as `0x${string}`
-const HUMAN = '0x90d9c75f3761c02Bf3d892A701846F6323e9112D' as `0x${string}`  // Policy setter
-const AGENT = '0x90d9c75f3761c02Bf3d892A701846F6323e9112D' as `0x${string}`   // Agent wallet (demo: same wallet)
+// Sepolia contracts
+const SEPOLIA_CONTRACT = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as `0x${string}`
+const SEPOLIA_ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as `0x${string}`
+const SEPOLIA_USDC = '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as `0x${string}`
+
+// Mainnet contracts
+const MAINNET_CONTRACT = '0x9f5C622170F11C35d3343fE444731E3F732De38a' as `0x${string}`
+const MAINNET_ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as `0x${string}` // same or different?
+const MAINNET_USDC = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as `0x${string}`
+
 const WETH = '0x4200000000000000000000000000000000000006' as `0x${string}`
-const USDC = '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as `0x${string}`
 
 const ABI = parseAbi([
   'function policies(address, address) view returns (uint256 maxPerAction, uint256 dailyLimit, bool active)',
@@ -23,23 +29,37 @@ const ABI = parseAbi([
 
 export const dynamic = 'force-dynamic'
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const vault = req.nextUrl.searchParams.get('vault')
+  const chainParam = req.nextUrl.searchParams.get('chain')
+  const isMainnet = chainParam === 'mainnet'
+  const client = isMainnet ? mainnetClient : sepoliaClient
+  const CONTRACT = isMainnet ? MAINNET_CONTRACT : SEPOLIA_CONTRACT
+  const ROUTER = isMainnet ? MAINNET_ROUTER : SEPOLIA_ROUTER
+  const usdcAddr = isMainnet ? MAINNET_USDC : SEPOLIA_USDC
+
+  // Use vault address as the agent for policy lookups
+  const AGENT = vault as `0x${string}` || '0x0000000000000000000000000000000000000000' as `0x${string}`
+  // Policy setter is the factory
+  const HUMAN = isMainnet ? '0x5AFC9Ff3230eE0E4bE9e110F7672584Ab593A4F6' : '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774'
+
+  const safeRead = async (args: any, fallback: any = BigInt(0)) => {
+    try { return await client.readContract(args) } catch { return fallback }
+  }
+
   try {
-    // Read policy from chain
-    const [policy, owner, wethApproved, usdcApproved, dailySpent, remaining] = await Promise.all([
-      client.readContract({ address: CONTRACT, abi: ABI, functionName: 'policies', args: [HUMAN, AGENT] } as any),
-      client.readContract({ address: CONTRACT, abi: ABI, functionName: 'agentOwner', args: [AGENT] } as any),
-      client.readContract({ address: CONTRACT, abi: ABI, functionName: 'approvedTokens', args: [AGENT, WETH] } as any),
-      client.readContract({ address: CONTRACT, abi: ABI, functionName: 'approvedTokens', args: [AGENT, USDC] } as any),
-      client.readContract({ address: CONTRACT, abi: ABI, functionName: 'getDailySpent', args: [AGENT] } as any),
-      client.readContract({ address: CONTRACT, abi: ABI, functionName: 'getRemainingAllowance', args: [AGENT] } as any),
-    ])
+    const policy = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'policies', args: [HUMAN, AGENT] }, [BigInt(0), BigInt(0), false])
+    const owner = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'agentOwner', args: [AGENT] }, '0x0')
+    const wethApproved = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'approvedTokens', args: [AGENT, WETH] }, false)
+    const usdcApproved = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'approvedTokens', args: [AGENT, usdcAddr] }, false)
+    const dailySpent = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'getDailySpent', args: [AGENT] })
+    const remaining = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'getRemainingAllowance', args: [AGENT] })
 
     return NextResponse.json({
       policyContract: CONTRACT,
       routerContract: ROUTER,
-      chain: 'Base Sepolia',
-      chainId: 84532,
+      chain: isMainnet ? 'Base' : 'Base Sepolia',
+      chainId: isMainnet ? 8453 : 84532,
       human: HUMAN,
       agent: AGENT,
       policy: {

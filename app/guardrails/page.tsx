@@ -6,8 +6,10 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchCh
 import { parseEther } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 
-const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
-const AGENT_POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
+const SEPOLIA_VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
+const SEPOLIA_AGENT_POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc' as const
+const MAINNET_VAULT_FACTORY = '0x5AFC9Ff3230eE0E4bE9e110F7672584Ab593A4F6' as const
+const MAINNET_AGENT_POLICY = '0x9f5C622170F11C35d3343fE444731E3F732De38a' as const
 
 const factoryAbi = [
   {
@@ -45,6 +47,9 @@ export default function GuardrailsPage() {
   const { vaults, vaultData, hasVault, refreshVaults } = useAgentContext()
   const { address, chainId } = useAccount()
   const { switchChain } = useSwitchChain()
+  const isMainnet = chainId === base.id
+  const VAULT_FACTORY = isMainnet ? MAINNET_VAULT_FACTORY : SEPOLIA_VAULT_FACTORY
+  const AGENT_POLICY = isMainnet ? MAINNET_AGENT_POLICY : SEPOLIA_AGENT_POLICY
 
   // Pending edits (not yet submitted)
   const [maxPerTrade, setMaxPerTrade] = useState('')

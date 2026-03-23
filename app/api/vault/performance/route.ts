@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, formatEther, formatUnits, parseAbiItem } from 'viem'
-import { baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 
-const client = createPublicClient({ chain: baseSepolia, transport: http() })
-const ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as const
+const sepoliaClient = createPublicClient({ chain: baseSepolia, transport: http('https://sepolia.base.org') })
+const mainnetClient = createPublicClient({ chain: base, transport: http('https://mainnet.base.org') })
+
+const SEPOLIA_ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as const
+const MAINNET_ROUTER = '0x5Cc04847CE5A81319b55D34F9fB757465D3677E6' as const
 const WETH = '0x4200000000000000000000000000000000000006' as const
-const USDC = '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as const
+const SEPOLIA_USDC = '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as const
+const MAINNET_USDC = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const
+const WSTETH = '0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452' as const
 
 const erc20Abi = [
   { name: 'balanceOf', type: 'function', stateMutability: 'view', inputs: [{ name: '', type: 'address' }], outputs: [{ type: 'uint256' }] },
@@ -15,30 +20,39 @@ const swapEvent = parseAbiItem('event SwapExecuted(address indexed agent, addres
 
 export async function GET(req: NextRequest) {
   const vault = req.nextUrl.searchParams.get('vault')
+  const chainParam = req.nextUrl.searchParams.get('chain')
+  const isMainnet = chainParam === 'mainnet'
   if (!vault) return NextResponse.json({ error: 'vault required' }, { status: 400 })
+
+  const client = isMainnet ? mainnetClient : sepoliaClient
+  const ROUTER = isMainnet ? MAINNET_ROUTER : SEPOLIA_ROUTER
+  const USDC = isMainnet ? MAINNET_USDC : SEPOLIA_USDC
+
+  const safeRead = async (args: any, fallback: any = BigInt(0)) => {
+    try { return await client.readContract(args) } catch { return fallback }
+  }
 
   try {
     const currentBlock = await client.getBlockNumber()
     const fromBlock = currentBlock > BigInt(9000) ? currentBlock - BigInt(9000) : BigInt(0)
 
-    // Get all swap events from router
     const swaps = await client.getLogs({
-      address: ROUTER,
+      address: ROUTER as `0x${string}`,
       event: swapEvent,
       fromBlock,
       toBlock: 'latest',
     }).catch(() => [])
 
-    // Get current balances
-    const [ethBal, wethBal, usdcBal] = await Promise.all([
-      client.getBalance({ address: vault as `0x${string}` }),
-      // @ts-expect-error viem v2 strict types
-      client.readContract({ address: WETH, abi: erc20Abi, functionName: 'balanceOf', args: [vault as `0x${string}`] }),
-      // @ts-expect-error viem v2 strict types
-      client.readContract({ address: USDC, abi: erc20Abi, functionName: 'balanceOf', args: [vault as `0x${string}`] }),
-    ])
+    // Get current balances (sequential to avoid rate limiting)
+    let ethBal = BigInt(0)
+    try { ethBal = await client.getBalance({ address: vault as `0x${string}` }) } catch {}
+    const wethBal = await safeRead({ address: WETH, abi: erc20Abi, functionName: 'balanceOf', args: [vault as `0x${string}`] })
+    const usdcBal = await safeRead({ address: USDC as `0x${string}`, abi: erc20Abi, functionName: 'balanceOf', args: [vault as `0x${string}`] })
+    const wstethBal = isMainnet
+      ? await safeRead({ address: WSTETH as `0x${string}`, abi: erc20Abi, functionName: 'balanceOf', args: [vault as `0x${string}`] })
+      : BigInt(0)
 
-    // Get ETH price — try CoinGecko, fallback to Coinbase
+    // Get ETH price
     let ethPrice = 0
     try {
       const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', { signal: AbortSignal.timeout(5000) })
@@ -62,16 +76,14 @@ export async function GET(req: NextRequest) {
     const ethAmount = parseFloat(formatEther(ethBal))
     const wethAmount = parseFloat(formatEther(wethBal))
     const usdcAmount = parseFloat(formatUnits(usdcBal, 6))
+    const wstethAmount = parseFloat(formatEther(wstethBal))
 
-    // Calculate total portfolio value in USD
-    const totalEthValue = (ethAmount + wethAmount) * ethPrice
+    const totalEthValue = (ethAmount + wethAmount + wstethAmount) * ethPrice
     const totalUsd = totalEthValue + usdcAmount
 
-    // Process trade history for performance metrics
     const trades = swaps.map(log => {
       const args = log.args as any
       const tokenIn = args.tokenIn?.toLowerCase()
-      const tokenOut = args.tokenOut?.toLowerCase()
       const amountIn = args.amountIn || BigInt(0)
       const amountOut = args.amountOut || BigInt(0)
 
@@ -79,13 +91,12 @@ export async function GET(req: NextRequest) {
       const inAmount = isEthIn ? parseFloat(formatEther(amountIn)) : parseFloat(formatUnits(amountIn, 6))
       const outAmount = isEthIn ? parseFloat(formatUnits(amountOut, 6)) : parseFloat(formatEther(amountOut))
 
-      // Effective price: how much USD per ETH did we get/pay
       const effectivePrice = isEthIn
-        ? outAmount / inAmount  // sold ETH, got USDC
-        : inAmount / outAmount  // bought ETH, paid USDC
+        ? outAmount / inAmount
+        : inAmount / outAmount
 
       return {
-        direction: isEthIn ? 'SELL' : 'BUY',
+        direction: isEthIn ? 'SELL' as const : 'BUY' as const,
         ethAmount: isEthIn ? inAmount : outAmount,
         usdcAmount: isEthIn ? outAmount : inAmount,
         effectivePrice,
@@ -93,31 +104,22 @@ export async function GET(req: NextRequest) {
       }
     })
 
-    // Calculate trading P&L
-    // For each sell: compare effective price vs current price
-    // For each buy: compare current price vs effective price
     let tradingPnlUsd = 0
     let totalTraded = 0
     for (const t of trades) {
       if (t.direction === 'SELL') {
-        // Sold ETH at effectivePrice, could buy back now at ethPrice
-        // If effectivePrice > ethPrice: profit (sold high)
         tradingPnlUsd += (t.effectivePrice - ethPrice) * t.ethAmount
       } else {
-        // Bought ETH at effectivePrice, worth ethPrice now
         tradingPnlUsd += (ethPrice - t.effectivePrice) * t.ethAmount
       }
       totalTraded += t.usdcAmount
     }
 
-    // Vault age (from first block in range to now, approximate)
     const firstTradeBlock = trades.length > 0 ? Math.min(...trades.map(t => t.blockNumber)) : Number(currentBlock)
     const blocksSinceFirst = Number(currentBlock) - firstTradeBlock
-    const hoursSinceFirst = (blocksSinceFirst * 2) / 3600 // ~2s blocks on Base
+    const hoursSinceFirst = (blocksSinceFirst * 2) / 3600
     const daysSinceFirst = Math.max(hoursSinceFirst / 24, 0.01)
 
-    // Return calculation — don't annualize unless we have enough history
-    // Show actual P&L % for short periods, only annualize after 7+ days
     const returnPct = totalUsd > 0 && tradingPnlUsd !== 0
       ? (tradingPnlUsd / totalUsd) * 100
       : null
@@ -127,10 +129,12 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       vault,
+      chain: isMainnet ? 'base' : 'base-sepolia',
       portfolio: {
         eth: ethAmount.toFixed(4),
         weth: wethAmount.toFixed(4),
         usdc: usdcAmount.toFixed(2),
+        ...(isMainnet && { wstETH: wstethAmount.toFixed(4) }),
         totalUsd: totalUsd.toFixed(2),
         ethPrice,
       },
@@ -144,7 +148,7 @@ export async function GET(req: NextRequest) {
       },
       benchmarks: {
         lidoApr: lidoApr.toFixed(2),
-        eth24hChange: ethPrice > 0 ? null : null, // filled by frontend from rates context
+        eth24hChange: null,
       },
       trades: trades.map(t => ({
         direction: t.direction,
