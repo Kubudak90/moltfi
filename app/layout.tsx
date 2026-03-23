@@ -18,10 +18,10 @@ export const metadata = {
 
 function Nav() {
   return (
-    <nav className="border-b border-gray-800 bg-[#09090b]/80 backdrop-blur-sm sticky top-0 z-50">
+    <nav className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-indigo-600 flex items-center justify-center text-xs font-bold">MF</div>
+          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-xs font-bold">MF</div>
           <span className="font-bold text-lg">MoltFi</span>
           <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-yellow-400/15 text-yellow-400 border border-yellow-500/25">Base Sepolia</span>
         </Link>
@@ -43,8 +43,8 @@ function Nav() {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body className="bg-[#09090b] text-gray-100 antialiased">
+    <html lang="en" className={cn("dark font-sans", geist.variable)}>
+      <body className="bg-background text-foreground antialiased">
         <Providers>
           <Nav />
           <NavTabs />

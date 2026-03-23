@@ -33,7 +33,7 @@ export function ConnectWallet() {
 
   if (!mounted) {
     return (
-      <button className="bg-indigo-600 hover:bg-indigo-600 text-sm px-4 py-1.5 rounded-lg transition font-medium">
+      <button className="bg-blue-600 hover:bg-blue-600 text-sm px-4 py-1.5 rounded-lg transition font-medium">
         Connect Wallet
       </button>
     )
@@ -46,7 +46,7 @@ export function ConnectWallet() {
           onClick={() => setMenuOpen(!menuOpen)}
           className="flex items-center gap-2 bg-gray-800 hover:bg-gray-700 text-sm px-3 py-1.5 rounded-lg border border-gray-800 transition"
         >
-          <div className="w-5 h-5 rounded-full bg-indigo-600 flex items-center justify-center text-[10px] font-bold">
+          <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold">
             {address.slice(2, 4).toUpperCase()}
           </div>
           <span className="font-mono text-xs">{address.slice(0, 6)}...{address.slice(-4)}</span>
@@ -84,7 +84,7 @@ export function ConnectWallet() {
   return (
     <button
       onClick={() => connect({ connector: injected() })}
-      className="bg-indigo-600 hover:bg-indigo-600 text-sm px-4 py-1.5 rounded-lg transition font-medium"
+      className="bg-blue-600 hover:bg-blue-600 text-sm px-4 py-1.5 rounded-lg transition font-medium"
     >
       Connect Wallet
     </button>

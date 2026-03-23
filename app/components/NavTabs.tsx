@@ -26,7 +26,7 @@ export function NavTabs() {
               <Link key={tab.href} href={tab.href}
                 className={`px-4 py-3 text-sm font-medium transition border-b-2 -mb-px whitespace-nowrap ${
                   active
-                    ? 'border-indigo-500 text-white'
+                    ? 'border-blue-500 text-white'
                     : 'border-transparent text-gray-500 hover:text-gray-300'
                 }`}>
                 {tab.label}

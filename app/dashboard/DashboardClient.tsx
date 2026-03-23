@@ -113,7 +113,7 @@ export default function DashboardClient() {
   if (!address) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-24 text-center">
-        <div className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-2xl font-bold mx-auto mb-6">AG</div>
+        <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-2xl font-bold mx-auto mb-6">AG</div>
         <h1 className="text-3xl font-bold mb-3">Connect Your Wallet</h1>
         <p className="text-gray-400">Connect your wallet to get started.</p>
       </div>
@@ -140,7 +140,7 @@ export default function DashboardClient() {
         </div>
       )}
       {txStatus && (
-        <div className="bg-indigo-600/10 border border-indigo-500/20 rounded-lg p-4 text-sm text-indigo-300">
+        <div className="bg-blue-600/10 border border-blue-500/20 rounded-lg p-4 text-sm text-blue-300">
           {txConfirmed ? '✓ Transaction confirmed!' : txStatus}
         </div>
       )}
@@ -167,7 +167,7 @@ export default function DashboardClient() {
             <p className="text-gray-400 mb-6 text-center text-sm">Copy this and paste it into your AI agent&apos;s chat.</p>
             <div className="bg-gray-800/50 rounded-lg p-4 relative group">
               <button onClick={() => doCopy(skillSnippet)}
-                className="absolute top-3 right-3 text-gray-500 hover:text-indigo-400 transition p-1.5 rounded-lg hover:bg-gray-700/50">
+                className="absolute top-3 right-3 text-gray-500 hover:text-blue-400 transition p-1.5 rounded-lg hover:bg-gray-700/50">
                 {copied ? <span className="text-green-400 text-xs font-medium px-1">Copied!</span> : (
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
                 )}
@@ -181,10 +181,10 @@ export default function DashboardClient() {
 
       {/* No vault yet — show create button */}
       {!hasVault && address && (
-        <div className="bg-gray-900 border border-indigo-500/30 rounded-xl p-8 text-center space-y-4">
+        <div className="bg-gray-900 border border-blue-500/30 rounded-xl p-8 text-center space-y-4">
           {hasAgent && (
             <div className="flex items-center gap-3 mb-4 p-3 bg-gray-800/50 rounded-lg justify-center">
-              <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-xs font-bold">
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold">
                 {agents[0].agentName.slice(0, 2).toUpperCase()}
               </div>
               <div className="text-left">
@@ -198,7 +198,7 @@ export default function DashboardClient() {
             Deploy a smart contract vault on Base Sepolia. Your wallet owns it. The agent can only trade within your guardrails.
           </p>
           <button onClick={createVault} disabled={!serverAgentWallet && !hasAgent}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white px-8 py-3 rounded-lg text-sm font-medium transition">
+            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white px-8 py-3 rounded-lg text-sm font-medium transition">
             {txStatus || 'Create Vault'}
           </button>
           <p className="text-xs text-gray-600">Default guardrails: 1 ETH max per trade, 5 ETH daily limit. You can change these after.</p>
@@ -242,7 +242,7 @@ export default function DashboardClient() {
                   <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold">Your Vault</h2>
                     <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-                      className="text-xs font-mono text-indigo-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
+                      className="text-xs font-mono text-blue-400 hover:underline">{(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
                   </div>
 
                   
@@ -270,7 +270,7 @@ export default function DashboardClient() {
                         <div className="w-2 h-2 rounded-full bg-green-400" />
                         <span className="text-gray-400">Guardrails active — {vaultData.policy.maxPerAction} ETH/trade, {vaultData.policy.remaining} ETH remaining today</span>
                       </div>
-                      <span className="text-xs text-indigo-400">Manage →</span>
+                      <span className="text-xs text-blue-400">Manage →</span>
                     </a>
                   ) : (
                     <a href="/guardrails" className="flex items-center justify-between bg-yellow-500/5 border border-yellow-500/20 rounded-lg p-3 hover:bg-yellow-500/10 transition">
@@ -278,7 +278,7 @@ export default function DashboardClient() {
                         <div className="w-2 h-2 rounded-full bg-yellow-400" />
                         <span className="text-yellow-400">No guardrails set — agent cannot trade</span>
                       </div>
-                      <span className="text-xs text-indigo-400">Set up →</span>
+                      <span className="text-xs text-blue-400">Set up →</span>
                     </a>
                   )}
 
@@ -290,11 +290,11 @@ export default function DashboardClient() {
                         <div className="relative flex-1">
                           <input type="number" value={depositAmount} onChange={e => setDepositAmount(e.target.value)}
                             step="0.001" min="0" placeholder="0.01"
-                            className="w-full bg-gray-800 border border-gray-800 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-12" />
+                            className="w-full bg-gray-800 border border-gray-800 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 pr-12" />
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">ETH</span>
                         </div>
                         <button onClick={depositETH}
-                          className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition">
+                          className="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition">
                           Deposit
                         </button>
                       </div>
@@ -306,7 +306,7 @@ export default function DashboardClient() {
                   <div className="relative flex-1">
                     <input type="number" value={withdrawAmount} onChange={e => setWithdrawAmount(e.target.value)}
                       step="0.001" min="0" placeholder="0.01"
-                      className="w-full bg-gray-800 border border-gray-800 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-indigo-500 pr-16" />
+                      className="w-full bg-gray-800 border border-gray-800 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 pr-16" />
                     <select value={withdrawToken} onChange={e => setWithdrawToken(e.target.value as any)}
                       className="absolute right-1 top-1/2 -translate-y-1/2 bg-gray-700 border-none rounded text-xs text-gray-300 py-1 px-1.5 focus:outline-none">
                       <option value="ETH">ETH</option>
@@ -328,13 +328,13 @@ export default function DashboardClient() {
                     <div className="pt-3 border-t border-gray-800/50">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs text-gray-500">Recent Activity</span>
-                        <a href="/activity" className="text-xs text-indigo-400 hover:underline">View all →</a>
+                        <a href="/activity" className="text-xs text-blue-400 hover:underline">View all →</a>
                       </div>
                       {activity.map((a, i) => (
                         <div key={i} className="flex items-center justify-between text-xs py-1.5">
                           <span className="text-gray-400">{a.summary}</span>
                           <a href={`https://sepolia.basescan.org/tx/${a.txHash}`} target="_blank" rel="noopener"
-                            className="text-indigo-400 hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
+                            className="text-blue-400 hover:underline font-mono shrink-0 ml-2">{a.txHash.slice(0, 8)}…</a>
                         </div>
                       ))}
                     </div>
@@ -349,7 +349,7 @@ export default function DashboardClient() {
             <h3 className="font-semibold mb-3">How It Works</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="bg-gray-800/30 rounded-lg p-4">
-                <div className="text-sm font-medium text-indigo-400 mb-2">You (vault owner)</div>
+                <div className="text-sm font-medium text-blue-400 mb-2">You (vault owner)</div>
                 <p className="text-xs text-gray-400">Your wallet owns this vault. You deposit and withdraw funds, set trading limits, choose which tokens are allowed, and can freeze trading anytime. Your wallet signed the transaction that created this vault — you&apos;re the only one who can change the rules.</p>
               </div>
               <div className="bg-gray-800/30 rounded-lg p-4">
@@ -368,22 +368,22 @@ export default function DashboardClient() {
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-2">
                 <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-indigo-400 mt-0.5">→</span> Max amount per trade
+                  <span className="text-blue-400 mt-0.5">→</span> Max amount per trade
                 </div>
                 <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-indigo-400 mt-0.5">→</span> Daily spending cap
+                  <span className="text-blue-400 mt-0.5">→</span> Daily spending cap
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-indigo-400 mt-0.5">→</span> Which tokens can be traded
+                  <span className="text-blue-400 mt-0.5">→</span> Which tokens can be traded
                 </div>
                 <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-indigo-400 mt-0.5">→</span> Instant freeze (revoke all trading)
+                  <span className="text-blue-400 mt-0.5">→</span> Instant freeze (revoke all trading)
                 </div>
               </div>
             </div>
-            <a href="/guardrails" className="inline-block mt-4 text-xs text-indigo-400 hover:underline">Manage policies →</a>
+            <a href="/guardrails" className="inline-block mt-4 text-xs text-blue-400 hover:underline">Manage policies →</a>
           </div>
 
         </>

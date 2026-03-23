@@ -73,7 +73,7 @@ export default function GuardrailsPage() {
         </div>
         <a href={`https://sepolia.basescan.org/address/${AGENT_POLICY}#readContract`}
           target="_blank" rel="noopener"
-          className="text-xs text-indigo-400 hover:underline">View contract →</a>
+          className="text-xs text-blue-400 hover:underline">View contract →</a>
       </div>
 
       {txConfirmed && (
@@ -102,7 +102,7 @@ export default function GuardrailsPage() {
                   <span>{policy.remaining} ETH left</span>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-2">
-                  <div className="bg-indigo-500 h-2 rounded-full transition-all"
+                  <div className="bg-blue-500 h-2 rounded-full transition-all"
                     style={{ width: `${Math.min(100, (parseFloat(policy.dailySpent) / parseFloat(policy.dailyLimit)) * 100)}%` }} />
                 </div>
               </div>
@@ -118,19 +118,19 @@ export default function GuardrailsPage() {
                 <input type="number" step="0.01" min="0"
                   value={maxPerTrade} onChange={e => setMaxPerTrade(e.target.value)}
                   placeholder={policy.maxPerAction}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
               </div>
               <div>
                 <label className="text-xs text-gray-500 mb-1 block">Daily limit (ETH)</label>
                 <input type="number" step="0.1" min="0"
                   value={dailyLimit} onChange={e => setDailyLimit(e.target.value)}
                   placeholder={policy.dailyLimit}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+                  className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
               </div>
             </div>
             <div className="flex items-center gap-3">
               <button onClick={updatePolicy} disabled={saving || (!maxPerTrade && !dailyLimit)}
-                className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm px-4 py-2 rounded-lg transition">
+                className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm px-4 py-2 rounded-lg transition">
                 {isPending ? 'Confirm in wallet...' : txWaiting ? 'Waiting for confirmation...' : 'Update on-chain'}
               </button>
             </div>
@@ -174,7 +174,7 @@ export default function GuardrailsPage() {
                 <div key={c.addr} className="flex items-center justify-between">
                   <span className="text-gray-500">{c.label}</span>
                   <a href={`https://sepolia.basescan.org/address/${c.addr}`} target="_blank" rel="noopener"
-                    className="font-mono text-indigo-400 hover:underline">{c.addr.slice(0, 6)}...{c.addr.slice(-4)}</a>
+                    className="font-mono text-blue-400 hover:underline">{c.addr.slice(0, 6)}...{c.addr.slice(-4)}</a>
                 </div>
               ))}
             </div>
@@ -190,18 +190,18 @@ export default function GuardrailsPage() {
               <input type="number" step="0.01" min="0"
                 value={maxPerTrade} onChange={e => setMaxPerTrade(e.target.value)}
                 placeholder="0.5"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
             </div>
             <div>
               <label className="text-xs text-gray-500 mb-1 block">Daily limit (ETH)</label>
               <input type="number" step="0.1" min="0"
                 value={dailyLimit} onChange={e => setDailyLimit(e.target.value)}
                 placeholder="1"
-                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none" />
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:border-blue-500 focus:outline-none" />
             </div>
           </div>
           <button onClick={updatePolicy} disabled={saving || (!maxPerTrade && !dailyLimit)}
-            className="bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white text-sm px-4 py-2 rounded-lg transition">
+            className="bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm px-4 py-2 rounded-lg transition">
             {isPending ? 'Confirm in wallet...' : txWaiting ? 'Waiting for confirmation...' : 'Set guardrails'}
           </button>
         </div>

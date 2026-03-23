@@ -25,10 +25,10 @@ function HeroCards() {
           <pre className="bg-muted rounded-lg p-3 text-xs font-mono text-muted-foreground overflow-x-auto whitespace-pre-wrap break-all">curl -s https://moltfi-production.up.railway.app/api/skill</pre>
         </CardContent>
       </Card>
-      <Card className="border-indigo-500/20 text-left">
+      <Card className="border-blue-500/20 text-left">
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm text-indigo-400">I&apos;m a human</CardTitle>
-          <CardDescription>Copy this and paste it into your AI agent&apos;s chat:</CardDescription>
+          <CardTitle className="text-sm text-blue-400">I&apos;m a human</CardTitle>
+          <CardDescription>Connect your wallet above to create a vault and set trading policies. Then give your agent access — paste this into its chat:</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="relative">
@@ -52,17 +52,17 @@ export default function Home() {
     <div className="min-h-[calc(100vh-3.5rem)]">
       {/* Hero */}
       <section className="relative overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-indigo-600/15 rounded-full blur-[120px] -z-10" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-600/15 rounded-full blur-[120px] -z-10" />
 
         <div className="max-w-4xl mx-auto px-6 pt-24 pb-20 text-center">
-          <div className="inline-flex items-center gap-2 bg-indigo-600/10 border border-indigo-500/20 rounded-full px-4 py-1.5 mb-6">
+          <div className="inline-flex items-center gap-2 bg-blue-600/10 border border-blue-500/20 rounded-full px-4 py-1.5 mb-6">
             <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-sm text-indigo-300">Live on Base Sepolia</span>
+            <span className="text-sm text-blue-300">Live on Base Sepolia</span>
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
             On-chain guardrails<br />
-            <span className="text-indigo-400">for AI agent trading.</span>
+            <span className="text-blue-400">for AI agent trading.</span>
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
@@ -85,7 +85,7 @@ export default function Home() {
         <Card className="mb-8"><CardContent className="pt-6">
           <div className="flex items-center justify-between max-w-3xl mx-auto text-center">
             <div className="flex-1">
-              <div className="text-sm font-medium text-indigo-400 mb-1">Your Agent</div>
+              <div className="text-sm font-medium text-blue-400 mb-1">Your Agent</div>
               <div className="text-xs text-gray-500">&quot;Swap 0.1 WETH to USDC&quot;</div>
             </div>
             <div className="text-gray-600 px-2">→</div>
@@ -114,7 +114,7 @@ export default function Home() {
             { step: '4', title: 'Every trade is verified on-chain', desc: 'If the trade is within your limits, it executes on Uniswap V3. If it exceeds them, the transaction reverts automatically. Every trade has a Basescan link you can verify.' },
           ].map(item => (
             <Card key={item.step}><CardContent className="flex gap-4 pt-5">
-              <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>
+              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>
               <div>
                 <h3 className="font-semibold mb-1">{item.title}</h3>
                 <p className="text-sm text-muted-foreground">{item.desc}</p>
@@ -195,15 +195,15 @@ export default function Home() {
           </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center text-xs">
             <a href="https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc"
-              target="_blank" rel="noopener" className="text-indigo-400 hover:underline font-mono">
+              target="_blank" rel="noopener" className="text-blue-400 hover:underline font-mono">
               AgentPolicy →
             </a>
             <a href="https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6"
-              target="_blank" rel="noopener" className="text-indigo-400 hover:underline font-mono">
+              target="_blank" rel="noopener" className="text-blue-400 hover:underline font-mono">
               AgentGuardRouter →
             </a>
             <a href="https://sepolia.basescan.org/address/0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774"
-              target="_blank" rel="noopener" className="text-indigo-400 hover:underline font-mono">
+              target="_blank" rel="noopener" className="text-blue-400 hover:underline font-mono">
               VaultFactory →
             </a>
           </div>
@@ -217,7 +217,7 @@ export default function Home() {
           {[
             { name: 'Uniswap V3', desc: 'Swap execution via AgentGuardRouter', color: 'border-pink-500/30' },
             { name: 'Lido', desc: 'Live stETH APR data & staking integration', color: 'border-cyan-500/30' },
-            { name: 'Venice AI', desc: 'Zero-retention inference for trade processing', color: 'border-indigo-500/30' },
+            { name: 'Venice AI', desc: 'Zero-retention inference for trade processing', color: 'border-blue-500/30' },
             { name: 'Base', desc: 'All contracts on Base Sepolia', color: 'border-blue-400/30' },
             { name: 'OpenClaw', desc: 'Agent runtime & skill harness', color: 'border-orange-500/30' },
           ].map(item => (
@@ -232,12 +232,12 @@ export default function Home() {
       {/* Footer */}
       <footer className="border-t border-gray-800 py-8 text-center">
         <p className="text-sm text-gray-500 mb-2">
-          Built by <a href="https://moltbook.com/u/Kyro" className="text-indigo-400">Kyro</a> (AI agent) &amp;{' '}
-          <a href="https://x.com/ortegarod01" className="text-indigo-400">Rodrigo Ortega</a> (human)
+          Built by <a href="https://moltbook.com/u/Kyro" className="text-blue-400">Kyro</a> (AI agent) &amp;{' '}
+          <a href="https://x.com/ortegarod01" className="text-blue-400">Rodrigo Ortega</a> (human)
         </p>
         <p className="text-xs text-gray-600">
-          <a href="https://openclaw.ai" className="text-indigo-400/70">OpenClaw</a>
-          {' · '}<a href="https://venice.ai" className="text-indigo-400/70">Venice AI</a>
+          <a href="https://openclaw.ai" className="text-blue-400/70">OpenClaw</a>
+          {' · '}<a href="https://venice.ai" className="text-blue-400/70">Venice AI</a>
           {' · '}The Synthesis 2026
         </p>
       </footer>

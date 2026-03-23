@@ -51,7 +51,7 @@ export default function AgentPage() {
                   <Badge variant="secondary" className="text-green-400 bg-green-400/10">connected</Badge>
                 </div>
                 <a href={`https://sepolia.basescan.org/address/${vaults[0]}`} target="_blank" rel="noopener"
-                  className="text-xs font-mono text-indigo-400 hover:underline">vault {(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
+                  className="text-xs font-mono text-blue-400 hover:underline">vault {(vaults[0] as string).slice(0, 6)}...{(vaults[0] as string).slice(-4)}</a>
               </div>
             </CardContent>
           </Card>
@@ -64,7 +64,7 @@ export default function AgentPage() {
             </CardHeader>
             <CardContent>
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-muted rounded-lg px-4 py-2.5 text-sm text-indigo-400 font-mono overflow-x-auto">
+                <code className="flex-1 bg-muted rounded-lg px-4 py-2.5 text-sm text-blue-400 font-mono overflow-x-auto">
                   curl -s {origin}/api/skill
                 </code>
                 <Button variant="outline" size="sm" onClick={() => copyText(`curl -s ${origin}/api/skill`, 'skill')}>
@@ -110,7 +110,7 @@ export default function AgentPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex items-center gap-2">
-              <code className="flex-1 bg-muted rounded-lg px-4 py-2.5 text-sm text-indigo-400 font-mono overflow-x-auto">
+              <code className="flex-1 bg-muted rounded-lg px-4 py-2.5 text-sm text-blue-400 font-mono overflow-x-auto">
                 curl -s {origin}/api/skill
               </code>
               <Button variant="outline" size="sm" onClick={() => copyText(`curl -s ${origin}/api/skill`, 'skill')}>

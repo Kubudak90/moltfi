@@ -7,7 +7,7 @@ export const maxDuration = 120
 
 // ─── Config ───
 const VENICE_URL = 'https://api.venice.ai/api/v1/chat/completions'
-const MODEL = 'zai-org-glm-4.7'
+const MODELS = ['zai-org-glm-4.7', 'llama-3.3-70b'] // fallback chain
 
 function getVeniceKey(): string | null {
   try {
@@ -211,26 +211,36 @@ export async function POST(req: NextRequest) {
       { role: 'user', content: message },
     ]
 
-    // Step 1: Ask Venice what to do
-    const response = await fetch(VENICE_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${veniceKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages,
-        tools: TOOLS,
-        tool_choice: 'auto',
-      }),
-    })
-
-    if (!response.ok) {
+    // Step 1: Ask Venice what to do (try models in order)
+    let response: Response | null = null
+    let data: any = null
+    for (const model of MODELS) {
+      response = await fetch(VENICE_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${veniceKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          tools: TOOLS,
+          tool_choice: 'auto',
+        }),
+      })
+      if (response.ok) {
+        data = await response.json()
+        break
+      }
+      // If overloaded (503) or rate limited, try next model
+      if (response.status === 503 || response.status === 429) continue
+      // Other errors — bail
       return NextResponse.json({ error: `Venice error: ${response.status}` }, { status: 502 })
     }
 
-    const data = await response.json()
+    if (!data) {
+      return NextResponse.json({ error: 'All Venice models unavailable' }, { status: 502 })
+    }
     const choice = data.choices?.[0]
 
     // No tool call — just text
@@ -266,16 +276,20 @@ export async function POST(req: NextRequest) {
       },
     ]
 
-    const followup = await fetch(VENICE_URL, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${veniceKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ model: MODEL, messages: followupMessages }),
-    })
+    let followup: Response | null = null
+    for (const model of MODELS) {
+      followup = await fetch(VENICE_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${veniceKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ model, messages: followupMessages }),
+      })
+      if (followup.ok || (followup.status !== 503 && followup.status !== 429)) break
+    }
 
-    if (!followup.ok) {
+    if (!followup?.ok) {
       return NextResponse.json({
         reply: toolResult,
         model: data.model,
