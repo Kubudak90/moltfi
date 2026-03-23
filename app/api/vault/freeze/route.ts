@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createWalletClient, createPublicClient, http } from 'viem'
+import { createWalletClient, createPublicClient, http, encodeFunctionData } from 'viem'
 import { baseSepolia } from 'viem/chains'
 import { privateKeyToAccount } from 'viem/accounts'
 
@@ -23,14 +23,15 @@ export async function POST(req: NextRequest) {
     const walletClient = createWalletClient({ account, chain: baseSepolia, transport: http('https://sepolia.base.org') })
     const publicClient = createPublicClient({ chain: baseSepolia, transport: http('https://sepolia.base.org') })
 
-    const txHash = await walletClient.writeContract({
-      address: VAULT_FACTORY,
+    const data = encodeFunctionData({
       abi: factoryAbi,
       functionName: 'revokePolicy',
       args: [vault as `0x${string}`],
     })
 
-    const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash })
+    // @ts-expect-error viem v2 strict types
+    const txHash = await walletClient.sendTransaction({ to: VAULT_FACTORY, data })
+    await publicClient.waitForTransactionReceipt({ hash: txHash })
 
     return NextResponse.json({
       success: true,
