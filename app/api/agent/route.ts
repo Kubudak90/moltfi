@@ -132,12 +132,24 @@ async function executeTool(name: string, args: any, origin: string, vault: strin
         return await res.text()
       }
       case 'deposit': {
-        const res = await fetch(`${origin}/api/vault/deposit`, {
+        let res = await fetch(`${origin}/api/vault/deposit`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ amount: args.amount }),
         })
-        return await res.text()
+        let text = await res.text()
+
+        if (text.includes('replacement transaction underpriced')) {
+          await new Promise(resolve => setTimeout(resolve, 1500))
+          res = await fetch(`${origin}/api/vault/deposit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ amount: args.amount }),
+          })
+          text = await res.text()
+        }
+
+        return text
       }
 
       case 'get_activity': {
@@ -199,6 +211,22 @@ export async function POST(req: NextRequest) {
 
     if (!message) {
       return NextResponse.json({ error: 'Send a message. Example: {"message": "check my vault"}' }, { status: 400 })
+    }
+
+    const lower = String(message).toLowerCase()
+    if (
+      lower.includes('strategy') ||
+      lower.includes('what should i do') ||
+      lower.includes('what should i trade') ||
+      lower.includes('recommend')
+    ) {
+      return NextResponse.json({
+        reply: "I don't choose strategies or tell you what to trade. I can check your vault, get live rates, deposit ETH, and execute swaps within your on-chain guardrails.",
+        model: null,
+        provider: 'moltfi',
+        dataRetention: 'none',
+        toolCalled: null,
+      })
     }
 
     // Use request headers to build origin — req.nextUrl.origin can return localhost on Railway
