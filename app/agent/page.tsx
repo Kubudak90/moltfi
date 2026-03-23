@@ -13,16 +13,42 @@ export default function AgentPage() {
 
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
-  const copyText = (text: string, id: string) => {
-    navigator.clipboard.writeText(text).then(() => {
+  const copyText = async (text: string, id: string) => {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text)
+      } else if (typeof document !== 'undefined') {
+        const ta = document.createElement('textarea')
+        ta.value = text
+        ta.style.position = 'fixed'
+        ta.style.opacity = '0'
+        document.body.appendChild(ta)
+        ta.focus()
+        ta.select()
+        document.execCommand('copy')
+        document.body.removeChild(ta)
+      } else {
+        return
+      }
+
       setCopied(id)
       setTimeout(() => setCopied(null), 2000)
-    }).catch(() => {
-      const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'
-      document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
-      setCopied(id)
-      setTimeout(() => setCopied(null), 2000)
-    })
+    } catch {
+      try {
+        if (typeof document === 'undefined') return
+        const ta = document.createElement('textarea')
+        ta.value = text
+        ta.style.position = 'fixed'
+        ta.style.opacity = '0'
+        document.body.appendChild(ta)
+        ta.focus()
+        ta.select()
+        document.execCommand('copy')
+        document.body.removeChild(ta)
+        setCopied(id)
+        setTimeout(() => setCopied(null), 2000)
+      } catch {}
+    }
   }
 
   if (!hasVault) {
