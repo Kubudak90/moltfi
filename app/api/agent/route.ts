@@ -39,12 +39,12 @@ const TOOLS = [
     type: 'function' as const,
     function: {
       name: 'swap',
-      description: 'Execute a token swap through the vault via Uniswap V3. On-chain policy is enforced — if the swap exceeds limits, the transaction reverts. Supported pairs: WETH↔USDC.',
+      description: 'Execute a token swap through the vault via Uniswap V3. On-chain policy is enforced — if the swap exceeds limits, the transaction reverts. Supported pairs: WETH↔USDC, WETH↔wstETH.',
       parameters: {
         type: 'object',
         properties: {
-          tokenIn: { type: 'string', enum: ['WETH', 'USDC'], description: 'Token to sell' },
-          tokenOut: { type: 'string', enum: ['WETH', 'USDC'], description: 'Token to buy' },
+          tokenIn: { type: 'string', enum: ['WETH', 'USDC', 'wstETH'], description: 'Token to sell' },
+          tokenOut: { type: 'string', enum: ['WETH', 'USDC', 'wstETH'], description: 'Token to buy' },
           amount: { type: 'string', description: 'Amount of tokenIn to swap (e.g. "0.001")' },
         },
         required: ['tokenIn', 'tokenOut', 'amount'],
@@ -100,7 +100,7 @@ How it works:
 - You execute trades through a vault with on-chain spending policy enforcement
 - The smart contract checks every trade against the guardrails (max per trade, daily limit) — if it exceeds limits, the transaction reverts
 - All reasoning is private (Venice AI, zero data retention). All trades are public blockchain transactions.
-- Supported: WETH↔USDC swaps via Uniswap V3, ETH deposits
+- Supported: WETH↔USDC and WETH↔wstETH swaps via Uniswap V3, ETH deposits
 
 You don't decide what to trade — the agent does. You enforce the rules and execute.
 
@@ -127,7 +127,7 @@ async function executeTool(name: string, args: any, origin: string, vault: strin
         const res = await fetch(`${origin}/api/vault/swap`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ tokenIn: args.tokenIn, tokenOut: args.tokenOut, amount: args.amount }),
+          body: JSON.stringify({ tokenIn: args.tokenIn, tokenOut: args.tokenOut, amount: args.amount, chain: 'mainnet' }),
         })
         return await res.text()
       }
