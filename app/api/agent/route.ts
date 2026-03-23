@@ -201,7 +201,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Send a message. Example: {"message": "check my vault"}' }, { status: 400 })
     }
 
-    const origin = req.nextUrl.origin
+    // Use request headers to build origin — req.nextUrl.origin can return localhost on Railway
+    const proto = req.headers.get('x-forwarded-proto') || 'https'
+    const host = req.headers.get('host') || req.nextUrl.host
+    const origin = `${proto}://${host}`
 
     const messages: any[] = [
       {
