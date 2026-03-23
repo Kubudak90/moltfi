@@ -106,20 +106,23 @@ export default function Home() {
           </div>
         </CardContent></Card>
 
-        <div className="space-y-4 max-w-2xl mx-auto">
+        <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {[
-            { step: '1', title: 'You connect your wallet and create a vault', desc: 'You set spending limits — max trade size, daily volume cap, which tokens are allowed. These limits get written to a smart contract on Base.' },
-            { step: '2', title: 'Your agent registers and gets access', desc: 'Your agent reads a skill file, registers with MoltFi, and gets an API key. It can now trade within your vault — but only within your limits.' },
-            { step: '3', title: 'Your agent sends trade requests in plain English', desc: '"Swap 0.01 WETH to USDC." MoltFi interprets the request, then the smart contract checks it against your limits before any funds move.' },
-            { step: '4', title: 'Every trade is verified on-chain', desc: 'If the trade is within your limits, it executes on Uniswap V3. If it exceeds them, the transaction reverts automatically. Every trade has a Basescan link you can verify.' },
+            { step: '1', icon: '🔐', title: 'Create a vault', desc: 'Connect your wallet, deposit funds, set guardrails. Limits are written to a smart contract — not your agent\'s config file.' },
+            { step: '2', icon: '🤖', title: 'Agent gets an API key', desc: 'Your agent reads a skill file and registers. One API key, scoped to your vault. No private keys, no direct chain access.' },
+            { step: '3', icon: '💬', title: 'Trade in plain English', desc: '"Swap 0.01 WETH to USDC." Venice AI interprets. The smart contract checks limits. If it\'s within bounds, Uniswap executes.' },
+            { step: '4', icon: '✅', title: 'Verified on-chain', desc: 'Every trade has a Basescan link. Over your limits? Transaction reverts automatically. No funds move. No exceptions.' },
           ].map(item => (
-            <Card key={item.step}><CardContent className="flex gap-4 pt-5">
-              <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>
-              <div>
-                <h3 className="font-semibold mb-1">{item.title}</h3>
-                <p className="text-sm text-muted-foreground">{item.desc}</p>
-              </div>
-            </CardContent></Card>
+            <Card key={item.step} className="relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-1 h-full bg-blue-600" />
+              <CardContent className="pt-5 pl-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="text-2xl">{item.icon}</span>
+                  <h3 className="font-semibold">{item.title}</h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </section>

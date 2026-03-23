@@ -2,6 +2,7 @@ import './globals.css'
 import Link from 'next/link'
 import { Providers } from './providers'
 import { ConnectWallet } from './components/ConnectWallet'
+import { NetworkBadge } from './components/NetworkBadge'
 import { NavTabs } from './components/NavTabs'
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
@@ -20,11 +21,13 @@ function Nav() {
   return (
     <nav className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-xs font-bold">MF</div>
-          <span className="font-bold text-lg">MoltFi</span>
-          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded bg-blue-400/15 text-blue-400 border border-blue-500/25">Base</span>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center text-xs font-bold">MF</div>
+            <span className="font-bold text-lg">MoltFi</span>
+          </Link>
+          <NetworkBadge />
+        </div>
         <div className="flex items-center gap-3">
           <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition px-3 py-1.5 rounded-lg hover:bg-gray-800/50">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
