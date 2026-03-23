@@ -44,30 +44,36 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     fetch('/api/agent/wallet').then(r => r.json()).then(d => setServerAgentWallet(d.agentWallet || null)).catch(() => {})
   }, [])
 
+  const chainSuffix = chainId === 8453 ? '&chain=mainnet' : ''
+  
   const refreshVaults = () => {
     if (!address) return
-    const chainSuffix = chainId === 8453 ? '&chain=mainnet' : ''
-    fetch(`/api/vault/status?human=${address}${chainSuffix}`).then(r => r.json()).then(d => {
-      setVaults(d.vaults || [])
-      if (d.vaults?.length > 0) {
-        fetch(`/api/vault/status?vault=${d.vaults[0]}${chainSuffix}`).then(r => r.json()).then(vd => {
-          // Also fetch policy to get approvedTokens
-          fetch(`/api/policy?vault=${d.vaults[0]}`).then(r => r.json()).then(pd => {
-            setVaultData({ ...vd, approvedTokens: pd.approvedTokens || {} })
-          }).catch(() => setVaultData(vd))
-        }).catch(() => {})
-      }
-    }).catch(() => {})
+    fetch(`/api/vault/status?human=${address}${chainSuffix}`)
+      .then(r => r.ok ? r.json() : Promise.reject('API error'))
+      .then(d => {
+        setVaults(d.vaults || [])
+        if (d.vaults?.length > 0) {
+          fetch(`/api/vault/status?vault=${d.vaults[0]}${chainSuffix}`)
+            .then(r => r.ok ? r.json() : Promise.reject('API error'))
+            .then(vd => {
+              fetch(`/api/policy?vault=${d.vaults[0]}`).then(r => r.ok ? r.json() : ({})).then(pd => {
+                setVaultData({ ...vd, approvedTokens: pd.approvedTokens || {} })
+              }).catch(() => setVaultData(vd))
+            }).catch(() => {})
+        } else {
+          setVaultData(null)
+        }
+      }).catch(() => {})
   }
 
   useEffect(() => {
     if (!address) return
     const check = () => {
-      fetch(`/api/agent/register?humanWallet=${address}`).then(r => r.json()).then(d => setAgents(d.agents || [])).catch(() => {})
+      fetch(`/api/agent/register?humanWallet=${address}`).then(r => r.ok ? r.json() : Promise.reject()).then(d => setAgents(d.agents || [])).catch(() => {})
       refreshVaults()
     }
     check()
-    const interval = setInterval(check, 5000)
+    const interval = setInterval(check, 15000)
     return () => clearInterval(interval)
   }, [address, chainId])
 

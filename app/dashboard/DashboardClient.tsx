@@ -6,9 +6,12 @@ import { parseEther } from 'viem'
 import { base, baseSepolia } from 'viem/chains'
 import { useAgentContext } from '../components/AgentContext'
 
-const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
+const VAULT_FACTORY_SEPOLIA = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774' as const
+const VAULT_FACTORY_MAINNET = '0x5AFC9Ff3230eE0E4bE9e110F7672584Ab593A4F6' as const
 const WETH = '0x4200000000000000000000000000000000000006' as const
-const USDC = '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as const
+const USDC_SEPOLIA = '0x036CbD53842c5426634e7929541eC2318f3dCF7e' as const
+const USDC_MAINNET = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as const
+const WSTETH = '0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452' as const
 
 const factoryAbi = [
   { name: 'createVault', type: 'function', stateMutability: 'nonpayable',
@@ -75,8 +78,12 @@ export default function DashboardClient() {
     if (!agentAddr) return
     if (!(await ensureNetwork())) return
     setTxStatus('Creating vault...')
-    writeContract({ account: address, address: VAULT_FACTORY, abi: factoryAbi, functionName: 'createVault',
-      args: [agentAddr as `0x${string}`, parseEther('1'), parseEther('5'), [WETH, USDC]], chain: chainId === baseSepolia.id ? baseSepolia : base })
+    const isMainnet = chainId === base.id
+    const factory = isMainnet ? VAULT_FACTORY_MAINNET : VAULT_FACTORY_SEPOLIA
+    const usdc = isMainnet ? USDC_MAINNET : USDC_SEPOLIA
+    const tokens = isMainnet ? [WETH, usdc, WSTETH] : [WETH, usdc]
+    writeContract({ account: address, address: factory, abi: factoryAbi, functionName: 'createVault',
+      args: [agentAddr as `0x${string}`, parseEther('1'), parseEther('5'), tokens], chain: isMainnet ? base : baseSepolia })
   }
 
   const depositETH = async () => {
@@ -99,7 +106,8 @@ export default function DashboardClient() {
         writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdrawETH',
           args: [parseEther(amt)], chain: chainId === baseSepolia.id ? baseSepolia : base })
       } else {
-        const token = withdrawToken === 'WETH' ? WETH : USDC
+        const usdc = chainId === base.id ? USDC_MAINNET : USDC_SEPOLIA
+        const token = withdrawToken === 'WETH' ? WETH : usdc
         const decimals = withdrawToken === 'USDC' ? 6 : 18
         const amount = BigInt(Math.floor(parseFloat(amt) * (10 ** decimals)))
         writeContract({ account: address, address: vaults[0] as `0x${string}`, abi: vaultAbi, functionName: 'withdraw',
