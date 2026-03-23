@@ -11,18 +11,16 @@ MoltFi
 Scoped API access for AI agent trading — with on-chain guardrails.
 
 ## description
-Give your AI agent an API key to trade crypto — with on-chain guardrails it physically cannot bypass. You set the limits. Smart contracts enforce them. You withdraw anytime.
+Give your AI agent a scoped API key to trade crypto — with on-chain guardrails it physically cannot bypass. You set the limits. Smart contracts enforce them. You stay in control.
 
-The problem with custodial wallets (like Bankr): your agent gets unlimited access to your funds with no spending limits. If the agent goes rogue or the service is compromised, there's nothing stopping it from draining everything. Software-level guardrails aren't better — they live in the agent's code, where a bug or prompt injection can bypass them.
+You connect your wallet, create a vault, deposit funds, and set spending limits (max per trade, daily cap, token allowlist). These limits get written to a smart contract on Base. Your agent registers and gets an API key — scoped access that lets it trade within your guardrails. Every trade goes through the smart contract before execution. Within limits → executes on Uniswap V3. Over limits → transaction reverts automatically. Every trade has a Basescan link.
 
-MoltFi gives your agent a scoped API key — not a private key. It can trade within your limits, but it cannot withdraw funds, change the limits, or exceed them. You connect your wallet, create a vault, deposit funds, and set spending limits (max per trade, daily cap, token allowlist). These limits get written to a smart contract on Base. Your agent registers and gets an API key — scoped access that lets it trade within your guardrails. Every trade goes through the smart contract before execution. Within limits → executes on Uniswap V3. Over limits → transaction reverts automatically. Every trade has a Basescan link.
-
-Powered by Venice AI (zero data retention) for trade processing, Uniswap V3 for swap execution, and Base for all on-chain infrastructure.
+Venice AI handles trade processing with zero data retention — agent reasoning stays private while trades are publicly verifiable on-chain. Live Lido stETH APR data informs strategy decisions, with staking infrastructure ready for mainnet deployment.
 
 ## problemStatement
-AI agents are trading crypto, but existing solutions give agents too much or too little access. Custodial wallets hand over unlimited control with no guardrails. Software-level limits live in the agent's own code — the exact wrong place to enforce them. A prompt injection, a bug, or a bad model update can bypass them. There's no way to give an AI agent scoped trading access with limits that it physically cannot circumvent.
+AI agents are trading crypto, but there's no good way to give an agent scoped trading access with limits that it physically cannot circumvent. Software-level guardrails live in the agent's own code — the exact wrong place to enforce them. A prompt injection, a bug, or a bad model update can bypass them.
 
-MoltFi solves this with scoped API keys and on-chain enforcement. The agent gets an API key that lets it trade within your limits. Smart contracts check every trade before execution. The agent operates freely within the guardrails. When it tries to exceed them, the transaction reverts. The human stays in control — only they can withdraw funds or change the rules.
+MoltFi solves this with scoped API keys and on-chain enforcement. The agent gets an API key that lets it trade within your limits. Smart contracts check every trade before execution. The agent operates freely within the guardrails. When it tries to exceed them, the transaction reverts. The human stays in control.
 
 ## repoURL
 https://github.com/ortegarod/moltfi
@@ -106,6 +104,8 @@ https://moltfi-production.up.railway.app
 | 2 | `ea3b366947c54689bd82ae80bf9f3310` | Venice: Private Agents |
 | 3 | `020214c160fc43339dd9833733791e6b` | Uniswap: Agentic Finance |
 | 4 | `bf374c2134344629aaadb5d6e639e840` | Base: Autonomous Trading |
+| 6 | `6f0e3d7dcadf4ef080d3f424963caff5` | Base: Agent Services on Base |
+| 5 | `5e445a077b5248e0974904915f76e1a0` | Lido: stETH Agent Treasury |
 
 ## submissionMetadata
 
@@ -116,7 +116,7 @@ https://moltfi-production.up.railway.app
   "agentHarness": "openclaw",
   "model": "claude-opus-4-6",
   "skills": ["github", "coding-agent"],
-  "tools": ["viem", "Uniswap V3 SwapRouter02", "Venice API (zai-org-glm-4.7)", "Foundry", "CoinGecko API", "Lido APR API", "Base Sepolia RPC", "ConnectKit"],
+  "tools": ["viem", "wagmi", "Uniswap V3 SwapRouter02", "Uniswap Trading API", "Venice API (zai-org-glm-4.7)", "Foundry", "CoinGecko API", "Lido APR API", "Base Sepolia RPC", "shadcn/ui"],
   "intention": "continuing",
   "intentionNotes": "MoltFi addresses a real gap — agents need guardrails that live on-chain, not in code. We plan to deploy to Base mainnet, add more guardrail types, and integrate with more DEXs."
 }

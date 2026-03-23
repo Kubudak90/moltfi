@@ -1,28 +1,48 @@
 'use client'
 
 import { useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 
-function CopyBlock({ text }: { text: string }) {
+function HeroCards() {
   const [copied, setCopied] = useState(false)
+  const textToCopy = 'Read this skill file and follow the instructions to manage my DeFi vault: curl -s https://moltfi-production.up.railway.app/api/skill'
   const doCopy = () => {
-    navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
+    navigator.clipboard.writeText(textToCopy).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000) })
       .catch(() => {
-        const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0'
+        const ta = document.createElement('textarea'); ta.value = textToCopy; ta.style.position = 'fixed'; ta.style.opacity = '0'
         document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta)
         setCopied(true); setTimeout(() => setCopied(false), 2000)
       })
   }
   return (
-    <div className="relative group">
-      <pre className="bg-gray-800 rounded-lg p-3 pr-10 text-xs font-mono text-gray-300 whitespace-pre-wrap break-all">{text}</pre>
-      <button onClick={doCopy}
-        className="absolute top-2 right-2 p-1.5 rounded-lg text-gray-500 hover:text-indigo-400 hover:bg-gray-700/50 transition">
-        {copied ? (
-          <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-        ) : (
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-        )}
-      </button>
+    <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-20">
+      <Card className="border-green-500/20 text-left">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm text-green-400">I&apos;m an AI agent</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <pre className="bg-muted rounded-lg p-3 text-xs font-mono text-muted-foreground overflow-x-auto whitespace-pre-wrap break-all">curl -s https://moltfi-production.up.railway.app/api/skill</pre>
+        </CardContent>
+      </Card>
+      <Card className="border-indigo-500/20 text-left">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm text-indigo-400">I&apos;m a human</CardTitle>
+          <CardDescription>Copy this and paste it into your AI agent&apos;s chat:</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="relative">
+            <pre className="bg-muted rounded-lg p-3 pr-10 text-xs font-mono text-muted-foreground whitespace-pre-wrap break-all">{textToCopy}</pre>
+            <Button variant="ghost" size="sm" className="absolute top-2 right-2 h-7 w-7 p-0" onClick={doCopy}>
+              {copied ? (
+                <svg className="w-4 h-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+              )}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
@@ -50,17 +70,7 @@ export default function Home() {
           </p>
 
           {/* Get started — agent or human */}
-          <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto mb-20">
-            <div className="bg-gray-900 border border-green-500/20 rounded-xl p-6 text-left">
-              <div className="text-green-400 font-medium text-sm mb-2">I&apos;m an AI agent</div>
-              <pre className="bg-gray-800 rounded-lg p-3 text-xs font-mono text-gray-300">curl -s https://moltfi-production.up.railway.app/api/skill</pre>
-            </div>
-            <div className="bg-gray-900 border border-indigo-500/20 rounded-xl p-6 text-left">
-              <div className="text-indigo-400 font-medium text-sm mb-2">I&apos;m a human</div>
-              <p className="text-xs text-gray-400 mb-3">Copy this and paste it into your AI agent&apos;s chat:</p>
-              <CopyBlock text="Read this skill file and follow the instructions to manage my DeFi vault: curl -s https://moltfi-production.up.railway.app/api/skill" />
-            </div>
-          </div>
+          <HeroCards />
         </div>
       </section>
 
@@ -72,7 +82,7 @@ export default function Home() {
         </p>
 
         {/* Flow diagram */}
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 mb-8">
+        <Card className="mb-8"><CardContent className="pt-6">
           <div className="flex items-center justify-between max-w-3xl mx-auto text-center">
             <div className="flex-1">
               <div className="text-sm font-medium text-indigo-400 mb-1">Your Agent</div>
@@ -94,7 +104,7 @@ export default function Home() {
               <div className="text-xs text-gray-500">Executes the swap</div>
             </div>
           </div>
-        </div>
+        </CardContent></Card>
 
         <div className="space-y-4 max-w-2xl mx-auto">
           {[
@@ -103,37 +113,37 @@ export default function Home() {
             { step: '3', title: 'Your agent sends trade requests in plain English', desc: '"Swap 0.01 WETH to USDC." MoltFi interprets the request, then the smart contract checks it against your limits before any funds move.' },
             { step: '4', title: 'Every trade is verified on-chain', desc: 'If the trade is within your limits, it executes on Uniswap V3. If it exceeds them, the transaction reverts automatically. Every trade has a Basescan link you can verify.' },
           ].map(item => (
-            <div key={item.step} className="flex gap-4 bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <Card key={item.step}><CardContent className="flex gap-4 pt-5">
               <div className="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold shrink-0">{item.step}</div>
               <div>
                 <h3 className="font-semibold mb-1">{item.title}</h3>
-                <p className="text-sm text-gray-400">{item.desc}</p>
+                <p className="text-sm text-muted-foreground">{item.desc}</p>
               </div>
-            </div>
+            </CardContent></Card>
           ))}
         </div>
       </section>
 
       {/* What's enforced */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
-        <h2 className="text-2xl font-bold mb-3 text-center">What the Smart Contract Enforces</h2>
+        <h2 className="text-2xl font-bold mb-3 text-center">You Set the Policies</h2>
         <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
-          These aren&apos;t software settings. They&apos;re on-chain rules that revert the transaction if violated.
+          Your wallet owns the vault. You configure exactly what your agent is allowed to do — enforced on-chain.
         </p>
         <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
           {[
-            { title: 'Max per trade', desc: 'Every swap is checked against your per-trade limit. Exceeds it → reverts.' },
-            { title: 'Daily spending cap', desc: 'Cumulative daily volume tracked on-chain. Resets every 24 hours.' },
-            { title: 'Token allowlist', desc: 'Only tokens you approved can be traded. Everything else is blocked.' },
-            { title: 'Instant revocation', desc: 'Freeze all agent trading with one transaction. Takes effect immediately.' },
+            { title: 'Max per trade', desc: 'Set a per-trade limit. Every swap is checked on-chain before execution.' },
+            { title: 'Daily spending cap', desc: 'Set a daily volume cap. Tracked cumulatively, resets every 24 hours.' },
+            { title: 'Token allowlist', desc: 'Choose which tokens your agent can trade. Everything else is blocked.' },
+            { title: 'Instant freeze', desc: 'Revoke all trading with one transaction. Takes effect immediately.' },
           ].map(item => (
-            <div key={item.title} className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <Card key={item.title}><CardContent className="pt-5">
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full bg-green-400" />
                 <h3 className="font-medium text-sm">{item.title}</h3>
               </div>
-              <p className="text-xs text-gray-400">{item.desc}</p>
-            </div>
+              <p className="text-xs text-muted-foreground">{item.desc}</p>
+            </CardContent></Card>
           ))}
         </div>
       </section>
@@ -145,7 +155,7 @@ export default function Home() {
           If your agent can make HTTP calls, it can use MoltFi. No SDK, no blockchain dependency.
         </p>
 
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+        <Card><CardContent className="pt-6">
           <div className="grid md:grid-cols-2 gap-8 items-center">
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-2 text-gray-300">
@@ -173,12 +183,12 @@ export default function Home() {
               <div className="text-gray-500 mt-3"># Smart contract enforces your limits</div>
             </div>
           </div>
-        </div>
+        </CardContent></Card>
       </section>
 
       {/* Contracts */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center">
+        <Card className="text-center"><CardContent className="pt-6">
           <h3 className="font-semibold text-lg mb-3">Deployed on Base Sepolia</h3>
           <p className="text-sm text-gray-400 mb-4">
             Real contracts, real swaps, verified on Basescan.
@@ -197,7 +207,7 @@ export default function Home() {
               VaultFactory →
             </a>
           </div>
-        </div>
+        </CardContent></Card>
       </section>
 
       {/* Built With */}
@@ -211,10 +221,10 @@ export default function Home() {
             { name: 'Base', desc: 'All contracts on Base Sepolia', color: 'border-blue-400/30' },
             { name: 'OpenClaw', desc: 'Agent runtime & skill harness', color: 'border-orange-500/30' },
           ].map(item => (
-            <div key={item.name} className={`bg-gray-900 border ${item.color} rounded-xl p-4 w-44`}>
+            <Card key={item.name} className={`${item.color} w-44`}><CardContent className="pt-4 pb-4">
               <div className="font-medium text-sm">{item.name}</div>
-              <div className="text-xs text-gray-500 mt-1">{item.desc}</div>
-            </div>
+              <div className="text-xs text-muted-foreground mt-1">{item.desc}</div>
+            </CardContent></Card>
           ))}
         </div>
       </section>

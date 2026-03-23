@@ -4,7 +4,7 @@ import { join } from 'path'
 
 export async function GET(req: NextRequest) {
   try {
-    const skillPath = join(process.cwd(), '..', 'skill', 'SKILL.md')
+    const skillPath = join(process.cwd(), 'skill', 'SKILL.md')
     let content = readFileSync(skillPath, 'utf-8')
 
     // Replace placeholder domain with the actual host so agents can use the skill directly
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest) {
     const proto = req.headers.get('x-forwarded-proto') || 'http'
     if (host) {
       const baseUrl = `${proto}://${host}`
-      content = content.replace(/https:\/\/moltfi\.app/g, baseUrl)
+      content = content.replace(/https:\/\/moltfi-production\.up\.railway\.app/g, baseUrl)
     }
 
     return new NextResponse(content, {

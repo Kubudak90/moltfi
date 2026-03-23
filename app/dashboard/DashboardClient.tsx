@@ -346,57 +346,44 @@ export default function DashboardClient() {
 
           {/* How it works — Human vs Agent */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-3">How Deposits & Withdrawals Work</h3>
+            <h3 className="font-semibold mb-3">How It Works</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="bg-gray-800/30 rounded-lg p-4">
-                <div className="text-sm font-medium text-indigo-400 mb-2">For Humans (you)</div>
-                <p className="text-xs text-gray-400 mb-2">Use the deposit and withdraw buttons above. Your wallet signs the transaction — ETH goes directly into (or out of) the vault smart contract on Base.</p>
-                <p className="text-xs text-gray-500">Only the vault owner (your wallet) can withdraw. Your agent cannot.</p>
+                <div className="text-sm font-medium text-indigo-400 mb-2">You (vault owner)</div>
+                <p className="text-xs text-gray-400">Your wallet owns this vault. You deposit and withdraw funds, set trading limits, choose which tokens are allowed, and can freeze trading anytime. Your wallet signed the transaction that created this vault — you&apos;re the only one who can change the rules.</p>
               </div>
               <div className="bg-gray-800/30 rounded-lg p-4">
-                <div className="text-sm font-medium text-green-400 mb-2">For AI Agents</div>
-                <p className="text-xs text-gray-400 mb-2">Your agent gets a scoped API key. It can trade within your guardrails using simple API calls — no blockchain knowledge needed:</p>
+                <div className="text-sm font-medium text-green-400 mb-2">Your agent (API access)</div>
+                <p className="text-xs text-gray-400 mb-2">Your agent gets an API key to trade within the policies you set. Plain English, no blockchain knowledge needed:</p>
                 <pre className="text-xs font-mono text-gray-300 bg-gray-900/80 rounded p-2 overflow-x-auto">POST /api/agent{'\n'}Authorization: Bearer mf_...{'\n'}{`{"message": "swap 0.01 WETH to USDC"}`}</pre>
-                <p className="text-xs text-gray-500 mt-2">The smart contract enforces your limits on every trade. Over limit → transaction reverts.</p>
+                <p className="text-xs text-gray-500 mt-2">Every trade goes through the smart contract. If it exceeds your policies → transaction reverts automatically.</p>
               </div>
             </div>
           </div>
 
-          {/* What your agent can do */}
+          {/* What you control */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
-            <h3 className="font-semibold mb-3">Scoped Access — What Your Agent Can Do</h3>
+            <h3 className="font-semibold mb-3">You Configure the Scope</h3>
+            <p className="text-xs text-gray-500 mb-3">As vault owner, you decide exactly what your agent is allowed to do. These policies are enforced on-chain.</p>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="space-y-2">
-                <div className="text-xs font-medium text-green-400 mb-1">CAN</div>
                 <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-green-400 mt-0.5">✓</span> Swap tokens within per-trade limit
+                  <span className="text-indigo-400 mt-0.5">→</span> Max amount per trade
                 </div>
                 <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-green-400 mt-0.5">✓</span> Trade within daily spending cap
-                </div>
-                <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-green-400 mt-0.5">✓</span> Check vault balance and market data
-                </div>
-                <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-green-400 mt-0.5">✓</span> Request AI strategy suggestions
+                  <span className="text-indigo-400 mt-0.5">→</span> Daily spending cap
                 </div>
               </div>
               <div className="space-y-2">
-                <div className="text-xs font-medium text-red-400 mb-1">CANNOT</div>
                 <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-red-400 mt-0.5">✗</span> Withdraw funds (owner-only)
+                  <span className="text-indigo-400 mt-0.5">→</span> Which tokens can be traded
                 </div>
                 <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-red-400 mt-0.5">✗</span> Change the guardrail limits
-                </div>
-                <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-red-400 mt-0.5">✗</span> Exceed per-trade or daily limits
-                </div>
-                <div className="flex items-start gap-2 text-xs text-gray-300">
-                  <span className="text-red-400 mt-0.5">✗</span> Access private keys
+                  <span className="text-indigo-400 mt-0.5">→</span> Instant freeze (revoke all trading)
                 </div>
               </div>
             </div>
+            <a href="/guardrails" className="inline-block mt-4 text-xs text-indigo-400 hover:underline">Manage policies →</a>
           </div>
 
         </>

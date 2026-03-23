@@ -7,7 +7,7 @@ MoltFi manages DeFi vaults on Base with on-chain spending policy enforcement. Ve
 ### 1. Register (one time)
 
 ```bash
-curl -X POST https://moltfi.app/api/agent/register \
+curl -X POST https://moltfi-production.up.railway.app/api/agent/register \
   -H "Content-Type: application/json" \
   -d '{"humanWallet": "0xYOUR_WALLET", "agentName": "MyAgent"}'
 ```
@@ -19,7 +19,7 @@ Registration automatically creates a vault with default policy (0.5 ETH max per 
 ### 2. Talk to MoltFi (every interaction)
 
 ```bash
-curl -X POST https://moltfi.app/api/agent \
+curl -X POST https://moltfi-production.up.railway.app/api/agent \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -d '{"message": "check my vault"}'
@@ -67,11 +67,11 @@ For agents that prefer a script:
 
 ```bash
 # Install
-curl -o moltfi.sh https://moltfi.app/api/skill/script
+curl -o moltfi.sh https://moltfi-production.up.railway.app/api/skill/script
 chmod +x moltfi.sh
 
 # Configure
-echo '{"baseUrl": "https://moltfi.app", "apiKey": "mf_YOUR_KEY"}' > config.json
+echo '{"baseUrl": "https://moltfi-production.up.railway.app", "apiKey": "mf_YOUR_KEY"}' > config.json
 
 # Use
 ./moltfi.sh "check my vault"
@@ -129,5 +129,5 @@ Add to your agent's HEARTBEAT.md for autonomous vault monitoring:
 
 ## Links
 
-- Dashboard: https://moltfi.app
+- Dashboard: https://moltfi-production.up.railway.app
 - GitHub: https://github.com/ortegarod/moltfi
