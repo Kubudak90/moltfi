@@ -312,7 +312,7 @@ export default function DashboardClient() {
                   </div>
 
                   {/* wstETH yield card */}
-                  {wsteth > 0 && (
+                  {wsteth > 0 ? (
                     <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center gap-2">
@@ -324,7 +324,41 @@ export default function DashboardClient() {
                       <div className="text-lg font-bold">{wsteth.toFixed(6)} wstETH</div>
                       <div className="text-xs text-gray-500 mt-1">
                         ≈ {wstethValueEth.toFixed(6)} ETH {price ? `($${(wstethValueEth * price).toFixed(2)})` : ''}
-                        {' · '}Yield accrues automatically via exchange rate
+                      </div>
+                      {rates?.lido && price > 0 && (
+                        <div className="mt-3 pt-3 border-t border-blue-500/10">
+                          <div className="text-xs text-gray-500">Estimated yearly yield</div>
+                          <div className="text-sm font-semibold text-green-400">
+                            +{(wstethValueEth * rates.lido.smaApr / 100).toFixed(6)} ETH/yr
+                            {' '}(${(wstethValueEth * price * rates.lido.smaApr / 100).toFixed(2)}/yr)
+                          </div>
+                        </div>
+                      )}
+                      <div className="text-xs text-gray-600 mt-2">Yield accrues automatically via wstETH exchange rate — no claiming needed.</div>
+                    </div>
+                  ) : (
+                    <div className="bg-gray-800/30 border border-gray-700/50 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-400">Lido Staking</span>
+                        {rates?.lido && <span className="text-xs text-green-400">{rates.lido.smaApr.toFixed(2)}% APR</span>}
+                      </div>
+                      <div className="text-xs text-gray-500 mb-3">
+                        Earn yield on your vault&apos;s ETH by staking with Lido. wstETH accrues yield automatically — no claiming needed. Available on Base Mainnet only.
+                      </div>
+                      <div className="bg-gray-900 rounded-lg p-3">
+                        <div className="text-[10px] text-gray-500 mb-1 font-medium uppercase tracking-wider">Paste to your AI agent</div>
+                        <code className="text-xs text-blue-300 break-all leading-relaxed block">
+                          Swap {totalEth > 0.01 ? (totalEth * 0.5).toFixed(4) : '0.01'} ETH to wstETH on my MoltFi vault on Base mainnet. Use Uniswap. The wstETH contract on Base is 0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452.
+                        </code>
+                        <button
+                          onClick={() => {
+                            const cmd = `Swap ${totalEth > 0.01 ? (totalEth * 0.5).toFixed(4) : '0.01'} ETH to wstETH on my MoltFi vault on Base mainnet. Use Uniswap. The wstETH contract on Base is 0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452.`
+                            navigator.clipboard.writeText(cmd).catch(() => {})
+                          }}
+                          className="mt-2 text-[10px] text-blue-400 hover:text-blue-300 transition"
+                        >
+                          Copy to clipboard
+                        </button>
                       </div>
                     </div>
                   )}
