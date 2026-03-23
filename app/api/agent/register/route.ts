@@ -11,10 +11,8 @@ const factoryAbi = [{
   outputs: [{ name: '', type: 'address[]' }],
 }] as const
 
-async function findSignerVault(): Promise<string | null> {
+async function findVaultForOwner(owner: string): Promise<string | null> {
   try {
-    const agentWallet = getAgentWallet()
-    if (!agentWallet) return null
     const client = createPublicClient({
       chain: baseSepolia,
       transport: http('https://sepolia.base.org'),
@@ -22,13 +20,19 @@ async function findSignerVault(): Promise<string | null> {
     // @ts-expect-error viem strict types
     const vaults = await client.readContract({
       address: VAULT_FACTORY, abi: factoryAbi,
-      functionName: 'getVaults', args: [agentWallet as `0x${string}`],
+      functionName: 'getVaults', args: [owner as `0x${string}`],
     })
     return vaults.length > 0 ? (vaults[vaults.length - 1] as string) : null
   } catch (e) {
-    console.error('[register] findSignerVault error:', e)
+    console.error('[register] findVaultForOwner error:', e)
     return null
   }
+}
+
+async function findSignerVault(): Promise<string | null> {
+  const agentWallet = getAgentWallet()
+  if (!agentWallet) return null
+  return findVaultForOwner(agentWallet)
 }
 
 export async function POST(req: NextRequest) {
@@ -51,8 +55,11 @@ export async function POST(req: NextRequest) {
 
     if (existing) {
       if (agentName) existing.agentName = agentName
-      // If no vault linked, try to find one on-chain
-      if (!existing.vault) {
+      // Prefer the human's real vault; fall back to signer vault only if needed
+      const humanVault = await findVaultForOwner(humanWallet)
+      if (humanVault) {
+        existing.vault = humanVault
+      } else if (!existing.vault) {
         const onChainVault = await findSignerVault()
         if (onChainVault) existing.vault = onChainVault
       }
@@ -73,12 +80,16 @@ export async function POST(req: NextRequest) {
     // New registration — generate API key
     const apiKey = generateApiKey()
 
-    // Find existing signer vault on-chain, or create one
+    // Prefer a vault owned by the human wallet; fall back to signer vault, then create one
     let vault = ''
-    const existingVault = await findSignerVault()
-    if (existingVault) {
-      vault = existingVault
+    const humanVault = await findVaultForOwner(humanWallet)
+    if (humanVault) {
+      vault = humanVault
     } else {
+      const existingVault = await findSignerVault()
+      if (existingVault) {
+        vault = existingVault
+      } else {
       try {
         const proto = req.headers.get('x-forwarded-proto') || 'https'
         const host = req.headers.get('host') || req.nextUrl.host
@@ -93,6 +104,7 @@ export async function POST(req: NextRequest) {
           vault = createData.vault
         }
       } catch {}
+      }
     }
 
     const registration: AgentRegistration = {
