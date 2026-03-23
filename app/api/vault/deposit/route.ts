@@ -3,6 +3,8 @@ import { createWalletClient, createPublicClient, http, parseEther, encodeFunctio
 import { queueTransaction } from '../../../../lib/tx-queue'
 import { privateKeyToAccount } from 'viem/accounts'
 import { baseSepolia } from 'viem/chains'
+
+const RPC_URL = 'https://sepolia.base.org'
 import { lookupVault } from '../lookup'
 
 const WETH = '0x4200000000000000000000000000000000000006' as const
@@ -24,8 +26,8 @@ export async function POST(req: NextRequest) {
     }
 
     const account = privateKeyToAccount(pk as `0x${string}`)
-    const walletClient = createWalletClient({ account, chain: baseSepolia, transport: http() })
-    const publicClient = createPublicClient({ chain: baseSepolia, transport: http() })
+    const walletClient = createWalletClient({ account, chain: baseSepolia, transport: http(RPC_URL) })
+    const publicClient = createPublicClient({ chain: baseSepolia, transport: http(RPC_URL) })
 
     const vault = await lookupVault(account.address)
     if (!vault) {
@@ -37,19 +39,26 @@ export async function POST(req: NextRequest) {
     const value = parseEther(amount.toString())
 
     const { transferHash, receipt } = await queueTransaction(async () => {
+      const baseNonce = await publicClient.getTransactionCount({
+        address: account.address,
+        blockTag: 'pending',
+      })
+
       // Wrap ETH → WETH
       // @ts-expect-error viem v2 strict types
       const wrapHash = await walletClient.sendTransaction({
         to: WETH,
         value,
+        nonce: baseNonce,
         data: encodeFunctionData({ abi: wethAbi, functionName: 'deposit' }),
       })
       await publicClient.waitForTransactionReceipt({ hash: wrapHash })
 
-      // Transfer WETH to vault
+      // Transfer WETH to vault using the next nonce explicitly
       // @ts-expect-error viem v2 strict types
       const tHash = await walletClient.sendTransaction({
         to: WETH,
+        nonce: baseNonce + 1,
         data: encodeFunctionData({
           abi: wethAbi,
           functionName: 'transfer',
