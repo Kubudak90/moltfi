@@ -344,6 +344,60 @@ export default function DashboardClient() {
             })()}
           </div>
 
+          {/* How it works — Human vs Agent */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h3 className="font-semibold mb-3">How Deposits & Withdrawals Work</h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="bg-gray-800/30 rounded-lg p-4">
+                <div className="text-sm font-medium text-indigo-400 mb-2">For Humans (you)</div>
+                <p className="text-xs text-gray-400 mb-2">Use the deposit and withdraw buttons above. Your wallet signs the transaction — ETH goes directly into (or out of) the vault smart contract on Base.</p>
+                <p className="text-xs text-gray-500">Only the vault owner (your wallet) can withdraw. Your agent cannot.</p>
+              </div>
+              <div className="bg-gray-800/30 rounded-lg p-4">
+                <div className="text-sm font-medium text-green-400 mb-2">For AI Agents</div>
+                <p className="text-xs text-gray-400 mb-2">Your agent gets a scoped API key. It can trade within your guardrails using simple API calls — no blockchain knowledge needed:</p>
+                <pre className="text-xs font-mono text-gray-300 bg-gray-900/80 rounded p-2 overflow-x-auto">POST /api/agent{'\n'}Authorization: Bearer mf_...{'\n'}{`{"message": "swap 0.01 WETH to USDC"}`}</pre>
+                <p className="text-xs text-gray-500 mt-2">The smart contract enforces your limits on every trade. Over limit → transaction reverts.</p>
+              </div>
+            </div>
+          </div>
+
+          {/* What your agent can do */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6">
+            <h3 className="font-semibold mb-3">Scoped Access — What Your Agent Can Do</h3>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <div className="text-xs font-medium text-green-400 mb-1">CAN</div>
+                <div className="flex items-start gap-2 text-xs text-gray-300">
+                  <span className="text-green-400 mt-0.5">✓</span> Swap tokens within per-trade limit
+                </div>
+                <div className="flex items-start gap-2 text-xs text-gray-300">
+                  <span className="text-green-400 mt-0.5">✓</span> Trade within daily spending cap
+                </div>
+                <div className="flex items-start gap-2 text-xs text-gray-300">
+                  <span className="text-green-400 mt-0.5">✓</span> Check vault balance and market data
+                </div>
+                <div className="flex items-start gap-2 text-xs text-gray-300">
+                  <span className="text-green-400 mt-0.5">✓</span> Request AI strategy suggestions
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="text-xs font-medium text-red-400 mb-1">CANNOT</div>
+                <div className="flex items-start gap-2 text-xs text-gray-300">
+                  <span className="text-red-400 mt-0.5">✗</span> Withdraw funds (owner-only)
+                </div>
+                <div className="flex items-start gap-2 text-xs text-gray-300">
+                  <span className="text-red-400 mt-0.5">✗</span> Change the guardrail limits
+                </div>
+                <div className="flex items-start gap-2 text-xs text-gray-300">
+                  <span className="text-red-400 mt-0.5">✗</span> Exceed per-trade or daily limits
+                </div>
+                <div className="flex items-start gap-2 text-xs text-gray-300">
+                  <span className="text-red-400 mt-0.5">✗</span> Access private keys
+                </div>
+              </div>
+            </div>
+          </div>
 
         </>
       )}

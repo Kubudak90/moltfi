@@ -67,7 +67,10 @@ export default function GuardrailsPage() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Guardrails</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Guardrails</h1>
+          <p className="text-sm text-gray-500 mt-1">Scoped access rules for your agent&apos;s API key — enforced on-chain.</p>
+        </div>
         <a href={`https://sepolia.basescan.org/address/${AGENT_POLICY}#readContract`}
           target="_blank" rel="noopener"
           className="text-xs text-indigo-400 hover:underline">View contract →</a>

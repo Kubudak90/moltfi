@@ -8,21 +8,21 @@
 MoltFi
 
 ## tagline
-On-chain guardrails for AI agent trading on Base.
+Scoped API access for AI agent trading — with on-chain guardrails.
 
 ## description
-Your AI agent wants to trade crypto on your behalf. But if the guardrails live in the agent's code, a bug or bad prompt can bypass them. MoltFi puts the limits on-chain — your agent literally cannot exceed them.
+Give your AI agent an API key to trade crypto — with on-chain guardrails it physically cannot bypass. You set the limits. Smart contracts enforce them. You withdraw anytime.
 
-You connect your wallet, create a vault, and set spending limits — max trade size, daily volume cap, which tokens are allowed. These limits get written to a smart contract on Base. Your agent registers via API, sends trade requests in plain English, and MoltFi routes every trade through the smart contract before execution. Within limits → trade executes on Uniswap V3. Over limits → transaction reverts automatically. Every trade has a Basescan link.
+The problem with custodial wallets (like Bankr): your agent gets unlimited access to your funds with no spending limits. If the agent goes rogue or the service is compromised, there's nothing stopping it from draining everything. Software-level guardrails aren't better — they live in the agent's code, where a bug or prompt injection can bypass them.
 
-The agent never touches private keys. You deposit funds, set the rules, and can withdraw anytime. The smart contract enforces the rules — not the agent's code, not MoltFi's servers. On-chain enforcement means the agent physically cannot exceed your limits.
+MoltFi gives your agent a scoped API key — not a private key. It can trade within your limits, but it cannot withdraw funds, change the limits, or exceed them. You connect your wallet, create a vault, deposit funds, and set spending limits (max per trade, daily cap, token allowlist). These limits get written to a smart contract on Base. Your agent registers and gets an API key — scoped access that lets it trade within your guardrails. Every trade goes through the smart contract before execution. Within limits → executes on Uniswap V3. Over limits → transaction reverts automatically. Every trade has a Basescan link.
 
 Powered by Venice AI (zero data retention) for trade processing, Uniswap V3 for swap execution, and Base for all on-chain infrastructure.
 
 ## problemStatement
-AI agents are trading crypto. But the guardrails live in the agent's own code — the exact wrong place to put limits on the agent. A prompt injection, a bug, or a bad model update can bypass software-level limits. There's no way to say "let my AI trade, but enforce a 0.5 ETH max per trade and 1 ETH daily cap" in a way the agent physically cannot bypass.
+AI agents are trading crypto, but existing solutions give agents too much or too little access. Custodial wallets hand over unlimited control with no guardrails. Software-level limits live in the agent's own code — the exact wrong place to enforce them. A prompt injection, a bug, or a bad model update can bypass them. There's no way to give an AI agent scoped trading access with limits that it physically cannot circumvent.
 
-MoltFi moves enforcement to the blockchain. Smart contracts check every trade before execution. The agent operates freely within the guardrails. When it tries to exceed them, the transaction reverts. The human stays in control.
+MoltFi solves this with scoped API keys and on-chain enforcement. The agent gets an API key that lets it trade within your limits. Smart contracts check every trade before execution. The agent operates freely within the guardrails. When it tries to exceed them, the transaction reverts. The human stays in control — only they can withdraw funds or change the rules.
 
 ## repoURL
 https://github.com/ortegarod/moltfi

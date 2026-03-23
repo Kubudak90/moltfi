@@ -1,8 +1,10 @@
-# MoltFi — On-chain guardrails for AI agent trading
+# MoltFi — Scoped access for AI agent trading
 
-Your AI agent wants to trade crypto on your behalf. But if the guardrails live in the agent's code, a bug or bad prompt can bypass them. MoltFi puts the limits on-chain — your agent literally cannot exceed them.
+Give your AI agent an API key to trade crypto — with on-chain guardrails it physically cannot bypass. You set the limits. Smart contracts enforce them. You withdraw anytime.
 
-**You** set the rules. **Your agent** trades within them. **Smart contracts** enforce every limit.
+**The problem:** Custodial wallets give your agent unlimited access. Software-level guardrails can be bypassed by bugs or prompt injection. There's no way to say "let my AI trade, but enforce a 0.5 ETH max per trade" in a way the agent physically cannot circumvent.
+
+**The solution:** MoltFi gives your agent a **scoped API key** — not a private key. It can trade within your limits, but it cannot withdraw funds, change the limits, or exceed them. The guardrails are enforced by smart contracts on Base, not by the agent's code or our server.
 
 🔗 **Live demo:** [moltfi-production.up.railway.app](https://moltfi-production.up.railway.app)
 
