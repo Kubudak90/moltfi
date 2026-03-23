@@ -4,8 +4,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "node .next/standalone/server.js",
-    "healthcheckPath": "/api/rates",
     "restartPolicyType": "ON_FAILURE"
   }
 }
