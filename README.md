@@ -20,14 +20,14 @@ Your Agent → MoltFi API → AgentPolicy (checks limits) → Uniswap V3 (execut
                                                      Reverts if over limits
 ```
 
-## What the smart contract enforces
+## Trading policies (on-chain)
 
-These aren't software settings. They're on-chain rules that revert the transaction if violated.
+You configure these. Smart contracts enforce them on every trade.
 
 - **Max per trade** — Every swap is checked against your per-trade limit
 - **Daily spending cap** — Cumulative daily volume tracked on-chain, resets every 24h
 - **Token allowlist** — Only tokens you approved can be traded
-- **Instant revocation** — Freeze all agent trading with one transaction
+- **Instant freeze** — Revoke all agent trading with one transaction
 
 ## Smart contracts (deployed on Base Sepolia)
 
