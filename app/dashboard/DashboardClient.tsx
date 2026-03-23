@@ -269,8 +269,10 @@ export default function DashboardClient() {
               const weth = parseFloat(vaultData?.balances?.WETH || '0')
               const usdc = parseFloat(vaultData?.balances?.USDC || '0')
               const eth = parseFloat(vaultData?.balances?.ETH || '0')
+              const wsteth = parseFloat(vaultData?.balances?.wstETH || '0')
               const price = ethPrice || 0
-              const totalEth = eth + weth
+              const wstethValueEth = wsteth * 1.17 // wstETH trades at ~1.17x ETH
+              const totalEth = eth + weth + wstethValueEth
               const totalUsd = price ? (totalEth * price + usdc) : 0
 
               return (
@@ -299,6 +301,24 @@ export default function DashboardClient() {
                     })()}
                     
                   </div>
+
+                  {/* wstETH yield card */}
+                  {wsteth > 0 && (
+                    <div className="bg-blue-500/5 border border-blue-500/20 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-blue-400">Lido wstETH</span>
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-400/15 text-green-400 border border-green-500/25">Earning yield</span>
+                        </div>
+                        {rates?.lido && <span className="text-xs text-green-400">{rates.lido.smaApr.toFixed(2)}% APR</span>}
+                      </div>
+                      <div className="text-lg font-bold">{wsteth.toFixed(6)} wstETH</div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        ≈ {wstethValueEth.toFixed(6)} ETH {price ? `($${(wstethValueEth * price).toFixed(2)})` : ''}
+                        {' · '}Yield accrues automatically via exchange rate
+                      </div>
+                    </div>
+                  )}
 
                   {/* Guardrails summary */}
                   {vaultData?.policy?.active ? (

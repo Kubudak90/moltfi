@@ -1,23 +1,37 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createPublicClient, http, formatEther } from 'viem'
-import { baseSepolia } from 'viem/chains'
+import { base, baseSepolia } from 'viem/chains'
 
-const client = createPublicClient({ chain: baseSepolia, transport: http('https://sepolia.base.org') })
+const sepoliaClient = createPublicClient({ chain: baseSepolia, transport: http('https://sepolia.base.org') })
+const mainnetClient = createPublicClient({ chain: base, transport: http('https://mainnet.base.org') })
 
+// Sepolia contracts
 const VAULT_FACTORY = '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774'
 const POLICY = '0x63649f61F29CE6dC9415263F4b727Bc908206Fbc'
 const WETH = '0x4200000000000000000000000000000000000006'
 const USDC = '0x036CbD53842c5426634e7929541eC2318f3dCF7e'
 
+// Mainnet contracts
+const MAINNET_VAULT_FACTORY = '0x5AFC9Ff3230eE0E4bE9e110F7672584Ab593A4F6'
+const MAINNET_POLICY = '0x9f5C622170F11C35d3343fE444731E3F732De38a'
+const MAINNET_USDC = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'
+const WSTETH = '0xc1CBa3fCea344f92D9239c08C0568f6F2F0ee452'
+
 export async function GET(req: NextRequest) {
   const vaultAddress = req.nextUrl.searchParams.get('vault')
   const humanWallet = req.nextUrl.searchParams.get('human')
+  const chainParam = req.nextUrl.searchParams.get('chain') // 'mainnet' or 'sepolia' (default)
+  const isMainnet = chainParam === 'mainnet'
+  const client = isMainnet ? mainnetClient : sepoliaClient
+  const factoryAddr = isMainnet ? MAINNET_VAULT_FACTORY : VAULT_FACTORY
+  const policyAddr = isMainnet ? MAINNET_POLICY : POLICY
+  const usdcAddr = isMainnet ? MAINNET_USDC : USDC
 
   try {
     // If human wallet provided, look up their vaults from factory
     if (humanWallet) {
       const vaults = await client.readContract({
-        address: VAULT_FACTORY as `0x${string}`,
+        address: factoryAddr as `0x${string}`,
         abi: [{ name: 'getVaults', type: 'function', stateMutability: 'view', inputs: [{ name: 'user', type: 'address' }], outputs: [{ name: '', type: 'address[]' }] }],
         functionName: 'getVaults',
         args: [humanWallet as `0x${string}`],
@@ -37,13 +51,22 @@ export async function GET(req: NextRequest) {
       { name: 'balance', type: 'function', stateMutability: 'view', inputs: [{ name: 'token', type: 'address' }], outputs: [{ name: '', type: 'uint256' }] },
     ]
 
-    const [owner, agent, wethBalance, usdcBalance, ethBalance] = await Promise.all([
+    const balanceCalls: Promise<any>[] = [
       client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'owner' } as any),
       client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'agent' } as any),
       client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [WETH] } as any),
-      client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [USDC] } as any),
+      client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [usdcAddr] } as any),
       client.getBalance({ address: vaultAddress as `0x${string}` }),
-    ])
+    ]
+    // Read wstETH balance on mainnet
+    if (isMainnet) {
+      balanceCalls.push(
+        client.readContract({ address: vaultAddress as `0x${string}`, abi: vaultAbi, functionName: 'balance', args: [WSTETH] } as any)
+      )
+    }
+    const results = await Promise.all(balanceCalls)
+    const [owner, agent, wethBalance, usdcBalance, ethBalance] = results
+    const wstethBalance = isMainnet ? results[5] : BigInt(0)
 
     // Get policy
     const policyAbi = [
@@ -54,9 +77,9 @@ export async function GET(req: NextRequest) {
 
     // Policy is set with factory as agentOwner, so we need factory address as the human
     const [policy, dailySpent, remaining] = await Promise.all([
-      client.readContract({ address: POLICY as `0x${string}`, abi: policyAbi, functionName: 'policies', args: [VAULT_FACTORY, vaultAddress] } as any),
-      client.readContract({ address: POLICY as `0x${string}`, abi: policyAbi, functionName: 'getDailySpent', args: [vaultAddress] } as any),
-      client.readContract({ address: POLICY as `0x${string}`, abi: policyAbi, functionName: 'getRemainingAllowance', args: [vaultAddress] } as any),
+      client.readContract({ address: policyAddr as `0x${string}`, abi: policyAbi, functionName: 'policies', args: [factoryAddr, vaultAddress] } as any),
+      client.readContract({ address: policyAddr as `0x${string}`, abi: policyAbi, functionName: 'getDailySpent', args: [vaultAddress] } as any),
+      client.readContract({ address: policyAddr as `0x${string}`, abi: policyAbi, functionName: 'getRemainingAllowance', args: [vaultAddress] } as any),
     ])
 
     return NextResponse.json({
@@ -67,7 +90,9 @@ export async function GET(req: NextRequest) {
         ETH: formatEther(ethBalance as bigint),
         WETH: formatEther(wethBalance as bigint),
         USDC: (Number(usdcBalance) / 1000000).toString(),
+        ...(isMainnet && { wstETH: formatEther(wstethBalance as bigint) }),
       },
+      chain: isMainnet ? 'base' : 'base-sepolia',
       policy: {
         maxPerAction: formatEther((policy as any)[0]),
         dailyLimit: formatEther((policy as any)[1]),

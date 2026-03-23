@@ -31,7 +31,7 @@ const AgentContext = createContext<AgentContextType>({
 export function useAgentContext() { return useContext(AgentContext) }
 
 export function AgentProvider({ children }: { children: ReactNode }) {
-  const { address } = useAccount()
+  const { address, chainId } = useAccount()
   const [agents, setAgents] = useState<AgentInfo[]>([])
   const [vaults, setVaults] = useState<string[]>([])
   const [vaultData, setVaultData] = useState<any>(null)
@@ -46,10 +46,11 @@ export function AgentProvider({ children }: { children: ReactNode }) {
 
   const refreshVaults = () => {
     if (!address) return
-    fetch(`/api/vault/status?human=${address}`).then(r => r.json()).then(d => {
+    const chainSuffix = chainId === 8453 ? '&chain=mainnet' : ''
+    fetch(`/api/vault/status?human=${address}${chainSuffix}`).then(r => r.json()).then(d => {
       setVaults(d.vaults || [])
       if (d.vaults?.length > 0) {
-        fetch(`/api/vault/status?vault=${d.vaults[0]}`).then(r => r.json()).then(vd => {
+        fetch(`/api/vault/status?vault=${d.vaults[0]}${chainSuffix}`).then(r => r.json()).then(vd => {
           // Also fetch policy to get approvedTokens
           fetch(`/api/policy?vault=${d.vaults[0]}`).then(r => r.json()).then(pd => {
             setVaultData({ ...vd, approvedTokens: pd.approvedTokens || {} })
@@ -68,7 +69,7 @@ export function AgentProvider({ children }: { children: ReactNode }) {
     check()
     const interval = setInterval(check, 5000)
     return () => clearInterval(interval)
-  }, [address])
+  }, [address, chainId])
 
   return (
     <AgentContext.Provider value={{
