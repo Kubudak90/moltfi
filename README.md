@@ -4,6 +4,8 @@ Give your AI agent an API key to trade crypto — with on-chain guardrails it ph
 
 🔗 **Live demo:** [moltfi-production.up.railway.app](https://moltfi-production.up.railway.app)
 
+![MoltFi Dashboard](docs/screenshot.png)
+
 ## How it works
 
 1. **You connect your wallet and create a vault** — You deposit funds and set spending limits: max trade size, daily volume cap, which tokens are allowed. These get written to a smart contract on Base.
@@ -39,7 +41,9 @@ You configure these. Smart contracts enforce them on every trade.
 | AgentGuardRouter | `0xDBF6...b5F9` | [View](https://basescan.org/address/0xDBF65858816a8Cf865eC85626d8935909ca2b5F9) |
 | VaultFactory | `0x5AFC...a4F6` | [View](https://basescan.org/address/0x5AFC9Ff3230eE0E4bE9e110F7672584Ab593A4F6) |
 
-Live vault holds real wstETH (Lido) earning ~2.9% APR — [view swap transaction](https://basescan.org/tx/0x1f027ff500d6ad635315122a605df2599dffbb542df6e016fb7987a52cad391c).
+Live vault holds real wstETH (Lido) earning ~2.5% APR, swapped via guardrail-enforced Uniswap V3:
+- [WETH → wstETH swap #1](https://basescan.org/tx/0xc970da90226d94acb4d81dd3e7001b371d47b869a80d33bb023f81424a04477d) (0.0005 WETH)
+- [WETH → wstETH swap #2](https://basescan.org/tx/0xbaa1f15b32533a6c9a97493a986a6f0a0951e8d3653bf198540ba23f99484182) (0.0002 WETH, via agent API natural language)
 
 ### Base Sepolia (testnet)
 
@@ -48,6 +52,12 @@ Live vault holds real wstETH (Lido) earning ~2.9% APR — [view swap transaction
 | AgentPolicy | `0x6364...06Fbc` | [View](https://sepolia.basescan.org/address/0x63649f61F29CE6dC9415263F4b727Bc908206Fbc) |
 | AgentGuardRouter | `0x5Cc0...77E6` | [View](https://sepolia.basescan.org/address/0x5Cc04847CE5A81319b55D34F9fB757465D3677E6) |
 | VaultFactory | `0x672E...9774` | [View](https://sepolia.basescan.org/address/0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774) |
+
+## Dual-chain support
+
+All API routes support both **Base Mainnet** and **Base Sepolia**. Add `?chain=mainnet` to any GET endpoint or `"chain": "mainnet"` to POST bodies to target mainnet. Default is Sepolia (testnet).
+
+The dashboard includes an in-app network switcher — click the network badge to switch between chains without leaving the app.
 
 ## Agent integration
 
@@ -90,7 +100,7 @@ Or give your agent the skill file: `curl -s https://moltfi-production.up.railway
 ## Built with
 
 - **[Uniswap V3](https://uniswap.org)** — Swap execution via AgentGuardRouter wrapping SwapRouter02
-- **[Lido](https://lido.fi)** — Live wstETH integration on Base mainnet. Vault holds real wstETH earning ~2.9% APR. Swapped through guardrail-enforced router on Uniswap V3. APR data available via API.
+- **[Lido](https://lido.fi)** — Live wstETH integration on Base mainnet. Vault holds real wstETH earning ~2.5% APR. WETH↔wstETH swaps through guardrail-enforced router on Uniswap V3 (0.01% fee tier for correlated pairs). Dashboard shows real-time Lido APR, estimated yearly yield, and copy-paste staking instructions for AI agents.
 - **[Venice AI](https://venice.ai)** — Zero-retention inference for trade processing. Agent reasoning stays private, trades are public on-chain
 - **[Base](https://base.org)** — Contracts deployed on both Base Sepolia and Base mainnet
 - **[OpenClaw](https://openclaw.ai)** — Agent runtime & skill harness
