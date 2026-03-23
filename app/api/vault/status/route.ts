@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
 
     let results: any
     try {
-      results = await client.multicall({ contracts: contracts.map(c => ({ ...c, address: c.address as `0x${string}` })), allowFailure: true })
+      results = await (client as any).multicall({ contracts: contracts.map((c: any) => ({ ...c, address: c.address as `0x${string}` })), allowFailure: true })
     } catch {
       // Fallback: if multicall itself fails, return minimal data
       return NextResponse.json({ vault: vaultAddress, owner: '0x0', agent: '0x0', balances: { ETH: '0', WETH: '0', USDC: '0' }, chain: isMainnet ? 'base' : 'base-sepolia', policy: { maxPerAction: '0', dailyLimit: '0', active: false, dailySpent: '0', remaining: '0' } })

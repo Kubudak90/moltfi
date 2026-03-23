@@ -54,7 +54,7 @@ export async function GET(req: NextRequest) {
     ]
     let results: any
     try {
-      results = await client.multicall({ contracts: contracts as any, allowFailure: true })
+      results = await (client as any).multicall({ contracts: contracts as any, allowFailure: true })
     } catch {
       return NextResponse.json({ error: 'RPC unavailable' }, { status: 503 })
     }
