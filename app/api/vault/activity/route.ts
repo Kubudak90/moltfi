@@ -213,6 +213,6 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({ vault, activities, count: activities.length })
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    return NextResponse.json({ vault: req.nextUrl.searchParams.get('vault'), activities: [], count: 0, rpcError: true })
   }
 }

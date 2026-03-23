@@ -162,6 +162,6 @@ export async function GET(req: NextRequest) {
       })),
     })
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    return NextResponse.json({ vault: req.nextUrl.searchParams.get('vault'), chain: req.nextUrl.searchParams.get('chain') === 'mainnet' ? 'base' : 'base-sepolia', portfolio: { eth: '0', weth: '0', usdc: '0', totalUsd: '0', ethPrice: 0 }, performance: { tradingPnlUsd: '0', totalTradesUsd: '0', tradeCount: 0 }, rpcError: true })
   }
 }

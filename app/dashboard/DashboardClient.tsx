@@ -238,7 +238,7 @@ export default function DashboardClient() {
       {/* Vault active */}
       {hasVault && (
         <>
-          {vaultData?.agent && serverAgentWallet && vaultData.agent !== '0x0' && vaultData.agent.toLowerCase() !== serverAgentWallet.toLowerCase() && (
+          {vaultData?.agent && serverAgentWallet && vaultData.agent !== '0x0' && !vaultData.rpcError && vaultData.agent.toLowerCase() !== serverAgentWallet.toLowerCase() && (
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 flex items-center justify-between gap-4">
               <div>
                 <div className="font-semibold text-yellow-300">Vault agent mismatch</div>
@@ -303,8 +303,9 @@ export default function DashboardClient() {
                       const totalInEth = totalEth + usdcInEth
                       return (
                         <>
-                          <div className="text-3xl font-bold">{totalInEth > 0 ? `${totalInEth.toFixed(4)} ETH` : '—'}</div>
+                          <div className="text-3xl font-bold">{totalInEth > 0 ? `${totalInEth.toFixed(4)} ETH` : vaultData?.rpcError ? '...' : '—'}</div>
                           {totalUsd > 0 && <div className="text-sm text-gray-500 mt-1">≈ ${totalUsd.toFixed(2)}</div>}
+                          {vaultData?.rpcError && <div className="text-xs text-yellow-500/70 mt-1">Refreshing from chain...</div>}
                         </>
                       )
                     })()}
