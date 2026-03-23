@@ -58,10 +58,10 @@ https://moltfi-production.up.railway.app
 - **Instant revocation** — freeze all agent trading with one transaction
 
 ### Dashboard (4 pages)
-- **Vault** — Create vault, deposit/withdraw, see balances, guardrail status
-- **Guardrails** — View/update limits, see daily spending progress, contract links
-- **Agent** — Connection status, skill file URL, example requests
-- **Activity** — On-chain transaction history with guardrail check proof
+- **Dashboard** (`/dashboard`) — Create vault, deposit/withdraw, see balances, guardrail status
+- **Guardrails** (`/guardrails`) — View/update limits, see daily spending progress, contract links
+- **Agent** (`/agent`) — Connection status, skill file URL, example requests
+- **Activity** (`/activity`) — On-chain transaction history with guardrail check proof
 
 ### API (all working)
 | Endpoint | Method | What |
