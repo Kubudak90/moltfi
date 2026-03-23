@@ -8,41 +8,14 @@ const factoryAbi = [
   { name: 'getVaults', type: 'function', stateMutability: 'view', inputs: [{ name: 'user', type: 'address' }], outputs: [{ name: '', type: 'address[]' }] },
 ] as const
 
-const client = createPublicClient({ chain: baseSepolia, transport: http() })
+const client = createPublicClient({ chain: baseSepolia, transport: http('https://sepolia.base.org') })
 
 /**
  * Look up the vault for the given agent address.
- * Checks agent registration → human wallet → factory getVaults.
+ * Priority: on-chain vaults owned by the agent → agent registration → human wallet vaults.
  */
 export async function lookupVault(agentAddress: string): Promise<string | null> {
-  const dbPath = join(process.cwd(), 'data', 'agents.json')
-
-  // 1. Find vault from agent registration (check agentWallet or direct vault field)
-  if (existsSync(dbPath)) {
-    try {
-      const agents = JSON.parse(readFileSync(dbPath, 'utf-8'))
-      // Match by agentWallet or humanWallet
-      const agent = agents.find((a: any) =>
-        (a.agentWallet && a.agentWallet.toLowerCase() === agentAddress.toLowerCase()) ||
-        a.humanWallet.toLowerCase() === agentAddress.toLowerCase()
-      )
-      if (agent) {
-        // If registration has a vault stored, use it directly
-        if (agent.vault) return agent.vault
-        // Otherwise look up from factory
-        // @ts-expect-error viem v2 strict types
-        const vaults = await client.readContract({
-          address: VAULT_FACTORY,
-          abi: factoryAbi,
-          functionName: 'getVaults',
-          args: [agent.humanWallet as `0x${string}`],
-        })
-        if (vaults && vaults.length > 0) return vaults[0] as string
-      }
-    } catch {}
-  }
-
-  // 2. Fallback: check if agent itself owns vaults
+  // 1. Check if agent itself owns vaults on-chain (most reliable — signer IS the owner+agent)
   try {
     // @ts-expect-error viem v2 strict types
     const vaults = await client.readContract({
@@ -51,8 +24,21 @@ export async function lookupVault(agentAddress: string): Promise<string | null> 
       functionName: 'getVaults',
       args: [agentAddress as `0x${string}`],
     })
-    if (vaults && vaults.length > 0) return vaults[0] as string
+    if (vaults && vaults.length > 0) return vaults[vaults.length - 1] as string
   } catch {}
+
+  // 2. Fallback: check agent registration for linked vault
+  const dbPath = join(process.cwd(), 'data', 'agents.json')
+  if (existsSync(dbPath)) {
+    try {
+      const agents = JSON.parse(readFileSync(dbPath, 'utf-8'))
+      const agent = agents.find((a: any) =>
+        (a.agentWallet && a.agentWallet.toLowerCase() === agentAddress.toLowerCase()) ||
+        a.humanWallet.toLowerCase() === agentAddress.toLowerCase()
+      )
+      if (agent && agent.vault) return agent.vault
+    } catch {}
+  }
 
   return null
 }

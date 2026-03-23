@@ -15,14 +15,20 @@ async function findSignerVault(): Promise<string | null> {
   try {
     const agentWallet = getAgentWallet()
     if (!agentWallet) return null
-    const client = createPublicClient({ chain: baseSepolia, transport: http() })
+    const client = createPublicClient({
+      chain: baseSepolia,
+      transport: http('https://sepolia.base.org'),
+    })
     // @ts-expect-error viem strict types
     const vaults = await client.readContract({
       address: VAULT_FACTORY, abi: factoryAbi,
       functionName: 'getVaults', args: [agentWallet as `0x${string}`],
     })
     return vaults.length > 0 ? (vaults[vaults.length - 1] as string) : null
-  } catch { return null }
+  } catch (e) {
+    console.error('[register] findSignerVault error:', e)
+    return null
+  }
 }
 
 export async function POST(req: NextRequest) {
