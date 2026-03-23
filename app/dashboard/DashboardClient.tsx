@@ -238,7 +238,7 @@ export default function DashboardClient() {
       {/* Vault active */}
       {hasVault && (
         <>
-          {vaultData?.agent && serverAgentWallet && vaultData.agent.toLowerCase() !== serverAgentWallet.toLowerCase() && (
+          {vaultData?.agent && serverAgentWallet && vaultData.agent !== '0x0' && vaultData.agent.toLowerCase() !== serverAgentWallet.toLowerCase() && (
             <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 flex items-center justify-between gap-4">
               <div>
                 <div className="font-semibold text-yellow-300">Vault agent mismatch</div>

@@ -43,17 +43,28 @@ export async function GET(req: NextRequest) {
   // Policy setter is the factory
   const HUMAN = isMainnet ? '0x5AFC9Ff3230eE0E4bE9e110F7672584Ab593A4F6' : '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774'
 
-  const safeRead = async (args: any, fallback: any = BigInt(0)) => {
-    try { return await client.readContract(args) } catch { return fallback }
-  }
-
   try {
-    const policy = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'policies', args: [HUMAN, AGENT] }, [BigInt(0), BigInt(0), false])
-    const owner = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'agentOwner', args: [AGENT] }, '0x0')
-    const wethApproved = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'approvedTokens', args: [AGENT, WETH] }, false)
-    const usdcApproved = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'approvedTokens', args: [AGENT, usdcAddr] }, false)
-    const dailySpent = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'getDailySpent', args: [AGENT] })
-    const remaining = await safeRead({ address: CONTRACT, abi: ABI, functionName: 'getRemainingAllowance', args: [AGENT] })
+    const contracts = [
+      { address: CONTRACT, abi: ABI, functionName: 'policies' as const, args: [HUMAN, AGENT] },
+      { address: CONTRACT, abi: ABI, functionName: 'agentOwner' as const, args: [AGENT] },
+      { address: CONTRACT, abi: ABI, functionName: 'approvedTokens' as const, args: [AGENT, WETH] },
+      { address: CONTRACT, abi: ABI, functionName: 'approvedTokens' as const, args: [AGENT, usdcAddr] },
+      { address: CONTRACT, abi: ABI, functionName: 'getDailySpent' as const, args: [AGENT] },
+      { address: CONTRACT, abi: ABI, functionName: 'getRemainingAllowance' as const, args: [AGENT] },
+    ]
+    let results: any[]
+    try {
+      results = await client.multicall({ contracts: contracts as any, allowFailure: true })
+    } catch {
+      return NextResponse.json({ error: 'RPC unavailable' }, { status: 503 })
+    }
+    const get = (i: number, fallback: any = BigInt(0)) => results[i]?.status === 'success' ? results[i].result : fallback
+    const policy = get(0, [BigInt(0), BigInt(0), false])
+    const owner = get(1, '0x0')
+    const wethApproved = get(2, false)
+    const usdcApproved = get(3, false)
+    const dailySpent = get(4)
+    const remaining = get(5)
 
     return NextResponse.json({
       policyContract: CONTRACT,
