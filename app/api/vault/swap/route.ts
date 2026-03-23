@@ -4,6 +4,8 @@ import { queueTransaction } from '../../../../lib/tx-queue'
 import { privateKeyToAccount } from 'viem/accounts'
 import { base, baseSepolia } from 'viem/chains'
 import { lookupVault } from '../lookup'
+import { readFileSync, existsSync } from 'fs'
+import { join } from 'path'
 
 const SEPOLIA_TOKENS: Record<string, { address: `0x${string}`; decimals: number }> = {
   WETH: { address: '0x4200000000000000000000000000000000000006', decimals: 18 },
@@ -62,7 +64,23 @@ export async function POST(req: NextRequest) {
     const walletClient = createWalletClient({ account, chain, transport: http(rpcUrl) })
     const publicClient = createPublicClient({ chain, transport: http(rpcUrl) })
 
-    const vault = await lookupVault(account.address)
+    // Find the vault: first check the authenticated agent's registered human wallet on-chain,
+    // then fall back to agent-owned vaults
+    let vault: string | null = null
+    const dbPath = join(process.cwd(), 'data', 'agents.json')
+    if (existsSync(dbPath)) {
+      try {
+        const agents = JSON.parse(readFileSync(dbPath, 'utf-8'))
+        const agent = agents.find((a: any) => a.agentWallet?.toLowerCase() === account.address.toLowerCase())
+        if (agent?.humanWallet) {
+          const factory = isMainnet ? '0x5AFC9Ff3230eE0E4bE9e110F7672584Ab593A4F6' : '0x672E6aD29eA629398F4Ee29f51ad6Ad3f9869774'
+          const factoryAbi = [{ name: 'getVaults', type: 'function', stateMutability: 'view', inputs: [{ name: 'user', type: 'address' }], outputs: [{ name: '', type: 'address[]' }] }] as const
+          const vaults = await (publicClient as any).readContract({ address: factory, abi: factoryAbi, functionName: 'getVaults', args: [agent.humanWallet as `0x${string}`] })
+          if (vaults?.length > 0) vault = vaults[vaults.length - 1] as string
+        }
+      } catch {}
+    }
+    if (!vault) vault = await lookupVault(account.address, isMainnet ? 'mainnet' : undefined)
     if (!vault) {
       return NextResponse.json({ error: 'No vault found. Create a vault first.' }, { status: 404 })
     }
