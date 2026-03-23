@@ -4,6 +4,8 @@ Your AI agent wants to trade crypto on your behalf. But if the guardrails live i
 
 **You** set the rules. **Your agent** trades within them. **Smart contracts** enforce every limit.
 
+🔗 **Live demo:** [moltfi-production.up.railway.app](https://moltfi-production.up.railway.app)
+
 ## How it works
 
 1. **You connect your wallet and create a vault** — You set spending limits: max trade size, daily volume cap, which tokens are allowed. These get written to a smart contract on Base.
