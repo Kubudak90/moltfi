@@ -70,6 +70,8 @@ Or give your agent the skill file: `curl -s https://moltfi-production.up.railway
 | `/api/vault/stake` | POST | Stake ETH via Lido (mainnet-ready) |
 | `/api/vault/policy` | POST | Update guardrails on-chain |
 | `/api/vault/activity` | GET | On-chain trade history |
+| `/api/vault/freeze` | POST | Emergency freeze — revoke all trading |
+| `/api/vault/tokens` | POST | Manage token allowlist (approve/remove) |
 | `/api/rates` | GET | Live ETH price, Lido APR, Base gas |
 | `/api/skill` | GET | Skill file for agents |
 
