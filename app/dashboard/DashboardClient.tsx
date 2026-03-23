@@ -20,6 +20,7 @@ const vaultAbi = [
   { name: 'depositETH', type: 'function', stateMutability: 'payable', inputs: [], outputs: [] },
   { name: 'withdrawETH', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'amount', type: 'uint256' }], outputs: [] },
   { name: 'withdraw', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'token', type: 'address' }, { name: 'amount', type: 'uint256' }], outputs: [] },
+  { name: 'setAgent', type: 'function', stateMutability: 'nonpayable', inputs: [{ name: 'newAgent', type: 'address' }], outputs: [] },
 ] as const
 
 export default function DashboardClient() {
@@ -106,6 +107,26 @@ export default function DashboardClient() {
       }
     } catch (e: any) {
       setError(`Withdraw failed: ${e.message}`)
+      setTxStatus('')
+    }
+  }
+
+  const updateAgent = async () => {
+    if (!vaults[0] || !serverAgentWallet) { setError('Missing vault or server agent address'); return }
+    if (!(await ensureNetwork())) return
+    setError('')
+    try {
+      setTxStatus('Updating vault agent...')
+      writeContract({
+        account: address,
+        address: vaults[0] as `0x${string}`,
+        abi: vaultAbi,
+        functionName: 'setAgent',
+        args: [serverAgentWallet as `0x${string}`],
+        chain: baseSepolia,
+      })
+    } catch (e: any) {
+      setError(`Agent update failed: ${e.message}`)
       setTxStatus('')
     }
   }
@@ -208,6 +229,22 @@ export default function DashboardClient() {
       {/* Vault active */}
       {hasVault && (
         <>
+          {vaultData?.agent && serverAgentWallet && vaultData.agent.toLowerCase() !== serverAgentWallet.toLowerCase() && (
+            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-5 flex items-center justify-between gap-4">
+              <div>
+                <div className="font-semibold text-yellow-300">Vault agent mismatch</div>
+                <p className="text-sm text-yellow-200/80 mt-1">
+                  This vault trusts <span className="font-mono">{vaultData.agent}</span>, but the current server agent is <span className="font-mono">{serverAgentWallet}</span>.
+                  Update the vault agent once with your connected wallet so production can trade on this vault.
+                </p>
+              </div>
+              <button onClick={updateAgent}
+                className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-200 px-4 py-2 rounded-lg text-sm font-medium transition shrink-0">
+                Update Agent
+              </button>
+            </div>
+          )}
+
           {/* Market data — above the vault */}
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
