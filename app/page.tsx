@@ -212,18 +212,39 @@ export default function Home() {
 
       {/* Built With */}
       <section className="max-w-4xl mx-auto px-6 pb-20">
-        <h2 className="text-2xl font-bold mb-8 text-center">Built With</h2>
-        <div className="flex flex-wrap justify-center gap-4">
+        <h2 className="text-2xl font-bold mb-3 text-center">Built With</h2>
+        <p className="text-gray-500 text-center mb-8 max-w-2xl mx-auto">
+          Real infrastructure. Real contracts. Real swaps.
+        </p>
+
+        {/* Primary — OpenClaw */}
+        <Card className="border-blue-500/20 mb-6 max-w-2xl mx-auto">
+          <CardContent className="pt-6 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center text-lg font-bold shrink-0">⚡</div>
+            <div>
+              <h3 className="font-semibold text-lg">OpenClaw</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Agent runtime and skill harness. Kyro (AI co-builder) runs on OpenClaw — reading skill files, 
+                making API calls, managing vault operations, and coordinating the entire agent workflow autonomously.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Core integrations */}
+        <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
           {[
-            { name: 'Uniswap V3', desc: 'Swap execution via AgentGuardRouter', color: 'border-pink-500/30' },
-            { name: 'Lido', desc: 'Live stETH APR data & staking integration', color: 'border-cyan-500/30' },
-            { name: 'Venice AI', desc: 'Zero-retention inference for trade processing', color: 'border-blue-500/30' },
-            { name: 'Base', desc: 'All contracts on Base Sepolia', color: 'border-blue-400/30' },
-            { name: 'OpenClaw', desc: 'Agent runtime & skill harness', color: 'border-orange-500/30' },
+            { name: 'Base', icon: '🔵', desc: 'All smart contracts deployed and verified on Base Sepolia. AgentPolicy, AgentGuardRouter, and VaultFactory — live on-chain.' },
+            { name: 'Uniswap V3', icon: '🦄', desc: 'Every swap executes through Uniswap V3 SwapRouter02 via our AgentGuardRouter. Real liquidity, real trades.' },
+            { name: 'Venice AI', icon: '🔒', desc: 'Private inference with zero data retention. Processes plain English trade requests into contract calls. Your agent\'s reasoning never gets stored.' },
+            { name: 'Lido', icon: '💧', desc: 'Live stETH APR data on dashboard and via API. Staking infrastructure (ETH → stETH → wstETH through vault) built and ready for mainnet.' },
           ].map(item => (
-            <Card key={item.name} className={`${item.color} w-44`}><CardContent className="pt-4 pb-4">
-              <div className="font-medium text-sm">{item.name}</div>
-              <div className="text-xs text-muted-foreground mt-1">{item.desc}</div>
+            <Card key={item.name}><CardContent className="pt-5">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-lg">{item.icon}</span>
+                <h3 className="font-semibold">{item.name}</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">{item.desc}</p>
             </CardContent></Card>
           ))}
         </div>
