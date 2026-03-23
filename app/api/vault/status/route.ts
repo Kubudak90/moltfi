@@ -114,6 +114,17 @@ export async function GET(req: NextRequest) {
       }
     })
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 })
+    // On RPC failure, return 200 with zero defaults so UI doesn't crash
+    if (vaultAddress) {
+      return NextResponse.json({
+        vault: vaultAddress,
+        owner: '0x0', agent: '0x0',
+        balances: { ETH: '0', WETH: '0', USDC: '0', ...(isMainnet && { wstETH: '0' }) },
+        chain: isMainnet ? 'base' : 'base-sepolia',
+        policy: { maxPerAction: '0', dailyLimit: '0', active: false, dailySpent: '0', remaining: '0' },
+        rpcError: true,
+      })
+    }
+    return NextResponse.json({ error: 'RPC temporarily unavailable' }, { status: 503 })
   }
 }

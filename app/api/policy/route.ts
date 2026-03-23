@@ -88,6 +88,11 @@ export async function GET(req: NextRequest) {
       timestamp: new Date().toISOString(),
     })
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 })
+    // Return defaults on RPC failure so UI doesn't crash
+    return NextResponse.json({
+      policy: { maxPerAction: '0', dailyLimit: '0', active: false, dailySpent: '0', remaining: '0' },
+      approvedTokens: {},
+      rpcError: true,
+    })
   }
 }
