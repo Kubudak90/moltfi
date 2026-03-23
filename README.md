@@ -1,6 +1,6 @@
 # MoltFi — Scoped access for AI agent trading
 
-Give your AI agent an API key to trade crypto — with on-chain guardrails it physically cannot bypass. You set the limits. Smart contracts enforce them. You stay in control.
+Give your AI agent an API key to trade crypto — with on-chain guardrails it physically cannot bypass. Prompt injection can confuse a model. It cannot bypass a smart contract. You set the limits. Smart contracts enforce them. You stay in control.
 
 🔗 **Live demo:** [moltfi-production.up.railway.app](https://moltfi-production.up.railway.app)
 
@@ -29,7 +29,19 @@ You configure these. Smart contracts enforce them on every trade.
 - **Token allowlist** — Only tokens you approved can be traded
 - **Instant freeze** — Revoke all agent trading with one transaction
 
-## Smart contracts (deployed on Base Sepolia)
+## Smart contracts
+
+### Base Mainnet (production)
+
+| Contract | Address | Basescan |
+|----------|---------|----------|
+| AgentPolicy | `0x9f5C...e38a` | [View](https://basescan.org/address/0x9f5C622170F11C35d3343fE444731E3F732De38a) |
+| AgentGuardRouter | `0xDBF6...b5F9` | [View](https://basescan.org/address/0xDBF65858816a8Cf865eC85626d8935909ca2b5F9) |
+| VaultFactory | `0x5AFC...a4F6` | [View](https://basescan.org/address/0x5AFC9Ff3230eE0E4bE9e110F7672584Ab593A4F6) |
+
+Live vault holds real wstETH (Lido) earning ~2.9% APR — [view swap transaction](https://basescan.org/tx/0x1f027ff500d6ad635315122a605df2599dffbb542df6e016fb7987a52cad391c).
+
+### Base Sepolia (testnet)
 
 | Contract | Address | Basescan |
 |----------|---------|----------|
@@ -78,9 +90,9 @@ Or give your agent the skill file: `curl -s https://moltfi-production.up.railway
 ## Built with
 
 - **[Uniswap V3](https://uniswap.org)** — Swap execution via AgentGuardRouter wrapping SwapRouter02
-- **[Lido](https://lido.fi)** — Live stETH APR data on dashboard; staking endpoint routes ETH → stETH → wstETH through the vault. Full mainnet staking ready — Lido doesn't deploy to testnets
+- **[Lido](https://lido.fi)** — Live wstETH integration on Base mainnet. Vault holds real wstETH earning ~2.9% APR. Swapped through guardrail-enforced router on Uniswap V3. APR data available via API.
 - **[Venice AI](https://venice.ai)** — Zero-retention inference for trade processing. Agent reasoning stays private, trades are public on-chain
-- **[Base](https://base.org)** — All contracts deployed on Base Sepolia
+- **[Base](https://base.org)** — Contracts deployed on both Base Sepolia and Base mainnet
 - **[OpenClaw](https://openclaw.ai)** — Agent runtime & skill harness
 
 ## Architecture

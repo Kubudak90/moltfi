@@ -66,7 +66,7 @@ export default function Home() {
           </h1>
 
           <p className="text-lg sm:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-            Your AI agent wants to trade crypto on your behalf. But if the guardrails live in the agent&apos;s code, a bug or bad prompt can bypass them. MoltFi puts the limits on-chain — your agent literally cannot exceed them.
+            Prompt injection can confuse a model. It cannot bypass a smart contract. MoltFi puts your agent&apos;s trading limits on-chain — no bug, no bad prompt, no exploit can override them.
           </p>
 
           {/* Get started — agent or human */}
@@ -234,10 +234,10 @@ export default function Home() {
         {/* Core integrations */}
         <div className="grid sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
           {[
-            { name: 'Base', icon: '🔵', desc: 'All smart contracts deployed and verified on Base Sepolia. AgentPolicy, AgentGuardRouter, and VaultFactory — live on-chain.' },
-            { name: 'Uniswap V3', icon: '🦄', desc: 'Every swap executes through Uniswap V3 SwapRouter02 via our AgentGuardRouter. Real liquidity, real trades.' },
+            { name: 'Base', icon: '🔵', desc: 'Deployed on both Base Sepolia and Base mainnet. AgentPolicy, AgentGuardRouter, and VaultFactory — live on-chain with real transactions.' },
+            { name: 'Uniswap V3', icon: '🦄', desc: 'Every swap executes through Uniswap V3 SwapRouter02 via our AgentGuardRouter. Real liquidity, real trades, real guardrail enforcement.' },
             { name: 'Venice AI', icon: '🔒', desc: 'Private inference with zero data retention. Processes plain English trade requests into contract calls. Your agent\'s reasoning never gets stored.' },
-            { name: 'Lido', icon: '💧', desc: 'Live stETH APR data on dashboard and via API. Staking infrastructure (ETH → stETH → wstETH through vault) built and ready for mainnet.' },
+            { name: 'Lido', icon: '💧', desc: 'Live wstETH in our Base mainnet vault, earning ~2.9% APR. Swapped through our guardrail-enforced router. Real yield, real on-chain proof.' },
           ].map(item => (
             <Card key={item.name}><CardContent className="pt-5">
               <div className="flex items-center gap-2 mb-2">
