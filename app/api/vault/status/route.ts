@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
       contracts.push({ address: vaultAddress, abi: vaultAbi, functionName: 'balance', args: [WSTETH] })
     }
 
-    let results: any[]
+    let results: any
     try {
       results = await client.multicall({ contracts: contracts.map(c => ({ ...c, address: c.address as `0x${string}` })), allowFailure: true })
     } catch {

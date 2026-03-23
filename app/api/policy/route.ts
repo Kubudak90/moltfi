@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
       { address: CONTRACT, abi: ABI, functionName: 'getDailySpent' as const, args: [AGENT] },
       { address: CONTRACT, abi: ABI, functionName: 'getRemainingAllowance' as const, args: [AGENT] },
     ]
-    let results: any[]
+    let results: any
     try {
       results = await client.multicall({ contracts: contracts as any, allowFailure: true })
     } catch {
