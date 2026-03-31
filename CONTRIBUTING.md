@@ -1,26 +1,29 @@
 # Contributing to MoltFi
 
-Thank you for your interest in contributing to MoltFi! This document provides guidelines and instructions for contributing to this on-chain guardrails system for AI agent trading on Base.
+Thank you for your interest in contributing to MoltFi! This document provides guidelines and instructions for contributing to this on-chain guardrails protocol for AI agent trading on Base.
 
 ## Table of Contents
 
 - [Code of Conduct](#code-of-conduct)
 - [Getting Started](#getting-started)
 - [Development Setup](#development-setup)
-- [How to Contribute](#how-to-contribute)
-- [Coding Standards](#coding-standards)
+- [Project Structure](#project-structure)
+- [Contributing Guidelines](#contributing-guidelines)
+- [Smart Contract Development](#smart-contract-development)
+- [Frontend Development](#frontend-development)
 - [Testing](#testing)
+- [Submitting Changes](#submitting-changes)
 - [Security](#security)
-- [Areas for Contribution](#areas-for-contribution)
+- [Community](#community)
 
 ## Code of Conduct
 
-This project and everyone participating in it is governed by our commitment to:
+By participating in this project, you agree to:
 
-- **Security First**: All contributions must prioritize user fund safety
-- **Respectful Communication**: Be kind, constructive, and professional
-- **Collaborative Spirit**: Help others learn and grow
-- **Transparency**: Document decisions and trade-offs clearly
+- Be respectful and constructive in all interactions
+- Focus on what's best for the security and usability of the protocol
+- Accept constructive criticism gracefully
+- Show empathy towards other community members
 
 ## Getting Started
 
@@ -28,113 +31,267 @@ This project and everyone participating in it is governed by our commitment to:
 
 Before contributing, ensure you have:
 
-- **Git**: For version control
-- **Node.js**: v20+ (as specified in `.node-version`)
-- **Foundry**: For smart contract development
-- **Base Sepolia ETH**: For testing (get from [Base Sepolia Faucet](https://www.coinbase.com/faucets/base-sepolia-faucet))
+- **Node.js** (v18 or higher)
+- **Git** for version control
+- **MetaMask** or another Web3 wallet
+- **Base network** configured in your wallet
+- Basic understanding of:
+  - Solidity smart contracts
+  - Next.js/React for frontend
+  - Hardhat or Foundry for contract development
+  - Uniswap V3 integration
 
-### Project Structure
+### Knowledge Requirements
 
-```
-moltfi/
-├── app/              # Next.js app router
-├── components/       # React components (shadcn/ui)
-├── contracts/        # Solidity smart contracts
-├── docs/             # Documentation
-├── lib/              # Utility functions
-├── skill/            # Agent skill files
-├── src/contracts/    # Contract source files
-└── public/           # Static assets
-```
+Familiarity with these concepts is helpful:
+
+- Smart contract access control patterns
+- DeFi protocols (Uniswap V3, Lido)
+- AI agent integration patterns
+- Venice AI or similar LLM APIs
 
 ## Development Setup
 
-### 1. Clone the Repository
+### 1. Fork and Clone
 
 ```bash
-git clone https://github.com/ortegarod/moltfi.git
+git clone https://github.com/YOUR_USERNAME/moltfi.git
 cd moltfi
 ```
 
-### 2. Install Node.js Dependencies
+### 2. Install Dependencies
 
 ```bash
 npm install
 ```
 
-### 3. Install Foundry
+### 3. Environment Configuration
 
-```bash
-curl -L https://foundry.paradigm.xyz | bash
-foundryup
+Create a `.env.local` file:
+
+```env
+# Required for local development
+NEXT_PUBLIC_DEFAULT_CHAIN=sepolia
+
+# Optional: For contract deployment (maintainers only)
+PRIVATE_KEY=your_private_key_here
+BASE_RPC_URL=https://mainnet.base.org
+BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
+VENICE_API_KEY=your_venice_api_key_here
 ```
 
-### 4. Set Up Environment Variables
+### 4. Run Development Server
 
 ```bash
-cp .env.example .env.local
-# Edit .env.local with your configuration
-```
-
-Required environment variables:
-- `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID`: WalletConnect project ID
-- `VENICE_API_KEY`: Venice AI API key for natural language processing
-- `BASE_SEPOLIA_RPC_URL`: Base Sepolia RPC endpoint
-- `BASE_MAINNET_RPC_URL`: Base Mainnet RPC endpoint
-- `PRIVATE_KEY`: For contract deployment (testnet only)
-
-### 5. Build and Run
-
-```bash
-# Run development server
 npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
 ```
 
-## How to Contribute
+Visit `http://localhost:3000` to see the app.
 
-### Reporting Issues
+## Project Structure
 
-If you find a bug or have a suggestion:
+```
+moltfi/
+├── app/                    # Next.js app router pages
+├── components/             # React components
+│   ├── ui/                # UI components (buttons, inputs)
+│   └── ...                # Feature components
+├── contracts/              # Smart contract source code
+│   ├── AgentGuardRouter.sol
+│   ├── VaultFactory.sol
+│   └── ...
+├── src/                    # Utility functions and hooks
+│   ├── lib/               # Utility libraries
+│   └── ...
+├── skill/                  # AI agent skill definitions
+├── docs/                   # Documentation
+│   └── screenshot.png
+├── lib/                    # Third-party libraries
+├── public/                 # Static assets
+├── next.config.ts          # Next.js configuration
+├── tailwind.config.ts      # Tailwind CSS configuration
+└── railway.json            # Railway deployment config
+```
 
-1. **Check existing issues** to avoid duplicates
-2. **Create a new issue** with:
-   - Clear title and description
-   - Steps to reproduce (for bugs)
-   - Expected vs actual behavior
-   - System information (OS, Node version, browser)
-   - Screenshots if applicable
-   - **Security issues**: See [Security](#security) section
+## Contributing Guidelines
 
-### Submitting Pull Requests
+### Types of Contributions
 
-1. **Fork the repository** and create your branch:
+We welcome:
+
+1. **Bug Fixes**: Fix issues in smart contracts or frontend
+2. **Security Improvements**: Enhance contract security, add validation
+3. **Feature Enhancements**: New trading policies, UI improvements
+4. **Documentation**: Improve README, add guides, code comments
+5. **Testing**: Add test coverage for contracts and API endpoints
+6. **Agent Integrations**: New skill files for AI agent frameworks
+
+### Smart Contract Changes
+
+When modifying contracts in `/contracts`:
+
+1. **Security first**: All changes must prioritize security
+2. **Add tests**: Write comprehensive tests for new functionality
+3. **Gas optimization**: Consider gas costs for on-chain operations
+4. **Documentation**: Update contract documentation and deployment addresses
+5. **Review**: All contract changes require maintainer review
+
+### Frontend Changes
+
+When modifying the Next.js app:
+
+1. **Responsive design**: Ensure mobile and desktop compatibility
+2. **Wallet compatibility**: Test with multiple wallet providers
+3. **Error handling**: Handle Web3 errors gracefully
+4. **Accessibility**: Use semantic HTML and ARIA labels
+5. **Performance**: Optimize for fast load times
+
+### API Changes
+
+When modifying API routes in `/app/api`:
+
+1. **Validation**: Validate all inputs thoroughly
+2. **Error responses**: Return clear error messages
+3. **Rate limiting**: Consider adding rate limits for public endpoints
+4. **Documentation**: Update API documentation in README
+
+## Smart Contract Development
+
+### Contract Architecture
+
+MoltFi uses a guardrail pattern:
+
+```
+User Vault → AgentGuardRouter → Uniswap V3
+     ↑              ↑
+  Policy      Limit Checks
+```
+
+Key contracts:
+- **VaultFactory**: Creates user vaults
+- **AgentGuardRouter**: Enforces trading limits
+- **AgentPolicy**: Stores and validates policies
+
+### Local Contract Testing
+
+```bash
+# Compile contracts
+npx hardhat compile
+
+# Run tests
+npx hardhat test
+
+# Run tests with coverage
+npx hardhat coverage
+```
+
+### Contract Deployment
+
+**Note**: Only maintainers deploy to mainnet.
+
+For testnet deployment:
+
+```bash
+# Deploy to Base Sepolia
+npx hardhat run scripts/deploy.js --network baseSepolia
+```
+
+## Frontend Development
+
+### Component Guidelines
+
+- Use **TypeScript** for all components
+- Use **Tailwind CSS** for styling
+- Place reusable UI components in `/components/ui`
+- Use **shadcn/ui** patterns for consistency
+
+### Web3 Integration
+
+- Use **wagmi** for wallet connections
+- Use **viem** for contract interactions
+- Handle chain switching gracefully
+
+### Example Component
+
+```tsx
+// components/VaultStatus.tsx
+import { useAccount, useReadContract } from 'wagmi'
+import { vaultABI } from '@/src/lib/abis'
+
+export function VaultStatus({ vaultAddress }: { vaultAddress: string }) {
+  const { address } = useAccount()
+  
+  const { data: balance } = useReadContract({
+    address: vaultAddress as `0x${string}`,
+    abi: vaultABI,
+    functionName: 'getBalance',
+    args: [address]
+  })
+  
+  return (
+    <div className="p-4 border rounded">
+      <h3>Vault Balance</h3>
+      <p>{balance ? formatEther(balance) : '0'} ETH</p>
+    </div>
+  )
+}
+```
+
+## Testing
+
+### Contract Tests
+
+```bash
+# Run all contract tests
+npx hardhat test
+
+# Run specific test file
+npx hardhat test test/AgentGuardRouter.test.js
+
+# Run with gas report
+REPORT_GAS=true npx hardhat test
+```
+
+### Frontend Tests
+
+```bash
+# Run Jest tests
+npm test
+
+# Run with coverage
+npm test -- --coverage
+```
+
+### Integration Testing
+
+Test the full flow on Base Sepolia:
+
+1. Create a vault
+2. Set trading policies
+3. Register an agent
+4. Execute a trade within limits
+5. Verify limit enforcement
+
+## Submitting Changes
+
+### Pull Request Process
+
+1. **Create a branch**:
    ```bash
    git checkout -b feature/your-feature-name
    ```
 
-2. **Make your changes** following our coding standards
+2. **Make changes** following the guidelines above
 
-3. **Test your changes**:
+3. **Test thoroughly**:
    ```bash
-   # Run Next.js tests
    npm test
-   
-   # Run smart contract tests
-   cd contracts && forge test
-   
-   # Lint code
-   npm run lint
+   npx hardhat test
    ```
 
 4. **Commit with clear messages**:
    ```bash
-   git commit -m "feat: add daily spending limit reset"
+   git commit -m "feat: add daily spending cap reset notification"
    ```
 
 5. **Push to your fork**:
@@ -142,209 +299,95 @@ If you find a bug or have a suggestion:
    git push origin feature/your-feature-name
    ```
 
-6. **Open a Pull Request** with:
-   - Clear description of changes
-   - Link to related issue(s)
-   - Screenshots/demo for UI changes
-   - Test results
-   - Security considerations (if applicable)
+6. **Open a Pull Request**:
+   - Use a clear title and description
+   - Reference any related issues
+   - Include screenshots for UI changes
+   - List what was tested
 
-### Commit Message Convention
+### Commit Message Format
 
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
+We follow conventional commits:
 
 - `feat:` New feature
 - `fix:` Bug fix
 - `docs:` Documentation changes
-- `style:` Code style changes (formatting, etc.)
+- `style:` Code style (formatting)
 - `refactor:` Code refactoring
 - `test:` Adding or updating tests
-- `chore:` Build process or auxiliary tool changes
+- `chore:` Build process, dependencies
 - `security:` Security-related changes
 
-Example:
+Examples:
 ```
-feat: implement multi-token vault support
-
-- Add TokenRegistry contract
-- Update AgentPolicy to track multiple tokens
-- Add UI for token management
-- Include tests for edge cases
+feat: add support for multi-token vaults
+fix: correct daily cap calculation across timezones
+security: add reentrancy guard to executeSwap
 ```
-
-## Coding Standards
-
-### TypeScript/React
-
-- Use TypeScript for all new files
-- Follow ESLint and Prettier configuration
-- Use functional components with hooks
-- Follow existing component patterns (shadcn/ui)
-- Add JSDoc comments for complex functions
-
-Example:
-```typescript
-/**
- * Creates a new vault with specified spending limits
- * @param params - Vault creation parameters
- * @returns Transaction hash
- */
-async function createVault(params: VaultParams): Promise<string> {
-  // Implementation
-}
-```
-
-### Solidity
-
-- Follow [Solidity Style Guide](https://docs.soliditylang.org/en/latest/style-guide.html)
-- Use OpenZeppelin contracts where possible
-- Add comprehensive NatSpec documentation
-- Include security considerations in comments
-- Maximum line length: 120 characters
-
-Example:
-```solidity
-/**
- * @notice Executes a trade within the agent's scoped limits
- * @dev Reverts if trade exceeds daily or per-trade limits
- * @param _tokenIn Token to swap from
- * @param _tokenOut Token to swap to
- * @param _amountIn Amount of input token
- * @return amountOut Amount of output token received
- */
-function executeTrade(
-    address _tokenIn,
-    address _tokenOut,
-    uint256 _amountIn
-) external onlyRegisteredAgent returns (uint256 amountOut) {
-    // Implementation
-}
-```
-
-## Testing
-
-### Smart Contract Tests
-
-```bash
-cd contracts
-
-# Run all tests
-forge test
-
-# Run specific test
-forge test --match-test testTradeExecution
-
-# Run with gas report
-forge test --gas-report
-
-# Run with coverage
-forge coverage
-```
-
-### Frontend Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run with coverage
-npm run test:coverage
-
-# Run E2E tests (if available)
-npm run test:e2e
-```
-
-### Test Requirements
-
-- All new features must include tests
-- Smart contracts: >90% code coverage (security critical)
-- Frontend: >70% code coverage
-- Test edge cases and failure modes
-- Include integration tests for agent workflows
 
 ## Security
 
+### Security Checklist
+
+Before submitting:
+
+- [ ] No hardcoded private keys or API keys
+- [ ] Input validation on all user inputs
+- [ ] Reentrancy protection for external calls
+- [ ] Access control for admin functions
+- [ ] Events emitted for state changes
+- [ ] No storage collision in upgradeable contracts
+
 ### Reporting Security Issues
 
-**DO NOT** create public issues for security vulnerabilities.
+**DO NOT** open public issues for security vulnerabilities.
 
 Instead:
-1. Email security concerns to: [maintainer email]
-2. Include detailed description and reproduction steps
-3. Allow 48 hours for initial response
-4. Coordinate disclosure timeline
+1. Email security concerns to maintainers privately
+2. Allow time for assessment and fix
+3. Coordinate responsible disclosure
 
-### Security Best Practices
+## Agent Skill Contributions
 
-- Never commit private keys or sensitive data
-- Use environment variables for secrets
-- Follow [Consensys Smart Contract Best Practices](https://consensys.github.io/smart-contract-best-practices/)
-- Run Slither analysis: `slither contracts/`
-- Run Mythril analysis: `mythril analyze contracts/AgentPolicy.sol`
-- All state-changing functions must have access controls
-- Validate all inputs and use SafeMath
+To add support for a new AI agent framework:
 
-## Areas for Contribution
+1. Create a skill file in `/skill/`
+2. Follow the existing skill file format
+3. Test with the actual agent framework
+4. Document the integration
 
-### High Priority
+Example skill file structure:
+```json
+{
+  "name": "moltfi-trading",
+  "description": "Trade crypto with on-chain guardrails",
+  "endpoints": {
+    "register": "https://moltfi-production.up.railway.app/api/agent/register",
+    "trade": "https://moltfi-production.up.railway.app/api/agent"
+  }
+}
+```
 
-1. **Security Enhancements**
-   - Additional guardrail mechanisms
-   - Emergency pause functionality
-   - Multi-sig vault ownership
-   - Time-locked parameter changes
+## Community
 
-2. **Agent Integration**
-   - Additional AI model support
-   - Better natural language parsing
-   - Agent performance analytics
-   - Multi-agent coordination
+### Getting Help
 
-3. **Protocol Support**
-   - Additional DEX integrations
-   - Yield farming strategies
-   - Cross-chain bridges
-   - Lending protocol integration
+- **GitHub Issues**: Bug reports and feature requests
+- **Live Demo**: Try the app at [moltfi-production.up.railway.app](https://moltfi-production.up.railway.app)
+- **Documentation**: Check the README and ROADMAP.md
 
-### Medium Priority
+### Resources
 
-4. **User Experience**
-   - Mobile-responsive improvements
-   - Transaction history visualization
-   - Real-time notifications
-   - Gas optimization suggestions
+- [Base Documentation](https://docs.base.org)
+- [Uniswap V3 Docs](https://docs.uniswap.org/contracts/v3)
+- [Venice AI Docs](https://venice.ai/docs)
+- [Next.js Documentation](https://nextjs.org/docs)
 
-5. **Documentation**
-   - API documentation
-   - Video tutorials
-   - Agent integration guides
-   - Security best practices guide
+## Recognition
 
-6. **Developer Tools**
-   - SDK for agent developers
-   - CLI tools for vault management
-   - Testing utilities
-   - Local development environment
+Contributors will be recognized in:
+- Release notes
+- README contributors section
+- Project documentation
 
-### Good First Issues
-
-- Fix typos in documentation
-- Add inline code comments
-- Improve error messages
-- Update dependencies
-- Add TypeScript types
-- Improve test coverage
-
-## Questions?
-
-- Check the [live demo](https://moltfi-production.up.railway.app)
-- Review [ROADMAP.md](ROADMAP.md) for future plans
-- Read [SUBMISSION.md](SUBMISSION.md) for hackathon context
-
-## License
-
-By contributing, you agree that your contributions will be licensed under the same license as the project.
-
----
-
-Thank you for helping build secure on-chain guardrails for AI agent trading! 🔒🤖
+Thank you for helping make AI agent trading safer! 🔒
